@@ -1592,7 +1592,7 @@ let currentSearch = '';
 let filterCategory = '전체';
 let filterPriority = '전체';
 let filterAssignee = '전체';
-let sortKey = null;
+let sortKey = 'priority';
 let sortDir = 'asc';
 let devMode = false;
 let devHighlighted = null;
@@ -1626,7 +1626,8 @@ function switchRole(role) {
   filterCategory = '전체';
   filterPriority = '전체';
   filterAssignee = '전체';
-  sortKey = null;
+  sortKey = 'priority';
+  sortDir = 'asc';
   document.querySelectorAll('.ham-role-btn').forEach(b => b.classList.toggle('active', b.dataset.role === role));
   document.getElementById('currentRoleBadge').textContent = ROLE_LABELS[role];
   renderSidebar();
@@ -1692,7 +1693,7 @@ function renderPage() {
 
 // ── Requester List ──
 function renderRequesterList(el) {
-  const myReqs = applyFilters([...REQUESTS].filter(r => r.requester.id === 'u1').sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]));
+  const myReqs = applyFilters([...REQUESTS].filter(r => r.requester.id === 'u1'));
   el.innerHTML = `
     <div class="page-header">
       <div><div class="page-title">내 요청 목록</div><div class="page-subtitle">등록한 업무 요청의 진행 상황을 확인합니다</div></div>
@@ -1706,8 +1707,7 @@ function renderRequesterList(el) {
 
 // ── Manager List ──
 function renderManagerList(el) {
-  let reqs = [...REQUESTS].sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
-  reqs = applyFilters(reqs);
+  let reqs = applyFilters([...REQUESTS]);
 
   const isUnassignedFilter = currentFilter === '미배정';
 
@@ -1733,7 +1733,7 @@ function renderManagerList(el) {
 
 // ── Worker List ──
 function renderWorkerList(el) {
-  const myReqs = applyFilters([...REQUESTS].filter(r => r.assignee && r.assignee.id === 'u3').sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]));
+  const myReqs = applyFilters([...REQUESTS].filter(r => r.assignee && r.assignee.id === 'u3'));
   el.innerHTML = `
     <div class="page-header">
       <div><div class="page-title">내 담당 목록</div><div class="page-subtitle">나에게 배정된 요청을 처리합니다 (이준호)</div></div>
