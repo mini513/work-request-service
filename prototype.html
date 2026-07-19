@@ -2459,6 +2459,7 @@ function renderFilterBar(role) {
   </div>`;
 
   const statusRow = `<div class="filter-bar">
+    <label style="font-size:12px;color:var(--text-dim);white-space:nowrap">상태</label>
     <button class="filter-btn ${currentFilter==='전체'?'active':''}" onclick="filterStatus(this,'전체')">전체</button>
     ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active':''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
     <button class="filter-btn ${currentFilter==='미배정'?'active':''}" onclick="filterStatus(this,'미배정')">미배정</button>
