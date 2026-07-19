@@ -605,6 +605,137 @@ body {
   color: var(--text-dim);
 }
 
+/* ── IA Map ── */
+.ia-service {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.ia-root {
+  padding: 10px 24px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+}
+.ia-roles-row {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 0;
+  position: relative;
+}
+.ia-vline {
+  width: 2px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 auto;
+}
+.ia-hline-wrap {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  height: 20px;
+}
+.ia-hline {
+  position: absolute;
+  top: 0;
+  height: 2px;
+  background: var(--border);
+}
+.ia-role-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 200px;
+}
+.ia-role-box {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  text-align: center;
+  margin-bottom: 0;
+}
+.ia-role-box.requester { background: var(--blue-bg); color: var(--blue); border: 2px solid var(--blue); }
+.ia-role-box.manager { background: var(--yellow-bg); color: var(--yellow); border: 2px solid var(--yellow); }
+.ia-role-box.worker { background: var(--green-bg); color: var(--green); border: 2px solid var(--green); }
+.ia-pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+}
+.ia-page-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+.ia-page {
+  padding: 6px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  white-space: nowrap;
+}
+.ia-features {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+.ia-feature {
+  padding: 3px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 10px;
+  color: var(--text-dim);
+  text-align: center;
+  white-space: nowrap;
+}
+.ia-vline-sm {
+  width: 1.5px;
+  height: 10px;
+  background: var(--border);
+  margin: 0 auto;
+}
+.ia-common {
+  margin-top: 20px;
+  padding: 12px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.ia-common-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-right: 4px;
+}
+.ia-common-item {
+  font-size: 11px;
+  padding: 3px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-mid);
+}
+
 /* ── Request List ── */
 .req-list { display: flex; flex-direction: column; gap: 8px; }
 .req-item {
@@ -1507,6 +1638,7 @@ body.light .scenario-target {
         <div class="ham-section-label">Scenario</div>
         <button class="ham-action-btn" onclick="startScenario();toggleHamburger()">🎯 시나리오 모드</button>
         <button class="ham-action-btn" onclick="openScenarioMap();toggleHamburger()" style="margin-top:4px">📊 시나리오 흐름도</button>
+        <button class="ham-action-btn" onclick="openIAMap();toggleHamburger()" style="margin-top:4px">🗂 IA 구조도</button>
       </div>
       <div class="ham-divider"></div>
       <div class="ham-section">
@@ -1665,6 +1797,17 @@ body.light .scenario-target {
       <button class="modal-close" onclick="closeModal('scenarioMapModal')">×</button>
     </div>
     <div class="modal-body" id="scenarioMapBody" style="overflow-y:auto;max-height:calc(90vh - 80px)"></div>
+  </div>
+</div>
+
+<!-- IA Map Modal -->
+<div class="modal-overlay" id="iaMapModal">
+  <div class="modal" style="max-width:960px;max-height:90vh">
+    <div class="modal-header">
+      <h3>🗂 IA (Information Architecture)</h3>
+      <button class="modal-close" onclick="closeModal('iaMapModal')">×</button>
+    </div>
+    <div class="modal-body" id="iaMapBody" style="overflow-y:auto;max-height:calc(90vh - 80px)"></div>
   </div>
 </div>
 
@@ -2948,6 +3091,73 @@ function getScenarioGroups(steps) {
 }
 
 let filteredScenarios = [];
+
+function openIAMap() {
+  const IA = {
+    requester: {
+      label: '👤 요청자',
+      pages: [
+        { name: '내 요청 목록', features: ['상태 필터 (전체/접수/배정완료/진행중/완료/반려)', '검색', '정렬 (ID/카테고리/제목/긴급도/상태/등록일/담당자)', '새 요청 등록 버튼'] },
+        { name: '요청 상세', features: ['요청 내용 · 긴급도 · 희망완료일', '상태 스테퍼 (접수→배정완료→진행중→완료)', '담당자 · 보고자 · 작업 예정일', '처리 타임라인', '댓글'] },
+        { name: '새 요청 등록 (모달)', features: ['카테고리 · 제목 · 상세 내용', '긴급도 · 희망 완료일'] },
+      ]
+    },
+    manager: {
+      label: '👔 관리자',
+      pages: [
+        { name: '대시보드', features: ['현황 카드 (전체/미배정/진행중/완료)', 'KPI 경고 (2일 이상 미배정)', '카테고리별 분포 차트', '긴급도별 분포 차트'] },
+        { name: '전체 요청 목록', features: ['조건 필터 (카테고리/긴급도/담당자)', '상태 필터 (+ 미배정)', '검색', '정렬'] },
+        { name: '요청 상세', features: ['담당자 배정 (모달)', '반려 + 사유 입력 (모달)', '댓글'] },
+        { name: '처리 현황', features: ['기간 필터 (전체/오늘/7일/이번달/커스텀)', '완료 목록 테이블', '담당자별 완료율 차트'] },
+      ]
+    },
+    worker: {
+      label: '🔧 실무자',
+      pages: [
+        { name: '내 담당 목록', features: ['상태 필터', '검색 · 정렬', '상태 전환 드롭다운 (배정완료↔진행중↔완료)'] },
+        { name: '요청 상세', features: ['작업 시작 + 예정일 알림', '처리 완료 + 처리 내용 기록', '상태 되돌리기', '댓글'] },
+      ]
+    }
+  };
+
+  const roles = ['requester', 'manager', 'worker'];
+  const roleClass = { requester: 'requester', manager: 'manager', worker: 'worker' };
+
+  function renderPageTree(pages) {
+    return pages.map((p, i) =>
+      `${i > 0 ? '<div class="ia-vline-sm"></div>' : ''}
+      <div class="ia-page-wrap">
+        <div class="ia-page">${p.name}</div>
+        ${p.features.length ? `<div class="ia-features">${p.features.map(f => `<div class="ia-feature">${f}</div>`).join('')}</div>` : ''}
+      </div>`
+    ).join('');
+  }
+
+  const html = `<div class="ia-service">
+    <div class="ia-root">📋 사내 업무 요청 서비스</div>
+    <div class="ia-vline"></div>
+    <div class="ia-roles-row">
+      ${roles.map(r => `<div class="ia-role-col">
+        <div class="ia-vline"></div>
+        <div class="ia-role-box ${roleClass[r]}">${IA[r].label}</div>
+        <div class="ia-vline"></div>
+        <div class="ia-pages">${renderPageTree(IA[r].pages)}</div>
+      </div>`).join('')}
+    </div>
+    <div class="ia-common">
+      <span class="ia-common-label">공통 기능</span>
+      <span class="ia-common-item">🔔 알림</span>
+      <span class="ia-common-item">☰ 역할 전환</span>
+      <span class="ia-common-item">🎯 시나리오 모드</span>
+      <span class="ia-common-item">📊 시나리오 흐름도</span>
+      <span class="ia-common-item">🗂 IA 구조도</span>
+      <span class="ia-common-item">🌙 다크/라이트 모드</span>
+    </div>
+  </div>`;
+
+  document.getElementById('iaMapBody').innerHTML = html;
+  openModal('iaMapModal');
+}
 
 function openScenarioMap() {
   const roleLabels = { requester: '요청자', manager: '관리자', worker: '실무자' };
