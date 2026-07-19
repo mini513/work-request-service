@@ -1684,8 +1684,45 @@ function renderDashboard(el) {
 }
 
 // ── Log (성과 분석 + 완료 이력) ──
+let logPeriod = 'all';
+let logCustomFrom = '';
+let logCustomTo = '';
+
+function getLogDateRange() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (logPeriod === 'day') return { from: today, to: new Date(today.getTime() + 86400000) };
+  if (logPeriod === 'week') return { from: new Date(today.getTime() - 6 * 86400000), to: new Date(today.getTime() + 86400000) };
+  if (logPeriod === 'month') return { from: new Date(today.getFullYear(), today.getMonth(), 1), to: new Date(today.getTime() + 86400000) };
+  if (logPeriod === 'custom' && logCustomFrom && logCustomTo) return { from: new Date(logCustomFrom), to: new Date(new Date(logCustomTo).getTime() + 86400000) };
+  return null;
+}
+
+function filterByPeriod(requests) {
+  const range = getLogDateRange();
+  if (!range) return requests;
+  return requests.filter(r => {
+    const d = new Date(r.createdAt);
+    return d >= range.from && d < range.to;
+  });
+}
+
+function setLogPeriod(p) {
+  logPeriod = p;
+  if (p !== 'custom') { renderPage(); }
+}
+
+function applyCustomPeriod() {
+  logCustomFrom = document.getElementById('logFromDate').value;
+  logCustomTo = document.getElementById('logToDate').value;
+  if (!logCustomFrom || !logCustomTo) { alert('시작일과 종료일을 모두 선택해주세요.'); return; }
+  logPeriod = 'custom';
+  renderPage();
+}
+
 function renderLog(el) {
-  const all = REQUESTS;
+  const range = getLogDateRange();
+  const all = filterByPeriod(REQUESTS);
   const completed = all.filter(r => r.status === '완료');
   const urgentDone = completed.filter(r => r.priority === '긴급' || r.priority === '높음');
   const avgDays = completed.length > 0 ? (completed.reduce((sum, r) => {
@@ -1700,9 +1737,25 @@ function renderLog(el) {
   const maxPri = Math.max(...Object.values(byPriority), 1);
   const priColors = { '긴급': '#f55', '높음': '#ff8c00', '보통': '#5b8def', '낮음': '#22c55e' };
 
+  const periodLabel = logPeriod === 'all' ? '전체' : logPeriod === 'day' ? '오늘' : logPeriod === 'week' ? '최근 7일' : logPeriod === 'month' ? '이번 달' : `${logCustomFrom} ~ ${logCustomTo}`;
+
   el.innerHTML = `
     <div class="page-header">
       <div><div class="page-title">처리 현황</div><div class="page-subtitle">처리 성과와 완료 이력을 분석합니다</div></div>
+    </div>
+    <div class="card" style="padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="font-size:13px;font-weight:600;color:var(--text-mid);margin-right:4px">기간</span>
+      ${['all','day','week','month','custom'].map(p => {
+        const labels = { all: '전체', day: '오늘', week: '최근 7일', month: '이번 달', custom: '직접 설정' };
+        const active = logPeriod === p ? 'background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600' : '';
+        return `<button class="btn btn-sm btn-secondary" style="${active}" onclick="setLogPeriod('${p}')">${labels[p]}</button>`;
+      }).join('')}
+      ${logPeriod === 'custom' ? `<div style="display:flex;align-items:center;gap:6px;margin-left:8px">
+        <input type="date" id="logFromDate" class="form-input" style="width:140px;padding:4px 8px;font-size:12px" value="${logCustomFrom}">
+        <span style="color:var(--text-dim)">~</span>
+        <input type="date" id="logToDate" class="form-input" style="width:140px;padding:4px 8px;font-size:12px" value="${logCustomTo}">
+        <button class="btn btn-sm btn-primary" onclick="applyCustomPeriod()">적용</button>
+      </div>` : ''}
     </div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-label">처리 완료</div><div class="stat-value" style="color:var(--green)">${completed.length}<span style="font-size:14px;color:var(--text-dim);font-weight:400"> / ${all.length}</span></div></div>
