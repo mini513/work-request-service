@@ -2335,8 +2335,12 @@ const SCENARIOS = [
 let scenarioClickTargets = [];
 
 function clearScenarioTargets() {
-  scenarioClickTargets.forEach(({ el, handler }) => {
-    el.removeEventListener('click', handler, true);
+  scenarioClickTargets.forEach(({ el, handler, evt }) => {
+    if (evt) {
+      el.removeEventListener(evt, handler);
+    } else {
+      el.removeEventListener('click', handler, true);
+    }
   });
   scenarioClickTargets = [];
   document.querySelectorAll('.scenario-target, .scenario-target-no-label').forEach(el => {
@@ -2364,15 +2368,24 @@ function highlightScenarioTargets(s) {
 
         if (isClickable) {
           const isFormField = el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA';
-          const handler = function(e) {
-            if (!isFormField) {
+          if (isFormField) {
+            const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+            const handler = function() {
+              if (el.value && el.value.trim() !== '') {
+                setTimeout(() => nextScenarioStep(), 400);
+              }
+            };
+            el.addEventListener(evt, handler);
+            scenarioClickTargets.push({ el, handler, evt });
+          } else {
+            const handler = function(e) {
               e.preventDefault();
-            }
-            e.stopPropagation();
-            setTimeout(() => nextScenarioStep(), isFormField ? 500 : 0);
-          };
-          el.addEventListener('click', handler, true);
-          scenarioClickTargets.push({ el, handler });
+              e.stopPropagation();
+              nextScenarioStep();
+            };
+            el.addEventListener('click', handler, true);
+            scenarioClickTargets.push({ el, handler });
+          }
         }
       }
     });
