@@ -2340,11 +2340,11 @@ const SCENARIOS = [
     text: '<strong>상태 추적 ①</strong> 목록에서 추적할 요청을 클릭합니다.' },
   { role: 'requester', group: '요청 상태 추적', page: 'list', detail: 'REQ-001', target: '.status-stepper',
     text: '<strong>상태 추적 ②</strong> 상단 <em>상태 스텝퍼</em>에서 현재 진행 단계(접수→배정→진행→완료)를 확인합니다.' },
-  { role: 'requester', group: '요청 상태 추적', page: 'list', detail: 'REQ-001', target: '.timeline-item', targetLabel: false,
+  { role: 'requester', group: '요청 상태 추적', page: 'list', detail: 'REQ-001', target: '.timeline-item',
     text: '<strong>상태 추적 ③</strong> 타임라인에서 각 단계별 처리 이력(일시, 담당자, 상세 내용)을 확인합니다.' },
 
   // ── 요청자 시나리오 3: 실무자와 소통 ──
-  { role: 'requester', group: '실무자와 소통', page: 'list', detail: 'REQ-001', target: '.comment-item', targetLabel: false,
+  { role: 'requester', group: '실무자와 소통', page: 'list', detail: 'REQ-001', target: '.comment-item',
     text: '<strong>소통 ①</strong> 기존 댓글 이력에서 실무자의 진행 상황을 확인합니다.' },
   { role: 'requester', group: '실무자와 소통', page: 'list', detail: 'REQ-001', target: '.comment-input',
     text: '<strong>소통 ②</strong> 댓글 입력란에 추가 정보나 문의 사항을 작성하고 전송합니다.' },
@@ -2370,7 +2370,7 @@ const SCENARIOS = [
   // ── 관리자 시나리오 1: 전체 현황 파악 ──
   { role: 'manager', group: '전체 현황 파악', page: 'dashboard', detail: null, target: '.stats-row',
     text: '<strong>현황 파악 ①</strong> 대시보드에서 전체/미배정/진행중/완료 건수를 확인합니다.' },
-  { role: 'manager', group: '전체 현황 파악', page: 'dashboard', detail: null, target: '.card', targetLabel: false,
+  { role: 'manager', group: '전체 현황 파악', page: 'dashboard', detail: null, target: '.card',
     text: '<strong>현황 파악 ②</strong> 카테고리별(IT/비품/시설/기타) 요청 분포를 확인합니다.' },
 
   // ── 관리자 시나리오 2: KPI 경고 확인 ──
@@ -2396,7 +2396,7 @@ const SCENARIOS = [
     text: '<strong>반려 ③</strong> 반려 처리 후 상태가 "반려"로 변경되고, 요청자에게 알림이 전송됩니다.' },
 
   // ── 관리자 시나리오 5: 처리 현황 로그 ──
-  { role: 'manager', group: '처리 현황 로그', page: 'log', detail: null, target: '.stats-row', targetLabel: false,
+  { role: 'manager', group: '처리 현황 로그', page: 'log', detail: null, target: '.stats-row',
     text: '<strong>로그 ①</strong> 총 처리 건수와 주요 사항(긴급/높음) 건수를 확인합니다.' },
   { role: 'manager', group: '처리 현황 로그', page: 'log', detail: null, target: '.stats-table',
     text: '<strong>로그 ②</strong> 완료된 요청 목록에서 카테고리, 긴급도, 담당자, 처리일을 확인하여 팀 성과를 파악합니다.' },
