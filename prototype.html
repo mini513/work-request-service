@@ -443,6 +443,18 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
+.req-list-header .sortable {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.req-list-header .sortable:hover { color: var(--text); }
+.sort-arrow { font-size: 10px; opacity: 0.4; }
+.sort-arrow.active { opacity: 1; color: var(--accent); }
+.stats-table th.sortable { cursor: pointer; user-select: none; }
+.stats-table th.sortable:hover { color: var(--accent); }
 
 /* ── Request Detail ── */
 .detail-grid {
@@ -1467,6 +1479,8 @@ let currentPage = 'list';
 let currentDetailId = null;
 let currentFilter = '전체';
 let currentSearch = '';
+let sortKey = null;
+let sortDir = 'asc';
 let devMode = false;
 let devHighlighted = null;
 let scenarioActive = false;
@@ -1561,7 +1575,7 @@ function renderRequesterList(el) {
       <button class="btn btn-primary" onclick="openModal('newReqModal')">➕ 새 요청</button>
     </div>
     ${renderFilterBar('requester')}
-    <div class="req-list-header"><span>ID</span><span>카테고리</span><span>제목</span><span>긴급도</span><span>상태</span><span>등록일</span><span>담당자</span></div>
+    ${renderSortableHeader([{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'status',label:'상태'},{key:'date',label:'등록일'},{key:'assignee',label:'담당자'}])}
     <div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경하거나 새 요청을 등록해 보세요')}</div>
   `;
 }
@@ -1590,7 +1604,7 @@ function renderManagerList(el) {
     </div>
     ${alertHtml}
     ${renderFilterBar('manager')}
-    <div class="req-list-header"><span>ID</span><span>카테고리</span><span>제목</span><span>긴급도</span><span>상태</span><span>등록일</span><span>담당자</span></div>
+    ${renderSortableHeader([{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'status',label:'상태'},{key:'date',label:'등록일'},{key:'assignee',label:'담당자'}])}
     <div class="req-list">${reqs.length ? reqs.map(r => renderReqRow(r, isUnassigned)).join('') : renderEmptyState(isUnassigned ? '미배정 요청이 없습니다' : '해당하는 요청이 없습니다', isUnassigned ? '모든 요청에 담당자가 배정되었습니다' : '필터를 변경해 보세요')}</div>
   `;
 }
@@ -1603,7 +1617,7 @@ function renderWorkerList(el) {
       <div><div class="page-title">내 담당 목록</div><div class="page-subtitle">나에게 배정된 요청을 처리합니다 (이준호)</div></div>
     </div>
     ${renderFilterBar('worker')}
-    <div class="req-list-header"><span>ID</span><span>카테고리</span><span>제목</span><span>긴급도</span><span>상태</span><span>등록일</span><span>요청자</span></div>
+    ${renderSortableHeader([{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'status',label:'상태'},{key:'date',label:'등록일'},{key:'requester',label:'요청자'}])}
     <div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, false, true)).join('') : renderEmptyState('배정된 요청이 없습니다', '새로운 요청이 배정되면 알림으로 통보됩니다')}</div>
   `;
 }
@@ -1806,7 +1820,7 @@ function renderLog(el) {
     <div class="card">
       <div class="fw-600 mb-8">완료된 요청 목록</div>
       ${completed.length ? `<table class="stats-table">
-        <thead><tr><th>ID</th><th>카테고리</th><th>제목</th><th>긴급도</th><th>담당자</th><th>처리일</th></tr></thead>
+        <thead><tr><th class="sortable" onclick="toggleSort('id')">ID${sortArrow('id')}</th><th class="sortable" onclick="toggleSort('category')">카테고리${sortArrow('category')}</th><th class="sortable" onclick="toggleSort('title')">제목${sortArrow('title')}</th><th class="sortable" onclick="toggleSort('priority')">긴급도${sortArrow('priority')}</th><th class="sortable" onclick="toggleSort('assignee')">담당자${sortArrow('assignee')}</th><th class="sortable" onclick="toggleSort('date')">처리일${sortArrow('date')}</th></tr></thead>
         <tbody>
         ${completed.map(r => {
           const doneDate = r.timeline[r.timeline.length - 1].date.split(' ')[0];
@@ -1979,7 +1993,46 @@ function applyFilters(reqs) {
       (r.assignee && r.assignee.name.toLowerCase().includes(currentSearch))
     );
   }
-  return filtered;
+  return applySorting(filtered);
+}
+
+function toggleSort(key) {
+  if (sortKey === key) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+  else { sortKey = key; sortDir = 'asc'; }
+  renderPage();
+}
+
+function applySorting(reqs) {
+  if (!sortKey) return reqs;
+  const sorted = [...reqs];
+  const dir = sortDir === 'asc' ? 1 : -1;
+  sorted.sort((a, b) => {
+    let va, vb;
+    switch (sortKey) {
+      case 'id': va = a.id; vb = b.id; break;
+      case 'category': va = a.category; vb = b.category; break;
+      case 'title': va = a.title; vb = b.title; break;
+      case 'priority': va = PRIORITY_ORDER[a.priority]; vb = PRIORITY_ORDER[b.priority]; return (va - vb) * dir;
+      case 'status': va = STATUSES.indexOf(a.status); vb = STATUSES.indexOf(b.status); return (va - vb) * dir;
+      case 'date': va = a.createdAt; vb = b.createdAt; break;
+      case 'assignee': va = a.assignee ? a.assignee.name : ''; vb = b.assignee ? b.assignee.name : ''; break;
+      case 'requester': va = a.requester.name; vb = b.requester.name; break;
+      default: return 0;
+    }
+    return va < vb ? -dir : va > vb ? dir : 0;
+  });
+  return sorted;
+}
+
+function sortArrow(key) {
+  if (sortKey !== key) return '<span class="sort-arrow">↕</span>';
+  return `<span class="sort-arrow active">${sortDir === 'asc' ? '↑' : '↓'}</span>`;
+}
+
+function renderSortableHeader(columns) {
+  return '<div class="req-list-header">' + columns.map(c =>
+    c.key ? `<span class="sortable" onclick="toggleSort('${c.key}')">${c.label}${sortArrow(c.key)}</span>` : `<span>${c.label}</span>`
+  ).join('') + '</div>';
 }
 
 // ── Actions ──
