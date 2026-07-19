@@ -515,6 +515,79 @@ body {
   pointer-events: none;
 }
 
+/* ── Scenario Map ── */
+.smap-role-section { margin-bottom: 24px; }
+.smap-role-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.smap-role-header.requester { background: var(--blue-bg); color: var(--blue); }
+.smap-role-header.manager { background: var(--yellow-bg); color: var(--yellow); }
+.smap-role-header.worker { background: var(--green-bg); color: var(--green); }
+.smap-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  overflow-x: auto;
+  padding: 4px 0 12px 0;
+}
+.smap-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+.smap-group-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  padding: 6px 10px;
+  background: var(--surface2);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  white-space: nowrap;
+}
+.smap-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+}
+.smap-step {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 3px 6px;
+  line-height: 1.3;
+}
+.smap-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 16px;
+  padding: 0 4px;
+  flex-shrink: 0;
+  min-height: 50px;
+}
+.smap-legend {
+  display: flex;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
 /* ── Request List ── */
 .req-list { display: flex; flex-direction: column; gap: 8px; }
 .req-item {
@@ -1416,6 +1489,7 @@ body.light .scenario-target {
       <div class="ham-section">
         <div class="ham-section-label">Scenario</div>
         <button class="ham-action-btn" onclick="startScenario();toggleHamburger()">🎯 시나리오 모드</button>
+        <button class="ham-action-btn" onclick="openScenarioMap();toggleHamburger()" style="margin-top:4px">📊 시나리오 흐름도</button>
       </div>
       <div class="ham-divider"></div>
       <div class="ham-section">
@@ -1565,6 +1639,17 @@ body.light .scenario-target {
 </div>
 
 <div class="status-dropdown" id="statusDropdown"></div>
+
+<!-- Scenario Map Modal -->
+<div class="modal-overlay" id="scenarioMapModal">
+  <div class="modal" style="max-width:900px;max-height:90vh">
+    <div class="modal-header">
+      <h3>📊 시나리오 흐름도</h3>
+      <button class="modal-close" onclick="closeModal('scenarioMapModal')">×</button>
+    </div>
+    <div class="modal-body" id="scenarioMapBody" style="overflow-y:auto;max-height:calc(90vh - 80px)"></div>
+  </div>
+</div>
 
 <!-- Dev Mode Panel -->
 <div class="dev-panel" id="devPanel">
@@ -2849,6 +2934,53 @@ function getScenarioGroups(steps) {
 }
 
 let filteredScenarios = [];
+
+function openScenarioMap() {
+  const roleLabels = { requester: '요청자', manager: '관리자', worker: '실무자' };
+  const roleIcons = { requester: '👤', manager: '👔', worker: '🔧' };
+  const roleOrder = ['requester', 'manager', 'worker'];
+
+  let html = '';
+  roleOrder.forEach(role => {
+    const roleScenarios = SCENARIOS.filter(s => s.role === role);
+    if (!roleScenarios.length) return;
+
+    const groups = [];
+    let currentGroup = null;
+    roleScenarios.forEach(s => {
+      if (!currentGroup || currentGroup.name !== s.group) {
+        currentGroup = { name: s.group, steps: [] };
+        groups.push(currentGroup);
+      }
+      const cleanText = s.text.replace(/<[^>]+>/g, '').replace(/^([\w\s가-힣]+[①-⑩])\s*/, '');
+      currentGroup.steps.push(cleanText);
+    });
+
+    html += `<div class="smap-role-section">
+      <div class="smap-role-header ${role}">${roleIcons[role]} ${roleLabels[role]} 시나리오 흐름</div>
+      <div class="smap-flow">
+        ${groups.map((g, i) => `
+          ${i > 0 ? '<div class="smap-arrow">→</div>' : ''}
+          <div class="smap-group">
+            <div class="smap-group-title">${g.name}</div>
+            <div class="smap-steps">
+              ${g.steps.map((st, si) => `<div class="smap-step">${si + 1}. ${st.length > 30 ? st.slice(0, 30) + '…' : st}</div>`).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  });
+
+  html += `<div class="smap-legend">
+    <span>📋 시나리오 데이터에서 자동 생성</span>
+    <span>총 ${SCENARIOS.length}개 스텝</span>
+    <span>역할 ${roleOrder.filter(r => SCENARIOS.some(s => s.role === r)).length}개</span>
+  </div>`;
+
+  document.getElementById('scenarioMapBody').innerHTML = html;
+  openModal('scenarioMapModal');
+}
 
 function startScenario() {
   filteredScenarios = SCENARIOS.filter(s => s.role === currentRole);
