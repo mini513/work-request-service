@@ -1786,15 +1786,17 @@ function renderLog(el) {
               workers[name].total++;
               if (r.status === '완료') workers[name].done++;
             });
-            const maxW = Math.max(...Object.values(workers).map(w => w.total), 1);
-            return Object.entries(workers).map(([name, w]) => `<div class="bar-row">
+            return Object.entries(workers).map(([name, w]) => {
+              const rate = w.total > 0 ? Math.round((w.done / w.total) * 100) : 0;
+              return `<div class="bar-row">
               <div class="bar-label">${name}</div>
               <div class="bar-track">
-                <div class="bar-fill" style="width:${(w.total/maxW)*100}%;background:var(--accent);opacity:0.3"></div>
-                <div class="bar-fill" style="width:${(w.done/maxW)*100}%;background:var(--green);position:absolute;top:0;left:0;height:100%"></div>
+                <div class="bar-fill" style="width:100%;background:var(--accent);opacity:0.15"></div>
+                <div class="bar-fill" style="width:${rate}%;background:var(--green);position:absolute;top:0;left:0;height:100%"></div>
               </div>
-              <div class="bar-value">${w.done}/${w.total}</div>
-            </div>`).join('');
+              <div class="bar-value">${rate}% <span style="font-size:11px;color:var(--text-dim)">(${w.done}/${w.total})</span></div>
+            </div>`;
+            }).join('');
           })()}
         </div>
         <div style="font-size:11px;color:var(--text-dim);margin-top:8px;text-align:right">■ 완료 / ■ 전체 배정</div>
