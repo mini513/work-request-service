@@ -1418,8 +1418,28 @@ body.light .scenario-target {
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('assignModal')">취소</button>
-      <button class="btn btn-danger" onclick="rejectRequest()" style="margin-right:auto">반려</button>
       <button class="btn btn-primary" onclick="confirmAssign()">배정 확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal-overlay" id="rejectModal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <h3>요청 반려</h3>
+      <button class="modal-close" onclick="closeModal('rejectModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="rejectReqInfo" style="margin-bottom:16px"></div>
+      <div class="form-group">
+        <label class="form-label">반려 사유</label>
+        <textarea class="form-textarea" id="rejectReason" placeholder="반려 사유를 입력하세요" rows="3"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('rejectModal')">취소</button>
+      <button class="btn btn-danger" onclick="confirmReject()">반려 확인</button>
     </div>
   </div>
 </div>
@@ -1773,7 +1793,7 @@ function renderDetail(el) {
     }
   }
   if (isManager && !req.assignee) {
-    actionButtons = `<div class="mt-16"><button class="btn btn-primary" onclick="openAssignModal('${req.id}')">담당자 배정</button></div>`;
+    actionButtons = `<div class="mt-16" style="display:flex;gap:8px"><button class="btn btn-primary" onclick="openAssignModal('${req.id}')">담당자 배정</button><button class="btn btn-danger" onclick="openRejectModal('${req.id}')">반려</button></div>`;
   }
 
   el.innerHTML = `
@@ -1982,13 +2002,27 @@ function confirmAssign() {
   renderNotiBadge();
 }
 
-function rejectRequest() {
-  const req = REQUESTS.find(r => r.id === assigningReqId);
+let rejectingReqId = null;
+function openRejectModal(id) {
+  rejectingReqId = id;
+  const req = REQUESTS.find(r => r.id === id);
+  document.getElementById('rejectReqInfo').innerHTML = `
+    <div class="fw-600">${req.id} — ${req.title}</div>
+    <div class="text-dim" style="font-size:12px;margin-top:4px">${req.category} · ${req.requester.name} · 긴급도: ${req.priority}</div>
+  `;
+  document.getElementById('rejectReason').value = '';
+  openModal('rejectModal');
+}
+
+function confirmReject() {
+  const reason = document.getElementById('rejectReason').value.trim();
+  if (!reason) { alert('반려 사유를 입력해주세요.'); return; }
+  const req = REQUESTS.find(r => r.id === rejectingReqId);
   req.status = '반려';
   const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
-  req.timeline.push({ date: now, action: '반려', by: USERS.manager.name, detail: '요청이 반려되었습니다' });
-  NOTIFICATIONS.requester.unshift({ id: 'n' + Date.now(), reqId: req.id, message: `요청이 반려되었습니다`, time: now, read: false });
-  closeModal('assignModal');
+  req.timeline.push({ date: now, action: '반려', by: USERS.manager.name, detail: reason });
+  NOTIFICATIONS.requester.unshift({ id: 'n' + Date.now(), reqId: req.id, message: `요청이 반려되었습니다: ${reason}`, time: now, read: false });
+  closeModal('rejectModal');
   renderPage();
   renderNotiBadge();
 }
@@ -2298,8 +2332,10 @@ const SCENARIOS = [
   // ── 관리자 시나리오 4: 요청 반려 ──
   { role: 'manager', group: '요청 반려', page: 'list', detail: 'REQ-005', target: '.btn-danger',
     text: '<strong>반려 ①</strong> 부적절한 요청의 상세 화면에서 "반려" 버튼을 클릭합니다.' },
+  { role: 'manager', group: '요청 반려', page: 'list', detail: 'REQ-005', target: '#rejectReason', action: 'openReject',
+    text: '<strong>반려 ②</strong> 반려 사유를 입력합니다.' },
   { role: 'manager', group: '요청 반려', page: 'list', detail: 'REQ-005', target: '.status-stepper',
-    text: '<strong>반려 ②</strong> 반려 처리 후 상태가 "반려"로 변경되고, 요청자에게 알림이 전송됩니다.' },
+    text: '<strong>반려 ③</strong> 반려 처리 후 상태가 "반려"로 변경되고, 요청자에게 알림이 전송됩니다.' },
 
   // ── 관리자 시나리오 5: 처리 현황 로그 ──
   { role: 'manager', group: '처리 현황 로그', page: 'log', detail: null, target: '.stats-row', targetLabel: false,
@@ -2450,7 +2486,7 @@ function applyScenarioStep() {
   const s = filteredScenarios[scenarioStep];
   switchRole(s.role);
 
-  const needsModal = s.action === 'openNewReq' || s.action === 'keepModal' || s.action === 'openAssign' || s.action === 'keepAssignModal';
+  const needsModal = s.action === 'openNewReq' || s.action === 'keepModal' || s.action === 'openAssign' || s.action === 'keepAssignModal' || s.action === 'openReject' || s.action === 'keepRejectModal';
   if (!needsModal) {
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
   }
@@ -2463,6 +2499,7 @@ function applyScenarioStep() {
 
   if (s.action === 'openNewReq') { setTimeout(() => openModal('newReqModal'), 200); }
   if (s.action === 'openAssign') { setTimeout(() => openModal('assignModal'), 200); }
+  if (s.action === 'openReject') { setTimeout(() => openRejectModal('REQ-005'), 200); }
   if (s.action === 'openNoti') { setTimeout(() => { document.querySelector('.noti-btn').click(); }, 200); }
 
   document.getElementById('scenarioText').innerHTML = `<span class="scenario-group-label">${s.group}</span> ${s.text}`;
