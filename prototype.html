@@ -733,27 +733,36 @@ body {
   color: var(--text-mid);
 }
 
-/* ── Stakeholder Map ── */
-.sh-map { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 24px; }
-.sh-legend { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
+/* ── Stakeholder Map (동심원) ── */
+.sh-map { display: flex; flex-direction: column; align-items: center; gap: 32px; padding: 24px; }
+.sh-concentric { position: relative; width: 640px; height: 640px; margin: 0 auto; }
+.sh-ring { position: absolute; border-radius: 50%; border: 2px dashed; display: flex; align-items: center; justify-content: center; }
+.sh-ring.outer { width: 640px; height: 640px; top: 0; left: 0; border-color: var(--border); background: var(--surface); }
+.sh-ring.middle { width: 420px; height: 420px; top: 110px; left: 110px; border-color: var(--border); background: var(--surface2); }
+.sh-ring.core { width: 200px; height: 200px; top: 220px; left: 220px; border-color: var(--accent); background: var(--accent-bg); z-index: 2; }
+.sh-ring-label { position: absolute; font-size: 10px; color: var(--text-dim); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+.sh-node { position: absolute; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 14px; background: var(--surface); border: 2px solid; border-radius: 10px; font-size: 12px; text-align: center; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.sh-node.core-node { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 700; font-size: 14px; }
+.sh-node-role { font-weight: 700; font-size: 13px; }
+.sh-node-name { font-size: 11px; color: var(--text-mid); }
+.sh-node.requester { border-color: var(--blue); }
+.sh-node.requester .sh-node-role { color: var(--blue); }
+.sh-node.manager { border-color: var(--yellow); }
+.sh-node.manager .sh-node-role { color: var(--yellow); }
+.sh-node.worker { border-color: var(--green); }
+.sh-node.worker .sh-node-role { color: var(--green); }
+.sh-node.reporter { border-color: #7c3aed; }
+.sh-node.reporter .sh-node-role { color: #7c3aed; }
+.sh-flow-section { width: 100%; }
+.sh-flow-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+.sh-flow-list { display: flex; flex-direction: column; gap: 8px; }
+.sh-flow-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+.sh-flow-from, .sh-flow-to { font-weight: 600; font-size: 12px; padding: 4px 10px; border-radius: 6px; white-space: nowrap; }
+.sh-flow-arrow { font-size: 16px; color: var(--text-dim); flex-shrink: 0; }
+.sh-flow-label { font-size: 12px; color: var(--text-mid); padding-left: 8px; border-left: 2px solid var(--border); }
+.sh-legend { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
 .sh-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-mid); }
 .sh-legend-color { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.1); }
-.sh-diagram { display: flex; justify-content: center; align-items: flex-start; gap: 40px; width: 100%; }
-.sh-col { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 180px; }
-.sh-role-header { padding: 8px 20px; border-radius: 8px; font-weight: 700; font-size: 13px; text-align: center; }
-.sh-role-header.requester { background: var(--blue-bg); color: var(--blue); border: 2px solid var(--blue); }
-.sh-role-header.manager { background: var(--yellow-bg); color: var(--yellow); border: 2px solid var(--yellow); }
-.sh-role-header.worker { background: var(--green-bg); color: var(--green); border: 2px solid var(--green); }
-.sh-role-header.reporter { background: #f3e8ff; color: #7c3aed; border: 2px solid #7c3aed; }
-.sh-person { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 16px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; font-size: 12px; min-width: 140px; }
-.sh-person-name { font-weight: 600; color: var(--text); }
-.sh-person-dept { font-size: 11px; color: var(--text-mid); }
-.sh-person-title { font-size: 10px; color: var(--text-light); }
-.sh-relations { width: 100%; margin-top: 8px; }
-.sh-relation-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.sh-relation-table th { background: var(--bg); padding: 8px 12px; text-align: left; font-weight: 600; border-bottom: 2px solid var(--border); color: var(--text); }
-.sh-relation-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-mid); vertical-align: top; }
-.sh-relation-arrow { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
 
 /* ── Request List ── */
 .req-list { display: flex; flex-direction: column; gap: 8px; }
@@ -3209,66 +3218,102 @@ function getScenarioGroups(steps) {
 let filteredScenarios = [];
 
 function openStakeholderMap() {
-  const stakeholders = [
-    { role: 'requester', class: 'requester', label: '👤 요청자', persons: [
-      { name: USERS.requester.name, dept: USERS.requester.dept, desc: '업무 요청 등록 · 진행 확인' }
-    ]},
-    { role: 'manager', class: 'manager', label: '👔 관리자', persons: [
-      { name: USERS.manager.name, dept: USERS.manager.dept, desc: '요청 검토 · 담당자 배정 · 반려' }
-    ]},
-    { role: 'worker', class: 'worker', label: '🔧 실무자', persons: [
-      { name: USERS.worker1.name, dept: USERS.worker1.dept, desc: '배정된 업무 처리' },
-      { name: USERS.worker2.name, dept: USERS.worker2.dept, desc: '배정된 업무 처리' },
-      { name: USERS.worker3.name, dept: USERS.worker3.dept, desc: '배정된 업무 처리' },
-    ]},
-    { role: 'reporter', class: 'reporter', label: '📊 보고자', persons: [
-      { name: USERS.reporter1.name, dept: USERS.reporter1.dept, desc: USERS.reporter1.title },
-      { name: USERS.reporter2.name, dept: USERS.reporter2.dept, desc: USERS.reporter2.title },
-    ]},
+  const flows = [
+    { from: '요청자', to: '관리자', label: '요청 등록', detail: '업무 요청서를 작성하여 관리자에게 제출', fromColor: 'var(--blue)', toColor: 'var(--yellow)' },
+    { from: '관리자', to: '요청자', label: '접수 · 반려 알림', detail: '요청 검토 결과를 요청자에게 알림 전송', fromColor: 'var(--yellow)', toColor: 'var(--blue)' },
+    { from: '관리자', to: '실무자', label: '담당자 배정', detail: '적합한 실무자를 선택하여 업무 배정', fromColor: 'var(--yellow)', toColor: 'var(--green)' },
+    { from: '실무자', to: '관리자', label: '상태 변경 보고', detail: '작업 시작 · 완료 등 진행 상태를 관리자에게 보고', fromColor: 'var(--green)', toColor: 'var(--yellow)' },
+    { from: '실무자', to: '요청자', label: '처리 완료 알림', detail: '요청 처리 완료 시 요청자에게 결과 통보', fromColor: 'var(--green)', toColor: 'var(--blue)' },
+    { from: '관리자', to: '보고자', label: '처리 현황 보고', detail: '팀별 업무 처리 현황을 상급 관리자에게 보고', fromColor: 'var(--yellow)', toColor: '#7c3aed' },
   ];
-
-  const relations = [
-    { from: '요청자', to: '관리자', action: '요청 등록', arrow: '→', color: 'var(--blue)' },
-    { from: '관리자', to: '요청자', action: '접수 · 반려 알림', arrow: '→', color: 'var(--yellow)' },
-    { from: '관리자', to: '실무자', action: '담당자 배정', arrow: '→', color: 'var(--yellow)' },
-    { from: '실무자', to: '관리자', action: '상태 변경 알림', arrow: '→', color: 'var(--green)' },
-    { from: '실무자', to: '요청자', action: '완료 알림', arrow: '→', color: 'var(--green)' },
-    { from: '관리자', to: '보고자', action: '처리 현황 보고', arrow: '→', color: 'var(--yellow)' },
-  ];
-
-  const diagramHtml = stakeholders.map(s => `
-    <div class="sh-col">
-      <div class="sh-role-header ${s.class}">${s.label}</div>
-      ${s.persons.map(p => `<div class="sh-person">
-        <span class="sh-person-name">${p.name}</span>
-        <span class="sh-person-dept">${p.dept}</span>
-        <span class="sh-person-title">${p.desc}</span>
-      </div>`).join('')}
-    </div>
-  `).join('');
-
-  const relationRows = relations.map(r =>
-    `<tr>
-      <td><span class="sh-relation-arrow" style="background:${r.color}15;color:${r.color}">${r.from}</span></td>
-      <td style="text-align:center;font-size:16px;color:var(--text-light)">→</td>
-      <td><span class="sh-relation-arrow" style="background:${r.color}15;color:${r.color}">${r.to}</span></td>
-      <td>${r.action}</td>
-    </tr>`
-  ).join('');
 
   const html = `<div class="sh-map">
     <div class="sh-legend">
-      <div class="sh-legend-item"><div class="sh-legend-color" style="background:var(--blue)"></div>요청자</div>
-      <div class="sh-legend-item"><div class="sh-legend-color" style="background:var(--yellow)"></div>관리자</div>
-      <div class="sh-legend-item"><div class="sh-legend-color" style="background:var(--green)"></div>실무자</div>
-      <div class="sh-legend-item"><div class="sh-legend-color" style="background:#7c3aed"></div>보고자</div>
+      <div class="sh-legend-item"><div class="sh-legend-color" style="background:var(--blue)"></div>요청자 (핵심 사용자)</div>
+      <div class="sh-legend-item"><div class="sh-legend-color" style="background:var(--yellow)"></div>관리자 (직접적)</div>
+      <div class="sh-legend-item"><div class="sh-legend-color" style="background:var(--green)"></div>실무자 (직접적)</div>
+      <div class="sh-legend-item"><div class="sh-legend-color" style="background:#7c3aed"></div>보고자 (간접적)</div>
     </div>
-    <div class="sh-diagram">${diagramHtml}</div>
-    <div class="sh-relations">
-      <table class="sh-relation-table">
-        <thead><tr><th>From</th><th></th><th>To</th><th>상호작용</th></tr></thead>
-        <tbody>${relationRows}</tbody>
-      </table>
+
+    <div class="sh-concentric">
+      <div class="sh-ring outer">
+        <span class="sh-ring-label" style="top:8px;left:50%;transform:translateX(-50%)">간접적 이해관계자</span>
+      </div>
+      <div class="sh-ring middle">
+        <span class="sh-ring-label" style="top:8px;left:50%;transform:translateX(-50%)">직접적 이해관계자</span>
+      </div>
+      <div class="sh-ring core">
+        <span class="sh-ring-label" style="top:8px;left:50%;transform:translateX(-50%)">핵심 사용자</span>
+      </div>
+
+      <div class="sh-node core-node" style="top:270px;left:258px">
+        <span>📋 서비스</span>
+        <span style="font-size:11px;opacity:0.85">업무 요청</span>
+      </div>
+
+      <div class="sh-node requester" style="top:160px;left:140px">
+        <span class="sh-node-role">👤 요청자</span>
+        <span class="sh-node-name">요청 등록 · 진행 확인</span>
+      </div>
+
+      <div class="sh-node manager" style="top:160px;left:400px">
+        <span class="sh-node-role">👔 관리자</span>
+        <span class="sh-node-name">검토 · 배정 · 반려</span>
+      </div>
+
+      <div class="sh-node worker" style="top:400px;left:140px">
+        <span class="sh-node-role">🔧 실무자</span>
+        <span class="sh-node-name">업무 처리 · 상태 보고</span>
+      </div>
+
+      <div class="sh-node reporter" style="top:40px;left:400px">
+        <span class="sh-node-role">📊 보고자</span>
+        <span class="sh-node-name">현황 파악 · 의사결정</span>
+      </div>
+
+      <svg style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none">
+        <defs>
+          <marker id="ah-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="var(--blue)"/></marker>
+          <marker id="ah-yellow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="var(--yellow)"/></marker>
+          <marker id="ah-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="var(--green)"/></marker>
+          <marker id="ah-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#7c3aed"/></marker>
+        </defs>
+        <!-- 요청자 → 관리자: 요청 등록 -->
+        <line x1="250" y1="175" x2="400" y2="175" stroke="var(--blue)" stroke-width="2" marker-end="url(#ah-blue)" opacity="0.7"/>
+        <text x="325" y="167" text-anchor="middle" font-size="10" fill="var(--blue)" font-weight="600">요청 등록</text>
+
+        <!-- 관리자 → 요청자: 접수/반려 -->
+        <line x1="400" y1="195" x2="250" y2="195" stroke="var(--yellow)" stroke-width="2" marker-end="url(#ah-yellow)" opacity="0.7"/>
+        <text x="325" y="210" text-anchor="middle" font-size="10" fill="var(--yellow)" font-weight="600">접수·반려</text>
+
+        <!-- 관리자 → 실무자: 배정 -->
+        <line x1="420" y1="210" x2="260" y2="400" stroke="var(--yellow)" stroke-width="2" marker-end="url(#ah-yellow)" opacity="0.7"/>
+        <text x="355" y="305" text-anchor="middle" font-size="10" fill="var(--yellow)" font-weight="600">담당자 배정</text>
+
+        <!-- 실무자 → 관리자: 상태 보고 -->
+        <line x1="280" y1="400" x2="440" y2="210" stroke="var(--green)" stroke-width="2" marker-end="url(#ah-green)" opacity="0.7"/>
+        <text x="375" y="320" text-anchor="middle" font-size="10" fill="var(--green)" font-weight="600">상태 보고</text>
+
+        <!-- 실무자 → 요청자: 완료 알림 -->
+        <line x1="200" y1="400" x2="200" y2="210" stroke="var(--green)" stroke-width="2" marker-end="url(#ah-green)" opacity="0.7"/>
+        <text x="188" y="310" text-anchor="end" font-size="10" fill="var(--green)" font-weight="600">완료 알림</text>
+
+        <!-- 관리자 → 보고자: 현황 보고 -->
+        <line x1="460" y1="160" x2="460" y2="90" stroke="var(--yellow)" stroke-width="2" marker-end="url(#ah-purple)" opacity="0.7"/>
+        <text x="475" y="130" font-size="10" fill="#7c3aed" font-weight="600">현황 보고</text>
+      </svg>
+    </div>
+
+    <div class="sh-flow-section">
+      <div class="sh-flow-title">상호작용 흐름</div>
+      <div class="sh-flow-list">
+        ${flows.map(f => `<div class="sh-flow-item">
+          <span class="sh-flow-from" style="background:${f.fromColor}15;color:${f.fromColor}">${f.from}</span>
+          <span class="sh-flow-arrow">→</span>
+          <span class="sh-flow-to" style="background:${f.toColor}15;color:${f.toColor}">${f.to}</span>
+          <span class="sh-flow-label"><strong>${f.label}</strong> — ${f.detail}</span>
+        </div>`).join('')}
+      </div>
     </div>
   </div>`;
 
