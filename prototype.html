@@ -513,67 +513,87 @@ body {
 }
 
 /* ── Scenario Map ── */
-.smap-role-section { margin-bottom: 24px; }
+.smap-role-section { margin-bottom: 28px; }
 .smap-role-header {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
   border-radius: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   font-weight: 700;
   font-size: 14px;
 }
 .smap-role-header.requester { background: var(--blue-bg); color: var(--blue); }
 .smap-role-header.manager { background: var(--yellow-bg); color: var(--yellow); }
 .smap-role-header.worker { background: var(--green-bg); color: var(--green); }
-.smap-flow {
+.smap-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.smap-main-flow {
   display: flex;
-  align-items: stretch;
+  align-items: flex-start;
   gap: 0;
   overflow-x: auto;
-  padding: 4px 0 12px 0;
+  padding-bottom: 12px;
 }
-.smap-group {
+.smap-node {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 120px;
+  min-width: 110px;
   flex-shrink: 0;
 }
-.smap-group-title {
-  font-size: 11px;
+.smap-node-box {
+  padding: 8px 14px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--text);
   text-align: center;
-  padding: 6px 10px;
-  background: var(--surface2);
-  border-radius: 6px;
-  margin-bottom: 6px;
+  color: var(--text);
   white-space: nowrap;
 }
-.smap-steps {
+.smap-sub-steps {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
   width: 100%;
 }
-.smap-step {
+.smap-sub-step {
+  padding: 4px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
   font-size: 10px;
-  color: var(--text-dim);
+  color: var(--text-mid);
   text-align: center;
-  padding: 3px 6px;
-  line-height: 1.3;
+  white-space: nowrap;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.smap-arrow {
+.smap-connector {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  padding-top: 10px;
   color: var(--text-dim);
-  font-size: 16px;
-  padding: 0 4px;
+  font-size: 18px;
   flex-shrink: 0;
-  min-height: 50px;
+  width: 24px;
+  justify-content: center;
+}
+.smap-note {
+  font-size: 10px;
+  color: var(--accent);
+  margin-top: 6px;
+  text-align: center;
 }
 .smap-legend {
   display: flex;
@@ -2946,20 +2966,24 @@ function openScenarioMap() {
         currentGroup = { name: s.group, steps: [] };
         groups.push(currentGroup);
       }
-      const cleanText = s.text.replace(/<[^>]+>/g, '').replace(/^([\w\s가-힣]+[①-⑩])\s*/, '');
+      const cleanText = s.text.replace(/<[^>]+>/g, '').replace(/^.*?[①-⑩]\s*/, '').trim();
       currentGroup.steps.push(cleanText);
     });
 
     html += `<div class="smap-role-section">
-      <div class="smap-role-header ${role}">${roleIcons[role]} ${roleLabels[role]} 시나리오 흐름</div>
-      <div class="smap-flow">
+      <div class="smap-role-header ${role}">${roleIcons[role]} ${roleLabels[role]}</div>
+      <div class="smap-label">Main Flow →</div>
+      <div class="smap-main-flow">
         ${groups.map((g, i) => `
-          ${i > 0 ? '<div class="smap-arrow">→</div>' : ''}
-          <div class="smap-group">
-            <div class="smap-group-title">${g.name}</div>
-            <div class="smap-steps">
-              ${g.steps.map((st, si) => `<div class="smap-step">${si + 1}. ${st.length > 30 ? st.slice(0, 30) + '…' : st}</div>`).join('')}
-            </div>
+          ${i > 0 ? '<div class="smap-connector">→</div>' : ''}
+          <div class="smap-node">
+            <div class="smap-node-box">${g.name}</div>
+            ${g.steps.length > 0 ? `<div class="smap-sub-steps">
+              ${g.steps.map(st => {
+                const short = st.length > 22 ? st.slice(0, 22) + '…' : st;
+                return `<div class="smap-sub-step" title="${st.replace(/"/g, '&quot;')}">${short}</div>`;
+              }).join('')}
+            </div>` : ''}
           </div>
         `).join('')}
       </div>
@@ -2967,9 +2991,7 @@ function openScenarioMap() {
   });
 
   html += `<div class="smap-legend">
-    <span>📋 시나리오 데이터에서 자동 생성</span>
-    <span>총 ${SCENARIOS.length}개 스텝</span>
-    <span>역할 ${roleOrder.filter(r => SCENARIOS.some(s => s.role === r)).length}개</span>
+    <span>📋 시나리오 데이터에서 자동 생성 · 총 ${SCENARIOS.length}개 스텝</span>
   </div>`;
 
   document.getElementById('scenarioMapBody').innerHTML = html;
