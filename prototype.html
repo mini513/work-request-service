@@ -1507,8 +1507,10 @@ body.light .scenario-target {
   margin-bottom: 8px;
 }
 .ham-divider {
-  height: 1px;
-  background: var(--border);
+  height: 0;
+  border-top: 1.5px solid var(--border);
+  border-bottom: 1.5px solid var(--border);
+  padding-top: 2px;
   margin: 8px 0;
 }
 .ham-role-btns {
@@ -1640,14 +1642,10 @@ body.light .scenario-target {
       </div>
       <div class="ham-divider"></div>
       <div class="ham-section">
-        <div class="ham-section-label">UX Planning</div>
+        <div class="ham-section-label">Service Planning</div>
         <button class="ham-action-btn" onclick="openScenarioMap();toggleHamburger()">📊 시나리오 흐름도</button>
         <button class="ham-action-btn" onclick="openIAMap();toggleHamburger()" style="margin-top:4px">🗂 IA 구조도</button>
-      </div>
-      <div class="ham-divider"></div>
-      <div class="ham-section">
-        <div class="ham-section-label">Developer</div>
-        <div class="ham-toggle-row">
+        <div class="ham-toggle-row" style="margin-top:4px">
           <span class="ham-toggle-label">개발 모드</span>
           <label class="toggle-switch"><input type="checkbox" id="devModeToggle" onchange="toggleDevPanel()"><span class="toggle-slider"></span></label>
         </div>
