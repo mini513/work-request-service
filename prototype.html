@@ -484,11 +484,14 @@ body {
   text-align: center;
   position: relative;
   padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .step::before {
   content: '';
   position: absolute;
-  top: 18px;
+  top: 14px;
   left: 0;
   right: 0;
   height: 3px;
@@ -728,6 +731,100 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
+/* ── Charts ── */
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+.chart-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bar-label {
+  width: 60px;
+  font-size: 12px;
+  color: var(--text-mid);
+  text-align: right;
+  flex-shrink: 0;
+}
+.bar-track {
+  flex: 1;
+  height: 24px;
+  background: var(--surface2);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  min-width: 2px;
+}
+.bar-value {
+  width: 32px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: left;
+  flex-shrink: 0;
+}
+.donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  justify-content: center;
+}
+.donut-svg {
+  width: 120px;
+  height: 120px;
+  transform: rotate(-90deg);
+}
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-mid);
+}
+.donut-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.donut-legend-count {
+  font-weight: 600;
+  color: var(--text);
+  margin-left: auto;
+  padding-left: 12px;
+}
+
 /* ── Dev Mode ── */
 .dev-panel {
   position: fixed;
@@ -877,30 +974,58 @@ body {
 /* ── Scenario Mode ── */
 .scenario-bar {
   display: none;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 20px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 20px;
   background: var(--accent-bg);
   border-bottom: 1px solid var(--accent);
   font-size: 13px;
   flex-shrink: 0;
 }
 .scenario-bar.show { display: flex; }
-.scenario-bar .step-text { flex: 1; }
-.scenario-bar .step-text strong { color: var(--accent); }
-.scenario-progress {
+.scenario-top-row {
   display: flex;
-  gap: 4px;
   align-items: center;
+  gap: 12px;
 }
-.scenario-dot-sm {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+.scenario-top-row .step-text { flex: 1; }
+.scenario-top-row .step-text strong { color: var(--accent); }
+.scenario-group-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+.scenario-bottom-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 28px;
+}
+.scenario-step-chip {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.scenario-step-chip.done { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+.scenario-step-chip.current { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.scenario-step-chip:hover { border-color: var(--accent); }
+.scenario-group-divider {
+  width: 1px;
+  height: 14px;
   background: var(--border);
+  margin: 0 2px;
 }
-.scenario-dot-sm.done { background: var(--accent); }
-.scenario-dot-sm.current { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
 
 /* ── Helpers ── */
 .text-dim { color: var(--text-dim); }
@@ -919,10 +1044,198 @@ body {
 .justify-between { justify-content: space-between; }
 .hidden { display: none !important; }
 
+/* Empty State / No Data */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-dim);
+  gap: 12px;
+}
+.empty-state-icon {
+  font-size: 48px;
+  opacity: 0.5;
+}
+.empty-state-icon svg {
+  width: 64px;
+  height: 64px;
+  stroke: var(--text-dim);
+  opacity: 0.4;
+}
+.empty-state-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-mid);
+}
+.empty-state-desc {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
 /* highlight for dev mode */
 .dev-highlight {
   outline: 2px solid var(--accent) !important;
   outline-offset: 2px;
+}
+
+/* Scenario Pulse */
+@keyframes scenario-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(91,141,239,0.6); }
+  50% { box-shadow: 0 0 0 8px rgba(91,141,239,0); }
+  100% { box-shadow: 0 0 0 0 rgba(91,141,239,0); }
+}
+body.light .scenario-target {
+  --pulse-color: rgba(79,70,229,0.5);
+}
+.scenario-target {
+  animation: scenario-pulse 1.5s ease-in-out infinite !important;
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 3px;
+  position: relative;
+  z-index: 100;
+}
+.scenario-target::after {
+  content: '👆 여기를 클릭';
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 101;
+}
+.scenario-target-no-label {
+  animation: scenario-pulse 1.5s ease-in-out infinite !important;
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 3px;
+}
+
+/* Hamburger Menu */
+.hamburger-wrap { position: relative; }
+.hamburger-dropdown {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  width: 240px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  z-index: 1000;
+  display: none;
+  padding: 12px 0;
+}
+.hamburger-dropdown.show { display: block; }
+.ham-section {
+  padding: 8px 16px;
+}
+.ham-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 8px;
+}
+.ham-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 0;
+}
+.ham-role-btns {
+  display: flex;
+  gap: 4px;
+}
+.ham-role-btn {
+  flex: 1;
+  padding: 6px 0;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-dim);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.ham-role-btn:hover { border-color: var(--accent); color: var(--text); }
+.ham-role-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.ham-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+.ham-toggle-label {
+  font-size: 13px;
+  color: var(--text-mid);
+}
+.toggle-switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  cursor: pointer;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 11px;
+  transition: 0.2s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--accent);
+}
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(18px);
+}
+.ham-action-btn {
+  width: 100%;
+  padding: 6px 0;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-mid);
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.ham-action-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Current role indicator in header */
+.current-role-badge {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 600;
+  background: var(--accent-bg);
+  color: var(--accent);
 }
 
 /* Scrollbar */
@@ -932,27 +1245,53 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
 </style>
 </head>
-<body>
+<body class="light">
 
 <!-- Scenario Bar -->
 <div class="scenario-bar" id="scenarioBar">
-  <span style="font-size:16px">📋</span>
-  <span class="step-text" id="scenarioText"><strong>시나리오 모드</strong> — 이해관계자별 업무 흐름을 체험합니다</span>
-  <div class="scenario-progress" id="scenarioProgress"></div>
-  <button class="btn btn-sm btn-secondary" onclick="prevScenarioStep()">◀ 이전</button>
-  <button class="btn btn-sm btn-primary" onclick="nextScenarioStep()">다음 ▶</button>
-  <button class="btn btn-sm btn-danger" onclick="exitScenario()">종료</button>
+  <div class="scenario-top-row">
+    <span style="font-size:16px">📋</span>
+    <span class="step-text" id="scenarioText"><strong>시나리오 모드</strong> — 이해관계자별 업무 흐름을 체험합니다</span>
+    <button class="btn btn-sm btn-secondary" onclick="prevScenarioStep()">◀ 이전</button>
+    <button class="btn btn-sm btn-primary" onclick="nextScenarioStep()">다음 ▶</button>
+    <button class="btn btn-sm btn-danger" onclick="exitScenario()">종료</button>
+  </div>
+  <div class="scenario-bottom-row" id="scenarioProgress"></div>
 </div>
 
 <!-- Header -->
 <div class="header">
-  <div class="header-logo">📋 업무요청</div>
-  <div class="role-switcher">
-    <button class="role-btn active" data-role="requester" onclick="switchRole('requester')">요청자</button>
-    <button class="role-btn" data-role="manager" onclick="switchRole('manager')">관리자</button>
-    <button class="role-btn" data-role="worker" onclick="switchRole('worker')">실무자</button>
+  <div class="hamburger-wrap">
+    <button class="icon-btn" onclick="toggleHamburger()" title="메뉴" id="hamburgerBtn">☰</button>
+    <div class="hamburger-dropdown" id="hamburgerDropdown">
+      <div class="ham-section">
+        <div class="ham-section-label">User Level</div>
+        <div class="ham-role-btns" id="hamRoleBtns">
+          <button class="ham-role-btn active" data-role="requester" onclick="switchRole('requester')">요청자</button>
+          <button class="ham-role-btn" data-role="manager" onclick="switchRole('manager')">관리자</button>
+          <button class="ham-role-btn" data-role="worker" onclick="switchRole('worker')">실무자</button>
+        </div>
+      </div>
+      <div class="ham-divider"></div>
+      <div class="ham-section">
+        <div class="ham-section-label">Scenario</div>
+        <button class="ham-action-btn" onclick="startScenario();toggleHamburger()">🎯 시나리오 모드</button>
+      </div>
+      <div class="ham-divider"></div>
+      <div class="ham-section">
+        <div class="ham-section-label">Developer</div>
+        <div class="ham-toggle-row">
+          <span class="ham-toggle-label">개발 모드</span>
+          <label class="toggle-switch"><input type="checkbox" id="devModeToggle" onchange="toggleDevPanel()"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+    </div>
   </div>
+  <div class="header-logo">📋 업무요청</div>
+  <span class="current-role-badge" id="currentRoleBadge">요청자</span>
   <div class="header-spacer"></div>
+  <button class="icon-btn" onclick="toggleTheme()" title="테마 전환" id="themeBtn">☀️</button>
+  <button class="icon-btn" onclick="toggleFullscreen()" title="전체화면" id="fullscreenBtn">⛶</button>
   <div class="noti-wrap">
     <button class="noti-btn" onclick="toggleNoti()">
       🔔
@@ -966,8 +1305,6 @@ body {
       <div id="notiList"></div>
     </div>
   </div>
-  <button class="icon-btn" onclick="toggleTheme()" title="테마 전환">🌓</button>
-  <button class="icon-btn" onclick="toggleDevPanel()" title="개발 모드" id="devToggleBtn">☰</button>
 </div>
 
 <!-- Layout -->
@@ -1071,7 +1408,7 @@ body {
 <div class="dev-panel" id="devPanel">
   <div class="dev-panel-header">
     <div class="dev-panel-title">🛠 개발 모드</div>
-    <button class="modal-close" onclick="toggleDevPanel()">×</button>
+    <button class="modal-close" onclick="closeDevPanel()">×</button>
   </div>
   <div id="devContent">
     <div class="dev-section">
@@ -1088,6 +1425,8 @@ body {
 let currentRole = 'requester';
 let currentPage = 'list';
 let currentDetailId = null;
+let currentFilter = '전체';
+let currentSearch = '';
 let devMode = false;
 let devHighlighted = null;
 let scenarioActive = false;
@@ -1110,14 +1449,23 @@ const SIDEBAR_MENUS = {
 };
 
 // ── Role Switch ──
+const ROLE_LABELS = { requester: '요청자', manager: '관리자', worker: '실무자' };
+
 function switchRole(role) {
   currentRole = role;
   currentPage = role === 'manager' ? 'dashboard' : 'list';
   currentDetailId = null;
-  document.querySelectorAll('.role-btn').forEach(b => b.classList.toggle('active', b.dataset.role === role));
+  currentFilter = '전체';
+  currentSearch = '';
+  document.querySelectorAll('.ham-role-btn').forEach(b => b.classList.toggle('active', b.dataset.role === role));
+  document.getElementById('currentRoleBadge').textContent = ROLE_LABELS[role];
   renderSidebar();
   renderPage();
   renderNotiBadge();
+}
+
+function toggleHamburger() {
+  document.getElementById('hamburgerDropdown').classList.toggle('show');
 }
 
 // ── Sidebar ──
@@ -1132,9 +1480,6 @@ function renderSidebar() {
     </div>`;
   });
   html += `<div class="sidebar-spacer"></div>`;
-  html += `<div class="sidebar-bottom">`;
-  html += `<div class="sidebar-item" onclick="startScenario()"><span class="icon">🎯</span>시나리오 모드</div>`;
-  html += `</div>`;
   document.getElementById('sidebar').innerHTML = html;
 }
 
@@ -1169,7 +1514,7 @@ function renderPage() {
 
 // ── Requester List ──
 function renderRequesterList(el) {
-  const myReqs = [...REQUESTS].filter(r => r.requester.id === 'u1').sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
+  const myReqs = applyFilters([...REQUESTS].filter(r => r.requester.id === 'u1').sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]));
   el.innerHTML = `
     <div class="page-header">
       <div><div class="page-title">내 요청 목록</div><div class="page-subtitle">등록한 업무 요청의 진행 상황을 확인합니다</div></div>
@@ -1177,23 +1522,27 @@ function renderRequesterList(el) {
     </div>
     ${renderFilterBar('requester')}
     <div class="req-list-header"><span>ID</span><span>카테고리</span><span>제목</span><span>긴급도</span><span>상태</span><span>등록일</span><span>담당자</span></div>
-    <div class="req-list">${myReqs.map(r => renderReqRow(r)).join('')}</div>
+    <div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경하거나 새 요청을 등록해 보세요')}</div>
   `;
 }
 
 // ── Manager List ──
 function renderManagerList(el) {
+  const isUnassigned = currentPage === 'unassigned';
   let reqs = [...REQUESTS].sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
-  if (currentPage === 'unassigned') reqs = reqs.filter(r => !r.assignee);
-  const title = currentPage === 'unassigned' ? '미배정 요청' : '전체 요청 목록';
-  const subtitle = currentPage === 'unassigned' ? '담당자가 아직 배정되지 않은 요청입니다' : '모든 부서의 업무 요청을 관리합니다';
+  if (isUnassigned) reqs = reqs.filter(r => !r.assignee);
+  reqs = applyFilters(reqs);
+  const title = isUnassigned ? '미배정 요청' : '전체 요청 목록';
+  const subtitle = isUnassigned ? '담당자가 아직 배정되지 않은 요청입니다. 빠른 배정이 필요합니다.' : '모든 부서의 업무 요청을 관리합니다';
 
-  const kpiAlerts = reqs.filter(r => !r.assignee && getDaysSince(r.createdAt) >= 1.5);
   let alertHtml = '';
-  kpiAlerts.forEach(r => {
-    const days = getDaysSince(r.createdAt);
-    alertHtml += `<div class="kpi-alert"><span class="icon">⚠️</span><span><strong>${r.id}</strong> ${r.title} — 접수 후 ${days.toFixed(0)}일 경과, 담당자 미배정 (KPI: 2일 이내)</span></div>`;
-  });
+  if (isUnassigned) {
+    const kpiAlerts = REQUESTS.filter(r => !r.assignee && getDaysSince(r.createdAt) >= 1.5);
+    kpiAlerts.forEach(r => {
+      const days = getDaysSince(r.createdAt);
+      alertHtml += `<div class="kpi-alert"><span class="icon">⚠️</span><span><strong>${r.id}</strong> ${r.title} — 접수 후 ${days.toFixed(0)}일 경과, 담당자 미배정 (KPI: 2일 이내)</span></div>`;
+    });
+  }
 
   el.innerHTML = `
     <div class="page-header">
@@ -1202,44 +1551,59 @@ function renderManagerList(el) {
     ${alertHtml}
     ${renderFilterBar('manager')}
     <div class="req-list-header"><span>ID</span><span>카테고리</span><span>제목</span><span>긴급도</span><span>상태</span><span>등록일</span><span>담당자</span></div>
-    <div class="req-list">${reqs.map(r => renderReqRow(r, true)).join('')}</div>
+    <div class="req-list">${reqs.length ? reqs.map(r => renderReqRow(r, isUnassigned)).join('') : renderEmptyState(isUnassigned ? '미배정 요청이 없습니다' : '해당하는 요청이 없습니다', isUnassigned ? '모든 요청에 담당자가 배정되었습니다' : '필터를 변경해 보세요')}</div>
   `;
 }
 
 // ── Worker List ──
 function renderWorkerList(el) {
-  const myReqs = [...REQUESTS].filter(r => r.assignee && r.assignee.id === 'u3').sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
+  const myReqs = applyFilters([...REQUESTS].filter(r => r.assignee && r.assignee.id === 'u3').sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]));
   el.innerHTML = `
     <div class="page-header">
       <div><div class="page-title">내 담당 목록</div><div class="page-subtitle">나에게 배정된 요청을 처리합니다 (이준호)</div></div>
     </div>
     ${renderFilterBar('worker')}
     <div class="req-list-header"><span>ID</span><span>카테고리</span><span>제목</span><span>긴급도</span><span>상태</span><span>등록일</span><span>요청자</span></div>
-    <div class="req-list">${myReqs.map(r => renderReqRow(r, false, true)).join('')}</div>
+    <div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, false, true)).join('') : renderEmptyState('배정된 요청이 없습니다', '새로운 요청이 배정되면 알림으로 통보됩니다')}</div>
   `;
 }
 
-// ── Dashboard ──
+// ── Dashboard (현황 요약 + KPI 경고 + 분포 차트) ──
 function renderDashboard(el) {
-  const total = REQUESTS.length;
+  const all = REQUESTS;
+  const total = all.length;
   const byStatus = {};
-  STATUSES.forEach(s => byStatus[s] = REQUESTS.filter(r => r.status === s).length);
-  const unassigned = REQUESTS.filter(r => !r.assignee).length;
-  const completed = REQUESTS.filter(r => r.status === '완료').length;
-  const avgDays = completed > 0 ? (REQUESTS.filter(r => r.status === '완료').reduce((sum, r) => {
-    const start = new Date(r.createdAt);
-    const end = new Date(r.timeline[r.timeline.length - 1].date);
-    return sum + (end - start) / (1000 * 60 * 60 * 24);
-  }, 0) / completed).toFixed(1) : '-';
+  STATUSES.forEach(s => byStatus[s] = all.filter(r => r.status === s).length);
+  const unassigned = all.filter(r => !r.assignee).length;
+  const completed = all.filter(r => r.status === '완료').length;
+  const inProgressCount = byStatus['진행중'] || 0;
 
-  const byCat = {};
-  CATEGORIES.forEach(c => byCat[c] = REQUESTS.filter(r => r.category === c).length);
-
-  const kpiAlerts = REQUESTS.filter(r => !r.assignee && getDaysSince(r.createdAt) >= 1.5);
+  const kpiAlerts = all.filter(r => !r.assignee && getDaysSince(r.createdAt) >= 1.5);
   let alertHtml = '';
   kpiAlerts.forEach(r => {
-    alertHtml += `<div class="kpi-alert"><span class="icon">⚠️</span><span><strong>${r.id}</strong> ${r.title} — 담당자 미배정 ${getDaysSince(r.createdAt).toFixed(0)}일 경과</span></div>`;
+    alertHtml += `<div class="kpi-alert" style="cursor:pointer" onclick="navigateTo('unassigned')"><span class="icon">⚠️</span><span><strong>${r.id}</strong> ${r.title} — 담당자 미배정 ${getDaysSince(r.createdAt).toFixed(0)}일 경과 <em style="color:var(--text-dim)">(클릭하여 배정)</em></span></div>`;
   });
+
+  const statusData = [
+    { name: '접수', count: byStatus['접수'] || 0, color: '#ff8c00' },
+    { name: '배정완료', count: byStatus['배정완료'] || 0, color: '#5b8def' },
+    { name: '진행중', count: inProgressCount, color: '#a78bfa' },
+    { name: '완료', count: completed, color: '#22c55e' },
+    { name: '반려', count: byStatus['반려'] || 0, color: '#f55' },
+  ];
+  const donutTotal = Math.max(statusData.reduce((s, d) => s + d.count, 0), 1);
+  let donutOffset = 0;
+  const donutSegments = statusData.filter(d => d.count > 0).map(d => {
+    const pct = (d.count / donutTotal) * 100;
+    const seg = { ...d, pct, offset: donutOffset };
+    donutOffset += pct;
+    return seg;
+  });
+
+  const byCat = {};
+  CATEGORIES.forEach(c => byCat[c] = all.filter(r => r.category === c).length);
+  const maxCat = Math.max(...Object.values(byCat), 1);
+  const catColors = { 'IT 장애': '#5b8def', '비품 요청': '#22c55e', '시설 보수': '#ff8c00', '기타': '#a78bfa' };
 
   el.innerHTML = `
     <div class="page-header">
@@ -1247,47 +1611,106 @@ function renderDashboard(el) {
     </div>
     ${alertHtml}
     <div class="stats-row">
-      <div class="stat-card"><div class="stat-label">전체 요청</div><div class="stat-value">${total}</div><div class="stat-sub">건</div></div>
-      <div class="stat-card"><div class="stat-label">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div><div class="stat-sub">건 — 빠른 배정 필요</div></div>
-      <div class="stat-card"><div class="stat-label">진행중</div><div class="stat-value" style="color:var(--accent)">${byStatus['진행중'] || 0}</div><div class="stat-sub">건</div></div>
-      <div class="stat-card"><div class="stat-label">완료</div><div class="stat-value" style="color:var(--green)">${completed}</div><div class="stat-sub">건</div></div>
-      <div class="stat-card"><div class="stat-label">평균 처리 시간</div><div class="stat-value">${avgDays}</div><div class="stat-sub">일</div></div>
+      <div class="stat-card" style="cursor:pointer" onclick="navigateTo('list')"><div class="stat-label">전체 요청</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card" style="cursor:pointer" onclick="navigateTo('unassigned')"><div class="stat-label">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div></div>
+      <div class="stat-card"><div class="stat-label">진행중</div><div class="stat-value" style="color:var(--accent)">${inProgressCount}</div></div>
+      <div class="stat-card" style="cursor:pointer" onclick="navigateTo('log')"><div class="stat-label">완료</div><div class="stat-value" style="color:var(--green)">${completed}</div></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div class="card">
-        <div class="fw-600 mb-8">상태별 현황</div>
-        ${STATUSES.map(s => `<div class="flex items-center justify-between" style="padding:6px 0;border-bottom:1px solid var(--border)">
-          <span class="badge" style="background:${STATUS_COLORS[s].bg};color:${STATUS_COLORS[s].text}">${s}</span>
-          <span class="fw-600">${byStatus[s] || 0}건</span>
-        </div>`).join('')}
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-card-title">상태별 분포</div>
+        <div class="donut-wrap">
+          <svg class="donut-svg" viewBox="0 0 42 42">
+            <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--surface2)" stroke-width="5"/>
+            ${donutSegments.map(d => `<circle cx="21" cy="21" r="15.9" fill="none" stroke="${d.color}" stroke-width="5" stroke-dasharray="${d.pct} ${100-d.pct}" stroke-dashoffset="${-d.offset}" stroke-linecap="round"/>`).join('')}
+          </svg>
+          <div class="donut-legend">
+            ${statusData.map(d => `<div class="donut-legend-item"><div class="donut-legend-dot" style="background:${d.color}"></div><span>${d.name}</span><span class="donut-legend-count">${d.count}</span></div>`).join('')}
+          </div>
+        </div>
       </div>
-      <div class="card">
-        <div class="fw-600 mb-8">카테고리별 현황</div>
-        ${CATEGORIES.map(c => `<div class="flex items-center justify-between" style="padding:6px 0;border-bottom:1px solid var(--border)">
-          <span>${c}</span>
-          <span class="fw-600">${byCat[c] || 0}건</span>
-        </div>`).join('')}
+      <div class="chart-card">
+        <div class="chart-card-title">카테고리별 요청 현황</div>
+        <div class="bar-chart">
+          ${CATEGORIES.map(c => `<div class="bar-row">
+            <div class="bar-label">${c}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${(byCat[c]/maxCat)*100}%;background:${catColors[c]}"></div></div>
+            <div class="bar-value">${byCat[c]}</div>
+          </div>`).join('')}
+        </div>
       </div>
     </div>
   `;
 }
 
-// ── Log ──
+// ── Log (성과 분석 + 완료 이력) ──
 function renderLog(el) {
-  const completed = REQUESTS.filter(r => r.status === '완료');
-  const urgent = completed.filter(r => r.priority === '긴급' || r.priority === '높음');
+  const all = REQUESTS;
+  const completed = all.filter(r => r.status === '완료');
+  const urgentDone = completed.filter(r => r.priority === '긴급' || r.priority === '높음');
+  const avgDays = completed.length > 0 ? (completed.reduce((sum, r) => {
+    const start = new Date(r.createdAt);
+    const end = new Date(r.timeline[r.timeline.length - 1].date);
+    return sum + (end - start) / (1000 * 60 * 60 * 24);
+  }, 0) / completed.length).toFixed(1) : '-';
+  const completionRate = all.length > 0 ? ((completed.length / all.length) * 100).toFixed(0) : '0';
+
+  const byPriority = {};
+  PRIORITIES.forEach(p => byPriority[p] = all.filter(r => r.priority === p).length);
+  const maxPri = Math.max(...Object.values(byPriority), 1);
+  const priColors = { '긴급': '#f55', '높음': '#ff8c00', '보통': '#5b8def', '낮음': '#22c55e' };
 
   el.innerHTML = `
     <div class="page-header">
-      <div><div class="page-title">처리 현황</div><div class="page-subtitle">완료된 요청의 처리 이력을 확인합니다</div></div>
+      <div><div class="page-title">처리 현황</div><div class="page-subtitle">처리 성과와 완료 이력을 분석합니다</div></div>
     </div>
     <div class="stats-row">
-      <div class="stat-card"><div class="stat-label">총 처리 건수</div><div class="stat-value" style="color:var(--green)">${completed.length}</div></div>
-      <div class="stat-card"><div class="stat-label">주요 사항 (긴급/높음)</div><div class="stat-value" style="color:var(--yellow)">${urgent.length}</div></div>
+      <div class="stat-card"><div class="stat-label">처리 완료</div><div class="stat-value" style="color:var(--green)">${completed.length}<span style="font-size:14px;color:var(--text-dim);font-weight:400"> / ${all.length}</span></div></div>
+      <div class="stat-card"><div class="stat-label">처리율</div><div class="stat-value" style="color:var(--accent)">${completionRate}%</div></div>
+      <div class="stat-card"><div class="stat-label">평균 처리일</div><div class="stat-value">${avgDays}<span style="font-size:14px;color:var(--text-dim);font-weight:400">일</span></div></div>
+      <div class="stat-card"><div class="stat-label">긴급/높음 처리</div><div class="stat-value" style="color:var(--yellow)">${urgentDone.length}</div></div>
     </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-card-title">긴급도별 요청 분포</div>
+        <div class="bar-chart">
+          ${PRIORITIES.map(p => `<div class="bar-row">
+            <div class="bar-label">${p}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${(byPriority[p]/maxPri)*100}%;background:${priColors[p]}"></div></div>
+            <div class="bar-value">${byPriority[p]}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">담당자별 처리 현황</div>
+        <div class="bar-chart">
+          ${(() => {
+            const workers = {};
+            all.filter(r => r.assignee).forEach(r => {
+              const name = r.assignee.name;
+              if (!workers[name]) workers[name] = { total: 0, done: 0 };
+              workers[name].total++;
+              if (r.status === '완료') workers[name].done++;
+            });
+            const maxW = Math.max(...Object.values(workers).map(w => w.total), 1);
+            return Object.entries(workers).map(([name, w]) => `<div class="bar-row">
+              <div class="bar-label">${name}</div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width:${(w.total/maxW)*100}%;background:var(--accent);opacity:0.3"></div>
+                <div class="bar-fill" style="width:${(w.done/maxW)*100}%;background:var(--green);position:absolute;top:0;left:0;height:100%"></div>
+              </div>
+              <div class="bar-value">${w.done}/${w.total}</div>
+            </div>`).join('');
+          })()}
+        </div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:8px;text-align:right">■ 완료 / ■ 전체 배정</div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="fw-600 mb-8">완료된 요청 목록</div>
-      <table class="stats-table">
+      ${completed.length ? `<table class="stats-table">
         <thead><tr><th>ID</th><th>카테고리</th><th>제목</th><th>긴급도</th><th>담당자</th><th>처리일</th></tr></thead>
         <tbody>
         ${completed.map(r => {
@@ -1302,7 +1725,7 @@ function renderLog(el) {
           </tr>`;
         }).join('')}
         </tbody>
-      </table>
+      </table>` : renderEmptyState('완료된 요청이 없습니다', '처리가 완료되면 이곳에 표시됩니다')}
     </div>
   `;
 }
@@ -1404,6 +1827,14 @@ function renderDetail(el) {
 }
 
 // ── Shared Components ──
+function renderEmptyState(message, desc) {
+  return `<div class="empty-state">
+    <div class="empty-state-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>
+    <div class="empty-state-title">${message || '데이터가 없습니다'}</div>
+    <div class="empty-state-desc">${desc || ''}</div>
+  </div>`;
+}
+
 function renderReqRow(r, showAssignBtn, showRequester) {
   const lastCol = showRequester
     ? `<span class="req-assignee">${r.requester.name}</span>`
@@ -1421,19 +1852,40 @@ function renderReqRow(r, showAssignBtn, showRequester) {
 
 function renderFilterBar(role) {
   return `<div class="filter-bar">
-    <button class="filter-btn active" onclick="filterStatus(this,'전체')">전체</button>
-    ${STATUSES.map(s => `<button class="filter-btn" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
-    <input class="search-input" placeholder="검색..." oninput="filterSearch(this.value)">
+    <button class="filter-btn ${currentFilter==='전체'?'active':''}" onclick="filterStatus(this,'전체')">전체</button>
+    ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active':''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
+    <input class="search-input" placeholder="검색..." value="${currentSearch}" oninput="filterSearch(this.value)">
   </div>`;
 }
 
 function filterStatus(btn, status) {
   btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  currentFilter = status;
   renderPage();
 }
 
-function filterSearch(val) {}
+function filterSearch(val) {
+  currentSearch = val.trim().toLowerCase();
+  renderPage();
+}
+
+function applyFilters(reqs) {
+  let filtered = reqs;
+  if (currentFilter !== '전체') {
+    filtered = filtered.filter(r => r.status === currentFilter);
+  }
+  if (currentSearch) {
+    filtered = filtered.filter(r =>
+      r.title.toLowerCase().includes(currentSearch) ||
+      r.id.toLowerCase().includes(currentSearch) ||
+      r.category.toLowerCase().includes(currentSearch) ||
+      r.requester.name.toLowerCase().includes(currentSearch) ||
+      (r.assignee && r.assignee.name.toLowerCase().includes(currentSearch))
+    );
+  }
+  return filtered;
+}
 
 // ── Actions ──
 function openDetail(id) {
@@ -1598,13 +2050,28 @@ function markAllRead() {
 }
 
 // ── Theme ──
-function toggleTheme() { document.body.classList.toggle('light'); }
+function toggleTheme() {
+  document.body.classList.toggle('light');
+  const isLight = document.body.classList.contains('light');
+  document.getElementById('themeBtn').textContent = isLight ? '☀️' : '🌙';
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+}
+document.addEventListener('fullscreenchange', () => {
+  document.getElementById('fullscreenBtn').textContent = document.fullscreenElement ? '⛶' : '⛶';
+});
 
 // ── Dev Mode ──
 function toggleDevPanel() {
-  devMode = !devMode;
+  const toggle = document.getElementById('devModeToggle');
+  devMode = toggle.checked;
   document.getElementById('devPanel').classList.toggle('open', devMode);
-  document.getElementById('devToggleBtn').style.color = devMode ? 'var(--accent)' : '';
   if (devMode) {
     document.addEventListener('click', devClickHandler, true);
   } else {
@@ -1613,8 +2080,14 @@ function toggleDevPanel() {
   }
 }
 
+function closeDevPanel() {
+  const toggle = document.getElementById('devModeToggle');
+  toggle.checked = false;
+  toggleDevPanel();
+}
+
 function devClickHandler(e) {
-  if (e.target.closest('.dev-panel') || e.target.closest('.header')) return;
+  if (e.target.closest('.dev-panel') || e.target.closest('.header') || e.target.closest('.hamburger-wrap')) return;
   if (!devMode) return;
   e.preventDefault();
   e.stopPropagation();
@@ -1732,15 +2205,183 @@ function rgbToHex(rgb) {
 
 // ── Scenario Mode ──
 const SCENARIOS = [
-  { role: 'requester', page: 'list', detail: null, text: '<strong>Step 1/6 — 요청자:</strong> 요청 목록을 확인합니다. 현재 등록된 요청들과 상태를 볼 수 있습니다.' },
-  { role: 'requester', page: 'new', detail: null, text: '<strong>Step 2/6 — 요청자:</strong> "새 요청" 버튼을 눌러 업무 요청을 등록합니다. 카테고리, 긴급도, 희망 완료일을 입력하세요.' },
-  { role: 'manager', page: 'dashboard', detail: null, text: '<strong>Step 3/6 — 관리자:</strong> 대시보드에서 전체 현황과 KPI 경고를 확인합니다.' },
-  { role: 'manager', page: 'unassigned', detail: null, text: '<strong>Step 4/6 — 관리자:</strong> 미배정 요청을 확인하고 실무자와 보고자를 배정합니다.' },
-  { role: 'worker', page: 'list', detail: null, text: '<strong>Step 5/6 — 실무자:</strong> 배정된 요청 목록을 확인합니다.' },
-  { role: 'worker', page: 'list', detail: 'REQ-001', text: '<strong>Step 6/6 — 실무자:</strong> 요청 상세에서 작업 예정일을 입력하고, 처리 완료까지 진행합니다.' },
+  // ── 요청자 시나리오 1: 새 요청 등록 ──
+  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '.btn-primary',
+    text: '<strong>요청 등록 ①</strong> "새 요청" 버튼을 클릭합니다.' },
+  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '#formCategory', action: 'openNewReq',
+    text: '<strong>요청 등록 ②</strong> <em>카테고리</em>를 선택합니다 (IT 장애, 비품 요청, 시설 보수, 기타).' },
+  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '#formTitle', action: 'keepModal',
+    text: '<strong>요청 등록 ③</strong> 요청 <em>제목</em>을 입력합니다.' },
+  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '#formContent', action: 'keepModal',
+    text: '<strong>요청 등록 ④</strong> <em>상세 내용</em>을 작성합니다. 증상, 위치, 긴급 사유 등을 구체적으로 기재합니다.' },
+  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '#formPriority', action: 'keepModal',
+    text: '<strong>요청 등록 ⑤</strong> <em>긴급도</em>를 선택합니다 (긴급 > 높음 > 보통 > 낮음).' },
+  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '#formDesiredDate', action: 'keepModal',
+    text: '<strong>요청 등록 ⑥</strong> <em>희망 완료일</em>을 지정합니다. 실무자가 일정을 참고합니다.' },
+  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '#newReqModal .btn-primary', action: 'keepModal',
+    text: '<strong>요청 등록 ⑦</strong> 모든 항목을 확인한 후 "요청 등록" 버튼을 클릭합니다.' },
+  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '.req-item',
+    text: '<strong>요청 등록 ⑧</strong> 등록 완료! 내 요청 목록에 새 건이 추가되고, 관리자에게 알림이 전송됩니다.' },
+
+  // ── 요청자 시나리오 2: 요청 상태 추적 ──
+  { role: 'requester', group: '요청 상태 추적', page: 'list', detail: null, target: '.req-item',
+    text: '<strong>상태 추적 ①</strong> 목록에서 추적할 요청을 클릭합니다.' },
+  { role: 'requester', group: '요청 상태 추적', page: 'list', detail: 'REQ-001', target: '.status-stepper',
+    text: '<strong>상태 추적 ②</strong> 상단 <em>상태 스텝퍼</em>에서 현재 진행 단계(접수→배정→진행→완료)를 확인합니다.' },
+  { role: 'requester', group: '요청 상태 추적', page: 'list', detail: 'REQ-001', target: '.timeline-item', targetLabel: false,
+    text: '<strong>상태 추적 ③</strong> 타임라인에서 각 단계별 처리 이력(일시, 담당자, 상세 내용)을 확인합니다.' },
+
+  // ── 요청자 시나리오 3: 실무자와 소통 ──
+  { role: 'requester', group: '실무자와 소통', page: 'list', detail: 'REQ-001', target: '.comment-item', targetLabel: false,
+    text: '<strong>소통 ①</strong> 기존 댓글 이력에서 실무자의 진행 상황을 확인합니다.' },
+  { role: 'requester', group: '실무자와 소통', page: 'list', detail: 'REQ-001', target: '.comment-input',
+    text: '<strong>소통 ②</strong> 댓글 입력란에 추가 정보나 문의 사항을 작성하고 전송합니다.' },
+
+  // ── 요청자 시나리오 4: 미배정 요청 확인 ──
+  { role: 'requester', group: '미배정 요청 확인', page: 'list', detail: 'REQ-003', target: '.detail-info-value',
+    text: '<strong>미배정 확인 ①</strong> 담당자가 미배정인 요청은 <em>"⏳ 배정 대기"</em>로 표시됩니다.' },
+  { role: 'requester', group: '미배정 요청 확인', page: 'list', detail: 'REQ-003', target: '.status-stepper',
+    text: '<strong>미배정 확인 ②</strong> 상태 스텝퍼에서 "접수" 단계에 머물러 있음을 확인합니다. 배정 완료 시 알림을 받습니다.' },
+
+  // ── 요청자 시나리오 5: 알림 확인 ──
+  { role: 'requester', group: '알림 확인', page: 'list', detail: null, target: '.noti-btn',
+    text: '<strong>알림 ①</strong> 🔔 알림 벨을 클릭합니다. 뱃지 숫자는 읽지 않은 알림 수입니다.' },
+  { role: 'requester', group: '알림 확인', page: 'list', detail: null, target: null, action: 'openNoti',
+    text: '<strong>알림 ②</strong> 담당자 배정, 작업 예정일 확정, 처리 완료 등 모든 상태 변화 알림을 확인합니다.' },
+
+  // ── 요청자 시나리오 6: 상태별 필터링 ──
+  { role: 'requester', group: '상태별 필터링', page: 'list', detail: null, target: '.filter-bar',
+    text: '<strong>필터 ①</strong> 상단 필터 버튼(전체/접수/배정완료/진행중/완료/반려)을 클릭하여 원하는 상태만 봅니다.' },
+  { role: 'requester', group: '상태별 필터링', page: 'list', detail: null, target: '.search-input',
+    text: '<strong>필터 ②</strong> 검색창에 키워드를 입력하면 제목/내용에서 검색됩니다.' },
+
+  // ── 관리자 시나리오 1: 전체 현황 파악 ──
+  { role: 'manager', group: '전체 현황 파악', page: 'dashboard', detail: null, target: '.stats-row',
+    text: '<strong>현황 파악 ①</strong> 대시보드에서 전체/미배정/진행중/완료 건수를 확인합니다.' },
+  { role: 'manager', group: '전체 현황 파악', page: 'dashboard', detail: null, target: '.card', targetLabel: false,
+    text: '<strong>현황 파악 ②</strong> 카테고리별(IT/비품/시설/기타) 요청 분포를 확인합니다.' },
+
+  // ── 관리자 시나리오 2: KPI 경고 확인 ──
+  { role: 'manager', group: 'KPI 경고 확인', page: 'dashboard', detail: null, target: '.kpi-alert',
+    text: '<strong>KPI ①</strong> ⚠️ 접수 후 2일 이내 미배정 시 긴급 경고가 표시됩니다.' },
+  { role: 'manager', group: 'KPI 경고 확인', page: 'unassigned', detail: null, target: '.kpi-alert',
+    text: '<strong>KPI ②</strong> 미배정 요청 목록에서도 동일한 경고를 확인하고, 즉시 배정 조치합니다.' },
+
+  // ── 관리자 시나리오 3: 담당자 배정 ──
+  { role: 'manager', group: '담당자 배정', page: 'unassigned', detail: null, target: '.req-item',
+    text: '<strong>배정 ①</strong> 미배정 요청 목록에서 배정할 요청을 클릭합니다.' },
+  { role: 'manager', group: '담당자 배정', page: 'unassigned', detail: 'REQ-003', target: '.btn-primary',
+    text: '<strong>배정 ②</strong> "담당자 배정" 버튼을 클릭합니다.' },
+  { role: 'manager', group: '담당자 배정', page: 'unassigned', detail: 'REQ-003', target: null, action: 'openAssign',
+    text: '<strong>배정 ③</strong> 배정 모달에서 <em>실무 담당자</em>와 <em>보고자(파트장)</em>를 각각 지정하고 확인합니다.' },
+
+  // ── 관리자 시나리오 4: 요청 반려 ──
+  { role: 'manager', group: '요청 반려', page: 'list', detail: 'REQ-005', target: '.btn-danger',
+    text: '<strong>반려 ①</strong> 부적절한 요청의 상세 화면에서 "반려" 버튼을 클릭합니다.' },
+  { role: 'manager', group: '요청 반려', page: 'list', detail: 'REQ-005', target: '.status-stepper',
+    text: '<strong>반려 ②</strong> 반려 처리 후 상태가 "반려"로 변경되고, 요청자에게 알림이 전송됩니다.' },
+
+  // ── 관리자 시나리오 5: 처리 현황 로그 ──
+  { role: 'manager', group: '처리 현황 로그', page: 'log', detail: null, target: '.stats-row', targetLabel: false,
+    text: '<strong>로그 ①</strong> 총 처리 건수와 주요 사항(긴급/높음) 건수를 확인합니다.' },
+  { role: 'manager', group: '처리 현황 로그', page: 'log', detail: null, target: '.stats-table',
+    text: '<strong>로그 ②</strong> 완료된 요청 목록에서 카테고리, 긴급도, 담당자, 처리일을 확인하여 팀 성과를 파악합니다.' },
+
+  // ── 관리자 시나리오 6: 신규 요청 알림 ──
+  { role: 'manager', group: '신규 요청 알림', page: 'dashboard', detail: null, target: '.noti-btn',
+    text: '<strong>알림 ①</strong> 🔔 신규 요청과 KPI 경고 알림을 확인합니다.' },
+
+  // ── 실무자 시나리오 1: 배정 알림 확인 ──
+  { role: 'worker', group: '배정 알림 확인', page: 'list', detail: null, target: '.noti-btn',
+    text: '<strong>알림 확인 ①</strong> 새 요청이 배정되면 🔔 알림으로 즉시 통보됩니다. 알림 벨을 클릭합니다.' },
+  { role: 'worker', group: '배정 알림 확인', page: 'list', detail: null, target: null, action: 'openNoti',
+    text: '<strong>알림 확인 ②</strong> 알림 목록에서 배정 내역, 요청자 댓글, 희망 완료일 임박 경고를 확인합니다.' },
+
+  // ── 실무자 시나리오 2: 내 담당 목록 확인 ──
+  { role: 'worker', group: '내 담당 목록 확인', page: 'list', detail: null, target: '.req-item',
+    text: '<strong>목록 확인 ①</strong> 우선순위(긴급→높음→보통→낮음) 순으로 정렬된 내 담당 목록을 확인합니다.' },
+  { role: 'worker', group: '내 담당 목록 확인', page: 'list', detail: null, target: '.filter-bar',
+    text: '<strong>목록 확인 ②</strong> 필터를 사용하여 진행중/배정완료 등 특정 상태만 볼 수 있습니다.' },
+
+  // ── 실무자 시나리오 3: 작업 시작 ──
+  { role: 'worker', group: '작업 시작', page: 'list', detail: 'REQ-001', target: '#estDate',
+    text: '<strong>작업 시작 ①</strong> <em>작업 가능일</em>을 입력합니다. 날짜 선택 시 요청자에게 자동 알림됩니다.' },
+  { role: 'worker', group: '작업 시작', page: 'list', detail: 'REQ-001', target: '.btn-primary',
+    text: '<strong>작업 시작 ②</strong> "작업 시작" 버튼을 클릭하면 상태가 "진행중"으로 변경됩니다.' },
+
+  // ── 실무자 시나리오 4: 요청자와 소통 ──
+  { role: 'worker', group: '요청자와 소통', page: 'list', detail: 'REQ-001', target: '.comment-input',
+    text: '<strong>소통 ①</strong> 댓글로 요청자에게 진행 상황을 공유합니다.' },
+
+  // ── 실무자 시나리오 5: 처리 완료 ──
+  { role: 'worker', group: '처리 완료', page: 'list', detail: 'REQ-001', target: '.btn-primary',
+    text: '<strong>완료 ①</strong> 작업 완료 후 "처리 완료" 버튼을 클릭합니다. 요청자와 보고자(파트장)에게 알림이 전송됩니다.' },
 ];
 
+let scenarioClickTargets = [];
+
+function clearScenarioTargets() {
+  scenarioClickTargets.forEach(({ el, handler }) => {
+    el.removeEventListener('click', handler, true);
+  });
+  scenarioClickTargets = [];
+  document.querySelectorAll('.scenario-target, .scenario-target-no-label').forEach(el => {
+    el.classList.remove('scenario-target', 'scenario-target-no-label');
+  });
+}
+
+function highlightScenarioTargets(s) {
+  clearScenarioTargets();
+  if (!s.target) return;
+    const selectors = s.target.split(',').map(t => t.trim());
+    selectors.forEach(sel => {
+      const el = Array.from(document.querySelectorAll(sel)).find(e => !e.closest('#scenarioBar') && !e.closest('.header'));
+      if (el) {
+        const isClickable = s.targetLabel !== false;
+        const cls = isClickable ? 'scenario-target' : 'scenario-target-no-label';
+        el.classList.add(cls);
+
+        const modal = el.closest('.modal-body');
+        if (modal) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        if (isClickable) {
+          const isFormField = el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA';
+          const handler = function(e) {
+            if (!isFormField) {
+              e.preventDefault();
+            }
+            e.stopPropagation();
+            setTimeout(() => nextScenarioStep(), isFormField ? 500 : 0);
+          };
+          el.addEventListener('click', handler, true);
+          scenarioClickTargets.push({ el, handler });
+        }
+      }
+    });
+}
+
+function getScenarioGroups(steps) {
+  const groups = [];
+  let currentGroup = null;
+  steps.forEach((s, i) => {
+    if (!currentGroup || currentGroup.name !== s.group) {
+      currentGroup = { name: s.group, startIdx: i, count: 0 };
+      groups.push(currentGroup);
+    }
+    currentGroup.count++;
+  });
+  return groups;
+}
+
+let filteredScenarios = [];
+
 function startScenario() {
+  filteredScenarios = SCENARIOS.filter(s => s.role === currentRole);
+  if (filteredScenarios.length === 0) { filteredScenarios = SCENARIOS; }
   scenarioActive = true;
   scenarioStep = 0;
   document.getElementById('scenarioBar').classList.add('show');
@@ -1749,27 +2390,59 @@ function startScenario() {
 
 function exitScenario() {
   scenarioActive = false;
+  clearScenarioTargets();
   document.getElementById('scenarioBar').classList.remove('show');
 }
 
 function nextScenarioStep() {
-  if (scenarioStep < SCENARIOS.length - 1) { scenarioStep++; applyScenarioStep(); }
+  if (scenarioStep < filteredScenarios.length - 1) { scenarioStep++; applyScenarioStep(); }
 }
 
 function prevScenarioStep() {
   if (scenarioStep > 0) { scenarioStep--; applyScenarioStep(); }
 }
 
+function jumpScenarioStep(idx) {
+  scenarioStep = idx;
+  applyScenarioStep();
+}
+
 function applyScenarioStep() {
-  const s = SCENARIOS[scenarioStep];
+  clearScenarioTargets();
+  const s = filteredScenarios[scenarioStep];
   switchRole(s.role);
+
+  const needsModal = s.action === 'openNewReq' || s.action === 'keepModal' || s.action === 'openAssign' || s.action === 'keepAssignModal';
+  if (!needsModal) {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
+  }
+
   if (s.detail) { currentDetailId = s.detail; renderPage(); }
-  else if (s.page === 'new') { openModal('newReqModal'); }
-  else { currentPage = s.page; currentDetailId = null; renderSidebar(); renderPage(); }
-  document.getElementById('scenarioText').innerHTML = s.text;
-  document.getElementById('scenarioProgress').innerHTML = SCENARIOS.map((_, i) =>
-    `<div class="scenario-dot-sm ${i < scenarioStep ? 'done' : ''} ${i === scenarioStep ? 'current' : ''}"></div>`
-  ).join('');
+  else if (s.page === 'new') { }
+  else if (!needsModal || !document.querySelector('.modal-overlay.show')) {
+    currentPage = s.page; currentDetailId = null; renderSidebar(); renderPage();
+  }
+
+  if (s.action === 'openNewReq') { setTimeout(() => openModal('newReqModal'), 200); }
+  if (s.action === 'openAssign') { setTimeout(() => openModal('assignModal'), 200); }
+  if (s.action === 'openNoti') { setTimeout(() => { document.querySelector('.noti-btn').click(); }, 200); }
+
+  document.getElementById('scenarioText').innerHTML = `<span class="scenario-group-label">${s.group}</span> ${s.text}`;
+
+  const groups = getScenarioGroups(filteredScenarios);
+  let progressHtml = '';
+  groups.forEach((g, gi) => {
+    if (gi > 0) progressHtml += '<div class="scenario-group-divider"></div>';
+    for (let i = g.startIdx; i < g.startIdx + g.count; i++) {
+      const cls = i < scenarioStep ? 'done' : (i === scenarioStep ? 'current' : '');
+      const stepInGroup = i - g.startIdx + 1;
+      progressHtml += `<div class="scenario-step-chip ${cls}" onclick="jumpScenarioStep(${i})" title="${g.name} ${stepInGroup}/${g.count}">${stepInGroup}</div>`;
+    }
+  });
+  document.getElementById('scenarioProgress').innerHTML = progressHtml;
+
+  const highlightDelay = needsModal ? 300 : 100;
+  setTimeout(() => highlightScenarioTargets(s), highlightDelay);
 }
 
 // ── Helpers ──
@@ -1781,6 +2454,9 @@ function getDaysSince(dateStr) {
 document.addEventListener('click', e => {
   if (!e.target.closest('.noti-wrap')) {
     document.getElementById('notiDropdown').classList.remove('show');
+  }
+  if (!e.target.closest('.hamburger-wrap')) {
+    document.getElementById('hamburgerDropdown').classList.remove('show');
   }
 });
 
