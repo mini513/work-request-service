@@ -1003,9 +1003,12 @@ body {
 .scenario-bottom-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   padding-left: 28px;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.scenario-bottom-row::-webkit-scrollbar { display: none; }
 .scenario-step-chip {
   font-size: 11px;
   padding: 2px 8px;
@@ -1025,6 +1028,17 @@ body {
   height: 14px;
   background: var(--border);
   margin: 0 2px;
+}
+.scenario-group-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  white-space: nowrap;
+  margin-right: -2px;
+}
+.scenario-group-name.active {
+  color: var(--accent);
+  font-weight: 700;
 }
 
 /* ── Helpers ── */
@@ -2433,6 +2447,8 @@ function applyScenarioStep() {
   let progressHtml = '';
   groups.forEach((g, gi) => {
     if (gi > 0) progressHtml += '<div class="scenario-group-divider"></div>';
+    const isActiveGroup = scenarioStep >= g.startIdx && scenarioStep < g.startIdx + g.count;
+    progressHtml += `<span class="scenario-group-name ${isActiveGroup ? 'active' : ''}">${g.name}</span>`;
     for (let i = g.startIdx; i < g.startIdx + g.count; i++) {
       const cls = i < scenarioStep ? 'done' : (i === scenarioStep ? 'current' : '');
       const stepInGroup = i - g.startIdx + 1;
