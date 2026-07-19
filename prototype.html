@@ -1557,7 +1557,6 @@ const SIDEBAR_MENUS = {
   manager: [
     { id: 'dashboard', icon: '📊', label: '대시보드' },
     { id: 'list', icon: '📋', label: '전체 요청 목록' },
-    { id: 'unassigned', icon: '⚠️', label: '미배정 요청', badge: () => REQUESTS.filter(r => !r.assignee).length },
     { id: 'log', icon: '📈', label: '처리 현황' },
   ],
   worker: [
@@ -1612,6 +1611,14 @@ function navigateTo(page) {
   renderPage();
 }
 
+function navigateWithFilter(status) {
+  currentPage = 'list';
+  currentFilter = status;
+  currentDetailId = null;
+  renderSidebar();
+  renderPage();
+}
+
 // ── Page Rendering ──
 function renderPage() {
   const main = document.getElementById('mainContent');
@@ -1649,15 +1656,13 @@ function renderRequesterList(el) {
 
 // ── Manager List ──
 function renderManagerList(el) {
-  const isUnassigned = currentPage === 'unassigned';
   let reqs = [...REQUESTS].sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
-  if (isUnassigned) reqs = reqs.filter(r => !r.assignee);
   reqs = applyFilters(reqs);
-  const title = isUnassigned ? '미배정 요청' : '전체 요청 목록';
-  const subtitle = isUnassigned ? '담당자가 아직 배정되지 않은 요청입니다. 빠른 배정이 필요합니다.' : '모든 부서의 업무 요청을 관리합니다';
+
+  const isUnassignedFilter = currentFilter === '미배정';
 
   let alertHtml = '';
-  if (isUnassigned) {
+  if (isUnassignedFilter) {
     const kpiAlerts = REQUESTS.filter(r => !r.assignee && getDaysSince(r.createdAt) >= 1.5);
     kpiAlerts.forEach(r => {
       const days = getDaysSince(r.createdAt);
@@ -1667,12 +1672,12 @@ function renderManagerList(el) {
 
   el.innerHTML = `
     <div class="page-header">
-      <div><div class="page-title">${title}</div><div class="page-subtitle">${subtitle}</div></div>
+      <div><div class="page-title">전체 요청 목록</div><div class="page-subtitle">모든 부서의 업무 요청을 관리합니다</div></div>
     </div>
-    ${alertHtml}
     ${renderFilterBar('manager')}
+    ${alertHtml}
     ${renderSortableHeader([{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'status',label:'상태'},{key:'date',label:'등록일'},{key:'assignee',label:'담당자'}])}
-    <div class="req-list">${reqs.length ? reqs.map(r => renderReqRow(r, isUnassigned)).join('') : renderEmptyState(isUnassigned ? '미배정 요청이 없습니다' : '해당하는 요청이 없습니다', isUnassigned ? '모든 요청에 담당자가 배정되었습니다' : '필터를 변경해 보세요')}</div>
+    <div class="req-list">${reqs.length ? reqs.map(r => renderReqRow(r, isUnassignedFilter)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경해 보세요')}</div>
   `;
 }
 
@@ -1733,7 +1738,7 @@ function renderDashboard(el) {
     ${alertHtml}
     <div class="stats-row">
       <div class="stat-card" style="cursor:pointer" onclick="navigateTo('list')"><div class="stat-label">전체 요청</div><div class="stat-value">${total}</div></div>
-      <div class="stat-card" style="cursor:pointer" onclick="navigateTo('unassigned')"><div class="stat-label">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div></div>
+      <div class="stat-card" style="cursor:pointer" onclick="navigateWithFilter('미배정')"><div class="stat-label">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div></div>
       <div class="stat-card"><div class="stat-label">진행중</div><div class="stat-value" style="color:var(--accent)">${inProgressCount}</div></div>
       <div class="stat-card" style="cursor:pointer" onclick="navigateTo('log')"><div class="stat-label">완료</div><div class="stat-value" style="color:var(--green)">${completed}</div></div>
     </div>
@@ -2033,19 +2038,19 @@ function getAssigneeList() {
 }
 
 function renderFilterBar(role) {
-  const statusRow = `<div class="filter-bar">
-    <button class="filter-btn ${currentFilter==='전체'?'active':''}" onclick="filterStatus(this,'전체')">전체</button>
-    ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active':''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
-    <div class="search-wrap">
-      <input class="search-input" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')execSearch(this.value)">
-      <button class="search-btn" onclick="execSearch(this.previousElementSibling.value)" title="검색">🔍</button>
-    </div>
-  </div>`;
-
-  if (role !== 'manager') return statusRow;
+  if (role !== 'manager') {
+    return `<div class="filter-bar">
+      <button class="filter-btn ${currentFilter==='전체'?'active':''}" onclick="filterStatus(this,'전체')">전체</button>
+      ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active':''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
+      <div class="search-wrap">
+        <input class="search-input" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')execSearch(this.value)">
+        <button class="search-btn" onclick="execSearch(this.previousElementSibling.value)" title="검색">🔍</button>
+      </div>
+    </div>`;
+  }
 
   const hasAdvFilter = filterCategory !== '전체' || filterPriority !== '전체' || filterAssignee !== '전체';
-  const advRow = `<div class="filter-row">
+  const conditionRow = `<div class="filter-row">
     <div class="filter-group">
       <label>카테고리</label>
       <select class="filter-select" onchange="filterCategory=this.value;renderPage()">
@@ -2069,9 +2074,19 @@ function renderFilterBar(role) {
       </select>
     </div>
     ${hasAdvFilter ? '<button class="filter-reset-btn" onclick="resetAdvFilters()">필터 초기화</button>' : ''}
+    <div class="search-wrap" style="margin-left:auto">
+      <input class="search-input" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')execSearch(this.value)">
+      <button class="search-btn" onclick="execSearch(this.previousElementSibling.value)" title="검색">🔍</button>
+    </div>
   </div>`;
 
-  return statusRow + advRow;
+  const statusRow = `<div class="filter-bar">
+    <button class="filter-btn ${currentFilter==='전체'?'active':''}" onclick="filterStatus(this,'전체')">전체</button>
+    ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active':''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
+    <button class="filter-btn ${currentFilter==='미배정'?'active':''}" onclick="filterStatus(this,'미배정')">미배정</button>
+  </div>`;
+
+  return conditionRow + statusRow;
 }
 
 function filterStatus(btn, status) {
@@ -2100,7 +2115,9 @@ function resetAdvFilters() {
 
 function applyFilters(reqs) {
   let filtered = reqs;
-  if (currentFilter !== '전체') {
+  if (currentFilter === '미배정') {
+    filtered = filtered.filter(r => !r.assignee);
+  } else if (currentFilter !== '전체') {
     filtered = filtered.filter(r => r.status === currentFilter);
   }
   if (currentRole === 'manager') {
@@ -2554,15 +2571,15 @@ const SCENARIOS = [
   // ── 관리자 시나리오 2: KPI 경고 확인 ──
   { role: 'manager', group: 'KPI 경고 확인', page: 'dashboard', detail: null, target: '.kpi-alert',
     text: '<strong>KPI ①</strong> ⚠️ 접수 후 2일 이내 미배정 시 긴급 경고가 표시됩니다.' },
-  { role: 'manager', group: 'KPI 경고 확인', page: 'unassigned', detail: null, target: '.kpi-alert',
-    text: '<strong>KPI ②</strong> 미배정 요청 목록에서도 동일한 경고를 확인하고, 즉시 배정 조치합니다.' },
+  { role: 'manager', group: 'KPI 경고 확인', page: 'list', detail: null, target: '.kpi-alert', beforeAction: () => { currentFilter = '미배정'; renderPage(); },
+    text: '<strong>KPI ②</strong> 전체 요청 목록에서 "미배정" 필터를 선택하면 경고를 확인하고 즉시 배정할 수 있습니다.' },
 
   // ── 관리자 시나리오 3: 담당자 배정 ──
-  { role: 'manager', group: '담당자 배정', page: 'unassigned', detail: null, target: '.req-item',
-    text: '<strong>배정 ①</strong> 미배정 요청 목록에서 배정할 요청을 클릭합니다.' },
-  { role: 'manager', group: '담당자 배정', page: 'unassigned', detail: 'REQ-003', target: '.btn-primary',
+  { role: 'manager', group: '담당자 배정', page: 'list', detail: null, target: '.req-item', beforeAction: () => { currentFilter = '미배정'; renderPage(); },
+    text: '<strong>배정 ①</strong> "미배정" 필터에서 배정할 요청을 클릭합니다.' },
+  { role: 'manager', group: '담당자 배정', page: 'list', detail: 'REQ-003', target: '.btn-primary',
     text: '<strong>배정 ②</strong> "담당자 배정" 버튼을 클릭합니다.' },
-  { role: 'manager', group: '담당자 배정', page: 'unassigned', detail: 'REQ-003', target: '#assignModal .btn-primary', action: 'openAssign',
+  { role: 'manager', group: '담당자 배정', page: 'list', detail: 'REQ-003', target: '#assignModal .btn-primary', action: 'openAssign',
     text: '<strong>배정 ③</strong> 실무 담당자와 보고자를 지정한 후 "배정 확인" 버튼을 클릭합니다.' },
 
   // ── 관리자 시나리오 4: 요청 반려 ──
@@ -2732,6 +2749,8 @@ function applyScenarioStep() {
   else if (!needsModal || !document.querySelector('.modal-overlay.show')) {
     currentPage = s.page; currentDetailId = null; renderSidebar(); renderPage();
   }
+
+  if (s.beforeAction) s.beforeAction();
 
   if (s.action === 'openNewReq') { setTimeout(() => openModal('newReqModal'), 200); }
   if (s.action === 'openAssign') { setTimeout(() => openModal('assignModal'), 200); }
