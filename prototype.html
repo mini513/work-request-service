@@ -394,17 +394,39 @@ body {
   color: var(--accent);
   font-weight: 600;
 }
+.search-wrap {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface2);
+  overflow: hidden;
+}
+.search-wrap:focus-within { border-color: var(--accent); }
 .search-input {
   padding: 6px 12px;
-  border: 1px solid var(--border);
-  background: var(--surface2);
+  border: none;
+  background: transparent;
   color: var(--text);
-  border-radius: 6px;
   font-size: 13px;
-  width: 200px;
-  margin-left: auto;
+  width: 180px;
+  outline: none;
 }
-.search-input:focus { outline: none; border-color: var(--accent); }
+.search-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.search-btn:hover { color: var(--accent); }
 
 /* ── Request List ── */
 .req-list { display: flex; flex-direction: column; gap: 8px; }
@@ -1963,7 +1985,10 @@ function renderFilterBar(role) {
   return `<div class="filter-bar">
     <button class="filter-btn ${currentFilter==='전체'?'active':''}" onclick="filterStatus(this,'전체')">전체</button>
     ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active':''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
-    <input class="search-input" placeholder="검색..." value="${currentSearch}" oninput="filterSearch(this.value)">
+    <div class="search-wrap">
+      <input class="search-input" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')execSearch(this.value)">
+      <button class="search-btn" onclick="execSearch(this.previousElementSibling.value)" title="검색">🔍</button>
+    </div>
   </div>`;
 }
 
@@ -1975,6 +2000,11 @@ function filterStatus(btn, status) {
 }
 
 function filterSearch(val) {
+  currentSearch = val.trim().toLowerCase();
+  renderPage();
+}
+
+function execSearch(val) {
   currentSearch = val.trim().toLowerCase();
   renderPage();
 }
