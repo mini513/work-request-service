@@ -1560,7 +1560,7 @@ function renderManagerList(el) {
     const kpiAlerts = REQUESTS.filter(r => !r.assignee && getDaysSince(r.createdAt) >= 1.5);
     kpiAlerts.forEach(r => {
       const days = getDaysSince(r.createdAt);
-      alertHtml += `<div class="kpi-alert"><span class="icon">⚠️</span><span><strong>${r.id}</strong> ${r.title} — 접수 후 ${days.toFixed(0)}일 경과, 담당자 미배정 (KPI: 2일 이내)</span></div>`;
+      alertHtml += `<div class="kpi-alert" style="cursor:pointer" onclick="openAssignModal('${r.id}')"><span class="icon">⚠️</span><span><strong>${r.id}</strong> ${r.title} — 접수 후 ${days.toFixed(0)}일 경과, 담당자 미배정 <em style="color:var(--text-dim)">(클릭하여 배정)</em></span></div>`;
     });
   }
 
@@ -1601,7 +1601,7 @@ function renderDashboard(el) {
   const kpiAlerts = all.filter(r => !r.assignee && getDaysSince(r.createdAt) >= 1.5);
   let alertHtml = '';
   kpiAlerts.forEach(r => {
-    alertHtml += `<div class="kpi-alert" style="cursor:pointer" onclick="navigateTo('unassigned')"><span class="icon">⚠️</span><span><strong>${r.id}</strong> ${r.title} — 담당자 미배정 ${getDaysSince(r.createdAt).toFixed(0)}일 경과 <em style="color:var(--text-dim)">(클릭하여 배정)</em></span></div>`;
+    alertHtml += `<div class="kpi-alert" style="cursor:pointer" onclick="openAssignModal('${r.id}')"><span class="icon">⚠️</span><span><strong>${r.id}</strong> ${r.title} — 담당자 미배정 ${getDaysSince(r.createdAt).toFixed(0)}일 경과 <em style="color:var(--text-dim)">(클릭하여 배정)</em></span></div>`;
   });
 
   const statusData = [
