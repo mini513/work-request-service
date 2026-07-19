@@ -469,13 +469,10 @@ body {
 .status-dropdown-wrap { position: relative; }
 .status-badge-btn {
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
   transition: opacity 0.15s;
 }
 .status-badge-btn:hover { opacity: 0.8; }
-.status-badge-btn .arrow { font-size: 8px; opacity: 0.6; }
+.status-badge-btn .arrow { font-size: 7px; opacity: 0.5; margin-left: 1px; }
 .status-dropdown {
   position: fixed;
   z-index: 10000;
@@ -2175,10 +2172,7 @@ function renderStatusBadge(r) {
   if (nextStatuses.length === 0) {
     return `<span class="badge" style="background:${STATUS_COLORS[r.status].bg};color:${STATUS_COLORS[r.status].text}">${r.status}</span>`;
   }
-  return `<span class="status-badge-btn" onclick="event.stopPropagation();toggleStatusDropdown(event,'${r.id}')">
-    <span class="badge" style="background:${STATUS_COLORS[r.status].bg};color:${STATUS_COLORS[r.status].text}">${r.status}</span>
-    <span class="arrow">▼</span>
-  </span>`;
+  return `<span class="status-badge-btn badge" style="background:${STATUS_COLORS[r.status].bg};color:${STATUS_COLORS[r.status].text}" onclick="event.stopPropagation();toggleStatusDropdown(event,'${r.id}')">${r.status} <span class="arrow">▼</span></span>`;
 }
 
 function toggleStatusDropdown(e, reqId) {
