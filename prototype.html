@@ -427,6 +427,45 @@ body {
   flex-shrink: 0;
 }
 .search-btn:hover { color: var(--accent); }
+.filter-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.filter-group label {
+  font-size: 12px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.filter-select {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+  min-width: 90px;
+}
+.filter-select:focus { border-color: var(--accent); }
+.filter-reset-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-dim);
+  font-size: 11px;
+  cursor: pointer;
+}
+.filter-reset-btn:hover { border-color: var(--accent); color: var(--text); }
 
 /* ── Request List ── */
 .req-list { display: flex; flex-direction: column; gap: 8px; }
@@ -473,8 +512,7 @@ body {
   gap: 3px;
 }
 .req-list-header .sortable:hover { color: var(--text); }
-.sort-arrow { font-size: 10px; opacity: 0.4; }
-.sort-arrow.active { opacity: 1; color: var(--accent); }
+.sort-arrow { font-size: 9px; color: var(--accent); font-weight: 700; }
 .stats-table th.sortable { cursor: pointer; user-select: none; }
 .stats-table th.sortable:hover { color: var(--accent); }
 
@@ -1501,6 +1539,9 @@ let currentPage = 'list';
 let currentDetailId = null;
 let currentFilter = '전체';
 let currentSearch = '';
+let filterCategory = '전체';
+let filterPriority = '전체';
+let filterAssignee = '전체';
 let sortKey = null;
 let sortDir = 'asc';
 let devMode = false;
@@ -1533,6 +1574,10 @@ function switchRole(role) {
   currentDetailId = null;
   currentFilter = '전체';
   currentSearch = '';
+  filterCategory = '전체';
+  filterPriority = '전체';
+  filterAssignee = '전체';
+  sortKey = null;
   document.querySelectorAll('.ham-role-btn').forEach(b => b.classList.toggle('active', b.dataset.role === role));
   document.getElementById('currentRoleBadge').textContent = ROLE_LABELS[role];
   renderSidebar();
@@ -1981,8 +2026,14 @@ function renderReqRow(r, showAssignBtn, showRequester) {
   </div>`;
 }
 
+function getAssigneeList() {
+  const names = new Set();
+  REQUESTS.forEach(r => { if (r.assignee) names.add(r.assignee.name); });
+  return [...names].sort();
+}
+
 function renderFilterBar(role) {
-  return `<div class="filter-bar">
+  const statusRow = `<div class="filter-bar">
     <button class="filter-btn ${currentFilter==='전체'?'active':''}" onclick="filterStatus(this,'전체')">전체</button>
     ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active':''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
     <div class="search-wrap">
@@ -1990,6 +2041,37 @@ function renderFilterBar(role) {
       <button class="search-btn" onclick="execSearch(this.previousElementSibling.value)" title="검색">🔍</button>
     </div>
   </div>`;
+
+  if (role !== 'manager') return statusRow;
+
+  const hasAdvFilter = filterCategory !== '전체' || filterPriority !== '전체' || filterAssignee !== '전체';
+  const advRow = `<div class="filter-row">
+    <div class="filter-group">
+      <label>카테고리</label>
+      <select class="filter-select" onchange="filterCategory=this.value;renderPage()">
+        <option value="전체"${filterCategory==='전체'?' selected':''}>전체</option>
+        ${CATEGORIES.map(c => `<option value="${c}"${filterCategory===c?' selected':''}>${c}</option>`).join('')}
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>긴급도</label>
+      <select class="filter-select" onchange="filterPriority=this.value;renderPage()">
+        <option value="전체"${filterPriority==='전체'?' selected':''}>전체</option>
+        ${PRIORITIES.map(p => `<option value="${p}"${filterPriority===p?' selected':''}>${p}</option>`).join('')}
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>담당자</label>
+      <select class="filter-select" onchange="filterAssignee=this.value;renderPage()">
+        <option value="전체"${filterAssignee==='전체'?' selected':''}>전체</option>
+        <option value="미배정"${filterAssignee==='미배정'?' selected':''}>미배정</option>
+        ${getAssigneeList().map(n => `<option value="${n}"${filterAssignee===n?' selected':''}>${n}</option>`).join('')}
+      </select>
+    </div>
+    ${hasAdvFilter ? '<button class="filter-reset-btn" onclick="resetAdvFilters()">필터 초기화</button>' : ''}
+  </div>`;
+
+  return statusRow + advRow;
 }
 
 function filterStatus(btn, status) {
@@ -2009,10 +2091,23 @@ function execSearch(val) {
   renderPage();
 }
 
+function resetAdvFilters() {
+  filterCategory = '전체';
+  filterPriority = '전체';
+  filterAssignee = '전체';
+  renderPage();
+}
+
 function applyFilters(reqs) {
   let filtered = reqs;
   if (currentFilter !== '전체') {
     filtered = filtered.filter(r => r.status === currentFilter);
+  }
+  if (currentRole === 'manager') {
+    if (filterCategory !== '전체') filtered = filtered.filter(r => r.category === filterCategory);
+    if (filterPriority !== '전체') filtered = filtered.filter(r => r.priority === filterPriority);
+    if (filterAssignee === '미배정') filtered = filtered.filter(r => !r.assignee);
+    else if (filterAssignee !== '전체') filtered = filtered.filter(r => r.assignee && r.assignee.name === filterAssignee);
   }
   if (currentSearch) {
     filtered = filtered.filter(r =>
@@ -2055,8 +2150,8 @@ function applySorting(reqs) {
 }
 
 function sortArrow(key) {
-  if (sortKey !== key) return '<span class="sort-arrow">↕</span>';
-  return `<span class="sort-arrow active">${sortDir === 'asc' ? '↑' : '↓'}</span>`;
+  if (sortKey !== key) return '';
+  return ` <span class="sort-arrow">${sortDir === 'asc' ? '▲' : '▼'}</span>`;
 }
 
 function renderSortableHeader(columns) {
