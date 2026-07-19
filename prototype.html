@@ -2026,6 +2026,7 @@ function submitRequest() {
   renderSidebar();
   renderPage();
   renderNotiBadge();
+  if (scenarioMode) { setTimeout(() => nextScenarioStep(), 300); }
 }
 
 let assigningReqId = null;
@@ -2057,6 +2058,7 @@ function confirmAssign() {
   renderSidebar();
   renderPage();
   renderNotiBadge();
+  if (scenarioMode) { setTimeout(() => nextScenarioStep(), 300); }
 }
 
 let rejectingReqId = null;
@@ -2082,6 +2084,7 @@ function confirmReject() {
   closeModal('rejectModal');
   renderPage();
   renderNotiBadge();
+  if (scenarioMode) { setTimeout(() => nextScenarioStep(), 300); }
 }
 
 function startWork(id) {
@@ -2383,8 +2386,8 @@ const SCENARIOS = [
     text: '<strong>배정 ①</strong> 미배정 요청 목록에서 배정할 요청을 클릭합니다.' },
   { role: 'manager', group: '담당자 배정', page: 'unassigned', detail: 'REQ-003', target: '.btn-primary',
     text: '<strong>배정 ②</strong> "담당자 배정" 버튼을 클릭합니다.' },
-  { role: 'manager', group: '담당자 배정', page: 'unassigned', detail: 'REQ-003', target: null, action: 'openAssign',
-    text: '<strong>배정 ③</strong> 배정 모달에서 <em>실무 담당자</em>와 <em>보고자(파트장)</em>를 각각 지정하고 확인합니다.' },
+  { role: 'manager', group: '담당자 배정', page: 'unassigned', detail: 'REQ-003', target: '#assignModal .btn-primary', action: 'openAssign',
+    text: '<strong>배정 ③</strong> 실무 담당자와 보고자를 지정한 후 "배정 확인" 버튼을 클릭합니다.' },
 
   // ── 관리자 시나리오 4: 요청 반려 ──
   { role: 'manager', group: '요청 반려', page: 'list', detail: 'REQ-005', target: '.btn-danger',
