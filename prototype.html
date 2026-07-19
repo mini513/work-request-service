@@ -1130,6 +1130,12 @@ body.light .scenario-target {
   animation: scenario-pulse 1.5s ease-in-out infinite !important;
   outline: 2px solid var(--accent) !important;
   outline-offset: 3px;
+  cursor: pointer;
+}
+.scenario-target-no-label.clicked {
+  animation: none !important;
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 3px;
 }
 
 /* Hamburger Menu */
@@ -2344,7 +2350,7 @@ function clearScenarioTargets() {
   });
   scenarioClickTargets = [];
   document.querySelectorAll('.scenario-target, .scenario-target-no-label').forEach(el => {
-    el.classList.remove('scenario-target', 'scenario-target-no-label');
+    el.classList.remove('scenario-target', 'scenario-target-no-label', 'clicked');
   });
 }
 
@@ -2366,6 +2372,11 @@ function highlightScenarioTargets(s) {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
+        if (!isClickable) {
+          const handler = function() { el.classList.add('clicked'); };
+          el.addEventListener('click', handler);
+          scenarioClickTargets.push({ el, handler, evt: 'click' });
+        }
         if (isClickable) {
           const isFormField = el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA';
           if (isFormField) {
