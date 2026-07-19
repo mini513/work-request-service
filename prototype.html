@@ -733,6 +733,28 @@ body {
   color: var(--text-mid);
 }
 
+/* ── Stakeholder Map ── */
+.sh-map { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 24px; }
+.sh-legend { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
+.sh-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-mid); }
+.sh-legend-color { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.1); }
+.sh-diagram { display: flex; justify-content: center; align-items: flex-start; gap: 40px; width: 100%; }
+.sh-col { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 180px; }
+.sh-role-header { padding: 8px 20px; border-radius: 8px; font-weight: 700; font-size: 13px; text-align: center; }
+.sh-role-header.requester { background: var(--blue-bg); color: var(--blue); border: 2px solid var(--blue); }
+.sh-role-header.manager { background: var(--yellow-bg); color: var(--yellow); border: 2px solid var(--yellow); }
+.sh-role-header.worker { background: var(--green-bg); color: var(--green); border: 2px solid var(--green); }
+.sh-role-header.reporter { background: #f3e8ff; color: #7c3aed; border: 2px solid #7c3aed; }
+.sh-person { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 16px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; font-size: 12px; min-width: 140px; }
+.sh-person-name { font-weight: 600; color: var(--text); }
+.sh-person-dept { font-size: 11px; color: var(--text-mid); }
+.sh-person-title { font-size: 10px; color: var(--text-light); }
+.sh-relations { width: 100%; margin-top: 8px; }
+.sh-relation-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.sh-relation-table th { background: var(--bg); padding: 8px 12px; text-align: left; font-weight: 600; border-bottom: 2px solid var(--border); color: var(--text); }
+.sh-relation-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-mid); vertical-align: top; }
+.sh-relation-arrow { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+
 /* ── Request List ── */
 .req-list { display: flex; flex-direction: column; gap: 8px; }
 .req-item {
@@ -1645,8 +1667,9 @@ body.light .scenario-target {
       <div class="ham-divider-double"></div>
       <div class="ham-section">
         <div class="ham-section-label">Service Planning</div>
-        <button class="ham-action-btn" onclick="openScenarioMap();toggleHamburger()">📊 시나리오 흐름도</button>
-        <button class="ham-action-btn" onclick="openIAMap();toggleHamburger()" style="margin-top:4px">🗂 IA 구조도</button>
+        <button class="ham-action-btn" onclick="openScenarioMap();toggleHamburger()">시나리오 흐름도</button>
+        <button class="ham-action-btn" onclick="openIAMap();toggleHamburger()" style="margin-top:4px">IA 구조도</button>
+        <button class="ham-action-btn" onclick="openStakeholderMap();toggleHamburger()" style="margin-top:4px">이해관계자맵</button>
         <div class="ham-toggle-row" style="margin-top:4px">
           <span class="ham-toggle-label">개발 모드</span>
           <label class="toggle-switch"><input type="checkbox" id="devModeToggle" onchange="toggleDevPanel()"><span class="toggle-slider"></span></label>
@@ -1812,6 +1835,16 @@ body.light .scenario-target {
       <button class="modal-close" onclick="closeModal('iaMapModal')">×</button>
     </div>
     <div class="modal-body" id="iaMapBody" style="overflow:auto;max-height:calc(90vh - 80px)"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="stakeholderMapModal">
+  <div class="modal" style="max-width:95vw;width:1400px;max-height:90vh">
+    <div class="modal-header">
+      <h3>이해관계자맵 (Stakeholder Map)</h3>
+      <button class="modal-close" onclick="closeModal('stakeholderMapModal')">×</button>
+    </div>
+    <div class="modal-body" id="stakeholderMapBody" style="overflow:auto;max-height:calc(90vh - 80px)"></div>
   </div>
 </div>
 
@@ -3096,6 +3129,74 @@ function getScenarioGroups(steps) {
 }
 
 let filteredScenarios = [];
+
+function openStakeholderMap() {
+  const stakeholders = [
+    { role: 'requester', class: 'requester', label: '👤 요청자', persons: [
+      { name: USERS.requester.name, dept: USERS.requester.dept, desc: '업무 요청 등록 · 진행 확인' }
+    ]},
+    { role: 'manager', class: 'manager', label: '👔 관리자', persons: [
+      { name: USERS.manager.name, dept: USERS.manager.dept, desc: '요청 검토 · 담당자 배정 · 반려' }
+    ]},
+    { role: 'worker', class: 'worker', label: '🔧 실무자', persons: [
+      { name: USERS.worker1.name, dept: USERS.worker1.dept, desc: '배정된 업무 처리' },
+      { name: USERS.worker2.name, dept: USERS.worker2.dept, desc: '배정된 업무 처리' },
+      { name: USERS.worker3.name, dept: USERS.worker3.dept, desc: '배정된 업무 처리' },
+    ]},
+    { role: 'reporter', class: 'reporter', label: '📊 보고자', persons: [
+      { name: USERS.reporter1.name, dept: USERS.reporter1.dept, desc: USERS.reporter1.title },
+      { name: USERS.reporter2.name, dept: USERS.reporter2.dept, desc: USERS.reporter2.title },
+    ]},
+  ];
+
+  const relations = [
+    { from: '요청자', to: '관리자', action: '요청 등록', arrow: '→', color: 'var(--blue)' },
+    { from: '관리자', to: '요청자', action: '접수 · 반려 알림', arrow: '→', color: 'var(--yellow)' },
+    { from: '관리자', to: '실무자', action: '담당자 배정', arrow: '→', color: 'var(--yellow)' },
+    { from: '실무자', to: '관리자', action: '상태 변경 알림', arrow: '→', color: 'var(--green)' },
+    { from: '실무자', to: '요청자', action: '완료 알림', arrow: '→', color: 'var(--green)' },
+    { from: '관리자', to: '보고자', action: '처리 현황 보고', arrow: '→', color: 'var(--yellow)' },
+  ];
+
+  const diagramHtml = stakeholders.map(s => `
+    <div class="sh-col">
+      <div class="sh-role-header ${s.class}">${s.label}</div>
+      ${s.persons.map(p => `<div class="sh-person">
+        <span class="sh-person-name">${p.name}</span>
+        <span class="sh-person-dept">${p.dept}</span>
+        <span class="sh-person-title">${p.desc}</span>
+      </div>`).join('')}
+    </div>
+  `).join('');
+
+  const relationRows = relations.map(r =>
+    `<tr>
+      <td><span class="sh-relation-arrow" style="background:${r.color}15;color:${r.color}">${r.from}</span></td>
+      <td style="text-align:center;font-size:16px;color:var(--text-light)">→</td>
+      <td><span class="sh-relation-arrow" style="background:${r.color}15;color:${r.color}">${r.to}</span></td>
+      <td>${r.action}</td>
+    </tr>`
+  ).join('');
+
+  const html = `<div class="sh-map">
+    <div class="sh-legend">
+      <div class="sh-legend-item"><div class="sh-legend-color" style="background:var(--blue)"></div>요청자</div>
+      <div class="sh-legend-item"><div class="sh-legend-color" style="background:var(--yellow)"></div>관리자</div>
+      <div class="sh-legend-item"><div class="sh-legend-color" style="background:var(--green)"></div>실무자</div>
+      <div class="sh-legend-item"><div class="sh-legend-color" style="background:#7c3aed"></div>보고자</div>
+    </div>
+    <div class="sh-diagram">${diagramHtml}</div>
+    <div class="sh-relations">
+      <table class="sh-relation-table">
+        <thead><tr><th>From</th><th></th><th>To</th><th>상호작용</th></tr></thead>
+        <tbody>${relationRows}</tbody>
+      </table>
+    </div>
+  </div>`;
+
+  document.getElementById('stakeholderMapBody').innerHTML = html;
+  openModal('stakeholderMapModal');
+}
 
 function openIAMap() {
   const IA = {
