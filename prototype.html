@@ -1507,10 +1507,15 @@ body.light .scenario-target {
   margin-bottom: 8px;
 }
 .ham-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 0;
+}
+.ham-divider-double {
   height: 0;
   border-top: 1.5px solid var(--border);
   border-bottom: 1.5px solid var(--border);
-  padding-top: 2px;
+  padding-top: 3px;
   margin: 8px 0;
 }
 .ham-role-btns {
@@ -1640,7 +1645,7 @@ body.light .scenario-target {
         <div class="ham-section-label">Scenario</div>
         <button class="ham-action-btn" onclick="startScenario();toggleHamburger()">🎯 시나리오 모드</button>
       </div>
-      <div class="ham-divider"></div>
+      <div class="ham-divider-double"></div>
       <div class="ham-section">
         <div class="ham-section-label">Service Planning</div>
         <button class="ham-action-btn" onclick="openScenarioMap();toggleHamburger()">📊 시나리오 흐름도</button>
