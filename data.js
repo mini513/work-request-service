@@ -1,0 +1,198 @@
+// ── 사용자 데이터 ──
+const USERS = {
+  requester: { id: 'u1', name: '김민수', dept: '영업팀', role: 'requester', avatar: '👤' },
+  manager:   { id: 'u2', name: '박지영', dept: '경영지원팀', role: 'manager', avatar: '👤' },
+  worker1:   { id: 'u3', name: '이준호', dept: 'IT지원팀', role: 'worker', avatar: '👤' },
+  worker2:   { id: 'u4', name: '최서연', dept: '시설관리팀', role: 'worker', avatar: '👤' },
+  worker3:   { id: 'u5', name: '정하늘', dept: 'IT지원팀', role: 'worker', avatar: '👤' },
+  reporter1: { id: 'u6', name: '한동훈', dept: 'IT지원팀', role: 'reporter', title: 'IT지원팀 파트장' },
+  reporter2: { id: 'u7', name: '윤미래', dept: '시설관리팀', role: 'reporter', title: '시설관리팀 파트장' },
+};
+
+const CATEGORIES = ['IT 장애', '비품 요청', '시설 보수', '기타'];
+const PRIORITIES = ['긴급', '높음', '보통', '낮음'];
+const STATUSES = ['접수', '배정완료', '진행중', '완료', '반려'];
+
+const STATUS_COLORS = {
+  '접수':     { bg: 'var(--yellow-bg)', text: 'var(--yellow)' },
+  '배정완료': { bg: 'var(--blue-bg)',   text: 'var(--blue)' },
+  '진행중':   { bg: 'var(--accent-bg)', text: 'var(--accent)' },
+  '완료':     { bg: 'var(--green-bg)',  text: 'var(--green)' },
+  '반려':     { bg: 'var(--red-bg)',    text: 'var(--red)' },
+};
+
+const PRIORITY_COLORS = {
+  '긴급': { bg: 'var(--red-bg)',    text: 'var(--red)' },
+  '높음': { bg: 'var(--yellow-bg)', text: 'var(--yellow)' },
+  '보통': { bg: 'var(--blue-bg)',   text: 'var(--blue)' },
+  '낮음': { bg: 'var(--green-bg)',  text: 'var(--green)' },
+};
+
+const PRIORITY_ORDER = { '긴급': 0, '높음': 1, '보통': 2, '낮음': 3 };
+
+// ── 요청 데이터 ──
+const REQUESTS = [
+  {
+    id: 'REQ-001',
+    category: 'IT 장애',
+    title: 'PC 블루스크린 반복 발생',
+    content: '업무 중 블루스크린이 하루 3회 이상 발생합니다. 긴급 조치 부탁드립니다.',
+    requester: USERS.requester,
+    priority: '긴급',
+    status: '진행중',
+    createdAt: '2026-07-14 09:30',
+    desiredDate: '2026-07-17',
+    assignee: USERS.worker1,
+    reporter: USERS.reporter1,
+    estimatedDate: '2026-07-16',
+    timeline: [
+      { date: '2026-07-14 09:30', action: '요청 등록', by: '김민수', detail: '블루스크린 반복 발생 접수' },
+      { date: '2026-07-14 14:00', action: '담당자 배정', by: '박지영', detail: '실무자: 이준호 / 보고자: 한동훈 파트장' },
+      { date: '2026-07-14 15:30', action: '작업 예정일 확정', by: '이준호', detail: '2026-07-16 방문 예정' },
+      { date: '2026-07-15 10:00', action: '진행중', by: '이준호', detail: '메모리 진단 중' },
+    ],
+    comments: [
+      { by: '이준호', date: '2026-07-15 10:15', text: '메모리 불량이 의심됩니다. 교체 부품 수배 중입니다.' },
+      { by: '김민수', date: '2026-07-15 11:00', text: '감사합니다. 오늘 중으로 가능할까요?' },
+    ],
+  },
+  {
+    id: 'REQ-002',
+    category: '비품 요청',
+    title: '회의실 B 프로젝터 램프 교체',
+    content: '프로젝터 밝기가 현저히 떨어져 프레젠테이션이 어렵습니다.',
+    requester: { id: 'u8', name: '정수아', dept: '마케팅팀', role: 'requester', avatar: '👤' },
+    priority: '보통',
+    status: '배정완료',
+    createdAt: '2026-07-15 11:00',
+    desiredDate: '2026-07-22',
+    assignee: USERS.worker2,
+    reporter: USERS.reporter2,
+    estimatedDate: null,
+    timeline: [
+      { date: '2026-07-15 11:00', action: '요청 등록', by: '정수아', detail: '프로젝터 램프 교체 요청' },
+      { date: '2026-07-15 16:00', action: '담당자 배정', by: '박지영', detail: '실무자: 최서연 / 보고자: 윤미래 파트장' },
+    ],
+    comments: [],
+  },
+  {
+    id: 'REQ-003',
+    category: '시설 보수',
+    title: '3층 남자 화장실 수도꼭지 누수',
+    content: '세면대 수도꼭지에서 물이 계속 흐릅니다. 빠른 수리 부탁드립니다.',
+    requester: { id: 'u9', name: '오태준', dept: '개발팀', role: 'requester', avatar: '👤' },
+    priority: '높음',
+    status: '접수',
+    createdAt: '2026-07-16 08:45',
+    desiredDate: '2026-07-18',
+    assignee: null,
+    reporter: null,
+    estimatedDate: null,
+    timeline: [
+      { date: '2026-07-16 08:45', action: '요청 등록', by: '오태준', detail: '3층 화장실 수도꼭지 누수 접수' },
+    ],
+    comments: [],
+  },
+  {
+    id: 'REQ-004',
+    category: 'IT 장애',
+    title: 'VPN 접속 불가',
+    content: '재택근무 중 VPN 연결이 되지 않습니다. 인증 오류 메시지가 표시됩니다.',
+    requester: USERS.requester,
+    priority: '긴급',
+    status: '완료',
+    createdAt: '2026-07-10 13:20',
+    desiredDate: '2026-07-11',
+    assignee: USERS.worker3,
+    reporter: USERS.reporter1,
+    estimatedDate: '2026-07-11',
+    timeline: [
+      { date: '2026-07-10 13:20', action: '요청 등록', by: '김민수', detail: 'VPN 접속 불가 접수' },
+      { date: '2026-07-10 14:00', action: '담당자 배정', by: '박지영', detail: '실무자: 정하늘 / 보고자: 한동훈 파트장' },
+      { date: '2026-07-10 14:30', action: '진행중', by: '정하늘', detail: 'VPN 인증서 갱신 작업 시작' },
+      { date: '2026-07-10 16:00', action: '완료', by: '정하늘', detail: 'VPN 인증서 재발급 완료. 정상 접속 확인.' },
+    ],
+    comments: [
+      { by: '정하늘', date: '2026-07-10 16:00', text: 'VPN 인증서가 만료되어 재발급했습니다. 다시 접속해보세요.' },
+      { by: '김민수', date: '2026-07-10 16:10', text: '정상 접속됩니다. 감사합니다!' },
+    ],
+  },
+  {
+    id: 'REQ-005',
+    category: '기타',
+    title: '사내 동호회 활동 공간 확보 요청',
+    content: '매주 수요일 저녁 동호회 활동을 위한 회의실 정기 예약이 필요합니다.',
+    requester: { id: 'u10', name: '강예린', dept: '인사팀', role: 'requester', avatar: '👤' },
+    priority: '낮음',
+    status: '접수',
+    createdAt: '2026-07-17 10:00',
+    desiredDate: '2026-07-25',
+    assignee: null,
+    reporter: null,
+    estimatedDate: null,
+    timeline: [
+      { date: '2026-07-17 10:00', action: '요청 등록', by: '강예린', detail: '동호회 공간 확보 요청' },
+    ],
+    comments: [],
+  },
+  {
+    id: 'REQ-006',
+    category: '시설 보수',
+    title: '2층 복도 형광등 깜빡임',
+    content: '2층 복도 중앙 형광등이 계속 깜빡거립니다.',
+    requester: { id: 'u11', name: '백승우', dept: '회계팀', role: 'requester', avatar: '👤' },
+    priority: '보통',
+    status: '완료',
+    createdAt: '2026-07-08 09:00',
+    desiredDate: '2026-07-12',
+    assignee: USERS.worker2,
+    reporter: USERS.reporter2,
+    estimatedDate: '2026-07-10',
+    timeline: [
+      { date: '2026-07-08 09:00', action: '요청 등록', by: '백승우', detail: '형광등 교체 요청' },
+      { date: '2026-07-08 11:00', action: '담당자 배정', by: '박지영', detail: '실무자: 최서연 / 보고자: 윤미래 파트장' },
+      { date: '2026-07-09 09:00', action: '진행중', by: '최서연', detail: '형광등 교체 작업' },
+      { date: '2026-07-09 10:30', action: '완료', by: '최서연', detail: 'LED 등으로 교체 완료' },
+    ],
+    comments: [],
+  },
+  {
+    id: 'REQ-007',
+    category: 'IT 장애',
+    title: '공용 프린터 인쇄 오류',
+    content: '3층 공용 프린터에서 인쇄 시 용지 걸림이 반복됩니다.',
+    requester: { id: 'u12', name: '임채원', dept: '법무팀', role: 'requester', avatar: '👤' },
+    priority: '높음',
+    status: '접수',
+    createdAt: '2026-07-17 14:30',
+    desiredDate: '2026-07-19',
+    assignee: null,
+    reporter: null,
+    estimatedDate: null,
+    timeline: [
+      { date: '2026-07-17 14:30', action: '요청 등록', by: '임채원', detail: '프린터 용지 걸림 반복' },
+    ],
+    comments: [],
+  },
+];
+
+// ── 알림 데이터 ──
+const NOTIFICATIONS = {
+  requester: [
+    { id: 'n1', reqId: 'REQ-001', message: '담당자가 배정되었습니다 (이준호)', time: '2026-07-14 14:00', read: true },
+    { id: 'n2', reqId: 'REQ-001', message: '작업 예정일이 확정되었습니다 (07/16)', time: '2026-07-14 15:30', read: true },
+    { id: 'n3', reqId: 'REQ-001', message: '이준호님이 댓글을 남겼습니다', time: '2026-07-15 10:15', read: false },
+    { id: 'n4', reqId: 'REQ-004', message: '요청이 처리 완료되었습니다', time: '2026-07-10 16:00', read: true },
+  ],
+  manager: [
+    { id: 'n5', reqId: 'REQ-003', message: '[신규] 3층 화장실 수도꼭지 누수', time: '2026-07-16 08:45', read: false },
+    { id: 'n6', reqId: 'REQ-005', message: '[신규] 사내 동호회 활동 공간 확보', time: '2026-07-17 10:00', read: false },
+    { id: 'n7', reqId: 'REQ-007', message: '[신규] 공용 프린터 인쇄 오류', time: '2026-07-17 14:30', read: false },
+    { id: 'n8', reqId: 'REQ-003', message: '⚠️ KPI 경고: 담당자 미배정 2일 임박', time: '2026-07-18 08:00', read: false, urgent: true },
+  ],
+  worker: [
+    { id: 'n9', reqId: 'REQ-001', message: '[배정] PC 블루스크린 반복 발생', time: '2026-07-14 14:00', read: true },
+    { id: 'n10', reqId: 'REQ-001', message: '김민수님이 댓글을 남겼습니다', time: '2026-07-15 11:00', read: false },
+    { id: 'n11', reqId: 'REQ-001', message: '⚠️ 희망 완료일 임박 (07/17)', time: '2026-07-16 09:00', read: false, urgent: true },
+  ],
+};

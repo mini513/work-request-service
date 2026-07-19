@@ -5,133 +5,1789 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>사내 업무 요청 서비스</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { overflow: hidden; height: 100vh; }
-  :root {
-    --bg: #0e1015;
-    --surface: #161a22;
-    --surface2: #1e2330;
-    --surface3: #262c3a;
-    --border: #2a3040;
-    --text: #e2e5ec;
-    --text-dim: #7b8298;
-    --text-mid: #a0a8be;
-    --accent: #5b8def;
-    --accent-bg: rgba(91,141,239,0.12);
-    --green: #22c55e;
-    --green-bg: rgba(34,197,94,0.12);
-    --red: #f55;
-    --red-bg: rgba(255,85,85,0.12);
-    --yellow: #ff8c00;
-    --yellow-bg: rgba(255,140,0,0.12);
-    --radius: 8px;
-  }
-  body.light {
-    --bg: #f0f2f5;
-    --surface: #ffffff;
-    --surface2: #f5f6f8;
-    --surface3: #e8eaef;
-    --border: #d4d8e0;
-    --text: #1a1d27;
-    --text-dim: #6b7085;
-    --text-mid: #4a5068;
-    --accent: #4f46e5;
-    --accent-bg: rgba(79,70,229,0.1);
-    --green: #16a34a;
-    --green-bg: rgba(22,163,74,0.1);
-    --red: #dc2626;
-    --red-bg: rgba(220,38,38,0.08);
-    --yellow: #f97316;
-    --yellow-bg: rgba(249,115,22,0.1);
-  }
-  body {
-    font-family: 'Segoe UI', -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    font-size: 14px;
-  }
+/* ── Reset & Variables ── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { overflow: hidden; height: 100vh; }
+:root {
+  --bg: #0e1015;
+  --surface: #161a22;
+  --surface2: #1e2330;
+  --surface3: #262c3a;
+  --border: #2a3040;
+  --text: #e2e5ec;
+  --text-dim: #7b8298;
+  --text-mid: #a0a8be;
+  --accent: #5b8def;
+  --accent-bg: rgba(91,141,239,0.12);
+  --green: #22c55e;
+  --green-bg: rgba(34,197,94,0.12);
+  --red: #f55;
+  --red-bg: rgba(255,85,85,0.12);
+  --yellow: #ff8c00;
+  --yellow-bg: rgba(255,140,0,0.12);
+  --blue: #5b8def;
+  --blue-bg: rgba(91,141,239,0.12);
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+body.light {
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --surface2: #f5f6f8;
+  --surface3: #e8eaef;
+  --border: #d4d8e0;
+  --text: #1a1d27;
+  --text-dim: #6b7085;
+  --text-mid: #4a5068;
+  --accent: #4f46e5;
+  --accent-bg: rgba(79,70,229,0.1);
+  --green: #16a34a;
+  --green-bg: rgba(22,163,74,0.1);
+  --red: #dc2626;
+  --red-bg: rgba(220,38,38,0.08);
+  --yellow: #f97316;
+  --yellow-bg: rgba(249,115,22,0.1);
+  --blue: #2563eb;
+  --blue-bg: rgba(37,99,235,0.08);
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+body {
+  font-family: 'Segoe UI', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
 
-  /* Header */
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 24px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    min-height: 52px;
-  }
-  .header-title {
-    font-size: 16px;
-    font-weight: 600;
-  }
-  .header-actions {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  height: 52px;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.header-logo {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.header-spacer { flex: 1; }
 
-  /* Theme toggle */
-  .theme-toggle {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    padding: 6px 12px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    font-size: 13px;
-  }
-  .theme-toggle:hover {
-    color: var(--text);
-    border-color: var(--accent);
-  }
+/* Role Switcher */
+.role-switcher {
+  display: flex;
+  background: var(--surface2);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+.role-btn {
+  padding: 5px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 13px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+.role-btn:hover { color: var(--text); }
+.role-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
 
-  /* Main content */
-  .main {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .placeholder {
-    text-align: center;
-    color: var(--text-dim);
-  }
-  .placeholder h2 {
-    font-size: 20px;
-    margin-bottom: 8px;
-    color: var(--text-mid);
-  }
-  .placeholder p {
-    font-size: 14px;
-  }
+/* Notification Bell */
+.noti-wrap { position: relative; }
+.noti-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.noti-btn:hover { border-color: var(--accent); color: var(--text); }
+.noti-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+.noti-dropdown {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  z-index: 1000;
+  display: none;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.noti-dropdown.show { display: block; }
+.noti-dropdown-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.noti-item {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.noti-item:hover { background: var(--surface2); }
+.noti-item.unread { background: var(--accent-bg); }
+.noti-item.unread:hover { background: var(--blue-bg); }
+.noti-item.urgent .noti-msg { color: var(--red); font-weight: 600; }
+.noti-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.noti-item:not(.unread) .noti-dot { background: transparent; }
+.noti-msg { font-size: 13px; line-height: 1.4; }
+.noti-time { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+/* Header Icon Buttons */
+.icon-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-btn:hover { border-color: var(--accent); color: var(--text); }
+
+/* ── Layout ── */
+.layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 12px 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-section {
+  padding: 8px 16px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.sidebar-item {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-mid);
+  cursor: pointer;
+  font-size: 13px;
+  border-left: 3px solid transparent;
+  transition: all 0.1s;
+}
+.sidebar-item:hover { background: var(--surface2); color: var(--text); }
+.sidebar-item.active {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+.sidebar-item .icon { font-size: 16px; width: 20px; text-align: center; }
+.sidebar-item .badge-count {
+  margin-left: auto;
+  background: var(--red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+.sidebar-spacer { flex: 1; }
+.sidebar-bottom {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+/* ── Main Content ── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+/* Page Header */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.page-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+.page-subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* ── Buttons ── */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover { opacity: 0.85; }
+.btn-secondary {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { border-color: var(--accent); }
+.btn-danger {
+  background: var(--red-bg);
+  color: var(--red);
+}
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+/* ── Stat Cards ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+}
+.stat-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+/* ── Filter Bar ── */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-btn {
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-btn:hover { border-color: var(--accent); color: var(--text); }
+.filter-btn.active {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+.search-input {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  border-radius: 6px;
+  font-size: 13px;
+  width: 200px;
+  margin-left: auto;
+}
+.search-input:focus { outline: none; border-color: var(--accent); }
+
+/* ── Request List ── */
+.req-list { display: flex; flex-direction: column; gap: 8px; }
+.req-item {
+  display: grid;
+  grid-template-columns: 80px 80px 1fr 100px 100px 90px 100px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.1s;
+  font-size: 13px;
+}
+.req-item:hover { border-color: var(--accent); background: var(--surface2); }
+.req-item .req-id { color: var(--text-dim); font-size: 12px; font-family: monospace; }
+.req-item .req-category { font-size: 12px; }
+.req-item .req-title-cell {}
+.req-item .req-title { font-weight: 500; }
+.req-item .req-requester { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.req-item .req-priority {}
+.req-item .req-status {}
+.req-item .req-date { font-size: 12px; color: var(--text-dim); }
+.req-item .req-assignee { font-size: 12px; color: var(--text-dim); }
+
+.req-list-header {
+  display: grid;
+  grid-template-columns: 80px 80px 1fr 100px 100px 90px 100px;
+  gap: 12px;
+  padding: 8px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ── Request Detail ── */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+}
+.detail-left {}
+.detail-right {}
+.detail-info-row {
+  display: flex;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.detail-info-label {
+  width: 100px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.detail-info-value { flex: 1; }
+.detail-content {
+  padding: 16px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 16px 0;
+}
+
+/* Status Stepper */
+.status-stepper {
+  display: flex;
+  gap: 0;
+  margin: 16px 0;
+}
+.step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  padding: 8px 0;
+}
+.step::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--border);
+}
+.step:first-child::before { left: 50%; }
+.step:last-child::before { right: 50%; }
+.step.done::before, .step.current::before { background: var(--accent); }
+.step-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--border);
+  margin: 0 auto 8px;
+  position: relative;
+  z-index: 1;
+}
+.step.done .step-dot { background: var(--accent); }
+.step.current .step-dot {
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-bg);
+}
+.step-label {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.step.done .step-label, .step.current .step-label { color: var(--accent); font-weight: 600; }
+
+/* Timeline */
+.timeline { margin: 16px 0; }
+.timeline-item {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  position: relative;
+}
+.timeline-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 24px;
+  bottom: -8px;
+  width: 2px;
+  background: var(--border);
+}
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.timeline-content { flex: 1; }
+.timeline-action { font-size: 13px; font-weight: 500; }
+.timeline-detail { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.timeline-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+/* Comments */
+.comments-section { margin-top: 20px; }
+.comments-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.comment-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.comment-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.comment-body { flex: 1; }
+.comment-header { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+.comment-name { font-size: 13px; font-weight: 600; }
+.comment-date { font-size: 11px; color: var(--text-dim); }
+.comment-text { font-size: 13px; line-height: 1.5; }
+.comment-input-wrap {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.comment-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.comment-input:focus { outline: none; border-color: var(--accent); }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: 520px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title { font-size: 16px; font-weight: 700; }
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 20px;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+.modal-close:hover { background: var(--surface2); color: var(--text); }
+.modal-body { padding: 20px; }
+.modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ── Forms ── */
+.form-group { margin-bottom: 16px; }
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-mid);
+  margin-bottom: 6px;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-select { cursor: pointer; }
+
+/* ── Assignment Panel ── */
+.assign-panel {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-top: 12px;
+}
+.assign-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.assign-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  width: 60px;
+  flex-shrink: 0;
+}
+
+/* ── KPI Alert ── */
+.kpi-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--red-bg);
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--red);
+}
+.kpi-alert .icon { font-size: 16px; }
+
+/* ── Log / Stats Table ── */
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.stats-table th {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.stats-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Dev Mode ── */
+.dev-panel {
+  position: fixed;
+  right: -380px;
+  top: 52px;
+  bottom: 0;
+  width: 380px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  z-index: 3000;
+  transition: right 0.25s ease;
+  overflow-y: auto;
+  box-shadow: -4px 0 16px rgba(0,0,0,0.3);
+}
+.dev-panel.open { right: 0; }
+.dev-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--accent-bg);
+}
+.dev-panel-title { font-size: 14px; font-weight: 700; color: var(--accent); }
+.dev-section {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.dev-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-mid);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dev-section-title .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.dev-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  background: var(--accent-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.dev-chain {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--text-dim);
+  padding-left: 8px;
+}
+.dev-chain .active-node { color: var(--accent); font-weight: 600; background: var(--accent-bg); padding: 1px 4px; border-radius: 3px; }
+.dev-path {
+  padding: 8px;
+  background: var(--surface2);
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--text-mid);
+  word-break: break-all;
+}
+.dev-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text-mid);
+  cursor: pointer;
+  margin-top: 6px;
+}
+.dev-copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+.dev-color-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+.dev-color-row label { font-size: 12px; color: var(--text-mid); }
+.dev-color-row .color-group { display: flex; align-items: center; gap: 6px; }
+.dev-color-input {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  background: none;
+  padding: 0;
+}
+.dev-color-hex {
+  width: 70px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: monospace;
+}
+.dev-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+.dev-slider-row label { font-size: 12px; color: var(--text-mid); width: 40px; }
+.dev-slider-row input[type="range"] {
+  flex: 1;
+  accent-color: var(--accent);
+}
+.dev-slider-row .val {
+  width: 40px;
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  border-radius: 4px;
+  font-size: 11px;
+  text-align: center;
+}
+.dev-weight-btns { display: flex; gap: 4px; }
+.dev-weight-btn {
+  flex: 1;
+  padding: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-dim);
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+}
+.dev-weight-btn:hover { border-color: var(--accent); }
+.dev-weight-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* ── Scenario Mode ── */
+.scenario-bar {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px;
+  background: var(--accent-bg);
+  border-bottom: 1px solid var(--accent);
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.scenario-bar.show { display: flex; }
+.scenario-bar .step-text { flex: 1; }
+.scenario-bar .step-text strong { color: var(--accent); }
+.scenario-progress {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.scenario-dot-sm {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+}
+.scenario-dot-sm.done { background: var(--accent); }
+.scenario-dot-sm.current { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+
+/* ── Helpers ── */
+.text-dim { color: var(--text-dim); }
+.text-accent { color: var(--accent); }
+.text-red { color: var(--red); }
+.text-green { color: var(--green); }
+.text-yellow { color: var(--yellow); }
+.fw-600 { font-weight: 600; }
+.mt-8 { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.gap-8 { gap: 8px; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.hidden { display: none !important; }
+
+/* highlight for dev mode */
+.dev-highlight {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
 </style>
 </head>
 <body>
 
+<!-- Scenario Bar -->
+<div class="scenario-bar" id="scenarioBar">
+  <span style="font-size:16px">📋</span>
+  <span class="step-text" id="scenarioText"><strong>시나리오 모드</strong> — 이해관계자별 업무 흐름을 체험합니다</span>
+  <div class="scenario-progress" id="scenarioProgress"></div>
+  <button class="btn btn-sm btn-secondary" onclick="prevScenarioStep()">◀ 이전</button>
+  <button class="btn btn-sm btn-primary" onclick="nextScenarioStep()">다음 ▶</button>
+  <button class="btn btn-sm btn-danger" onclick="exitScenario()">종료</button>
+</div>
+
+<!-- Header -->
 <div class="header">
-  <div class="header-title">사내 업무 요청 서비스</div>
-  <div class="header-actions">
-    <button class="theme-toggle" onclick="toggleTheme()">Theme</button>
+  <div class="header-logo">📋 업무요청</div>
+  <div class="role-switcher">
+    <button class="role-btn active" data-role="requester" onclick="switchRole('requester')">요청자</button>
+    <button class="role-btn" data-role="manager" onclick="switchRole('manager')">관리자</button>
+    <button class="role-btn" data-role="worker" onclick="switchRole('worker')">실무자</button>
+  </div>
+  <div class="header-spacer"></div>
+  <div class="noti-wrap">
+    <button class="noti-btn" onclick="toggleNoti()">
+      🔔
+      <span class="noti-badge" id="notiBadge">3</span>
+    </button>
+    <div class="noti-dropdown" id="notiDropdown">
+      <div class="noti-dropdown-header">
+        <span>알림</span>
+        <button class="btn btn-sm btn-secondary" onclick="markAllRead()">모두 읽음</button>
+      </div>
+      <div id="notiList"></div>
+    </div>
+  </div>
+  <button class="icon-btn" onclick="toggleTheme()" title="테마 전환">🌓</button>
+  <button class="icon-btn" onclick="toggleDevPanel()" title="개발 모드" id="devToggleBtn">☰</button>
+</div>
+
+<!-- Layout -->
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar"></div>
+
+  <!-- Main Content -->
+  <div class="main" id="mainContent"></div>
+</div>
+
+<!-- New Request Modal -->
+<div class="modal-overlay" id="newReqModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">새 업무 요청</div>
+      <button class="modal-close" onclick="closeModal('newReqModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">카테고리</label>
+        <select class="form-select" id="formCategory">
+          <option value="">선택해주세요</option>
+          <option>IT 장애</option>
+          <option>비품 요청</option>
+          <option>시설 보수</option>
+          <option>기타</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">제목</label>
+        <input class="form-input" id="formTitle" placeholder="요청 제목을 입력하세요">
+      </div>
+      <div class="form-group">
+        <label class="form-label">상세 내용</label>
+        <textarea class="form-textarea" id="formContent" placeholder="요청 내용을 자세히 작성해주세요"></textarea>
+      </div>
+      <div style="display:flex;gap:12px">
+        <div class="form-group" style="flex:1">
+          <label class="form-label">긴급도</label>
+          <select class="form-select" id="formPriority">
+            <option>보통</option>
+            <option>낮음</option>
+            <option>높음</option>
+            <option>긴급</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:1">
+          <label class="form-label">희망 완료일</label>
+          <input class="form-input" type="date" id="formDesiredDate">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">첨부파일</label>
+        <input class="form-input" type="file" id="formAttach" style="padding:5px">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('newReqModal')">취소</button>
+      <button class="btn btn-primary" onclick="submitRequest()">요청 등록</button>
+    </div>
   </div>
 </div>
 
-<div class="main">
-  <div class="placeholder">
-    <h2>사내 업무 요청 서비스</h2>
-    <p>여기에 프로토타입을 구현하세요</p>
+<!-- Assign Modal -->
+<div class="modal-overlay" id="assignModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">담당자 배정</div>
+      <button class="modal-close" onclick="closeModal('assignModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="assignReqInfo" style="margin-bottom:16px"></div>
+      <div class="form-group">
+        <label class="form-label">실무 담당자</label>
+        <select class="form-select" id="assignWorker">
+          <option value="">선택해주세요</option>
+          <option value="u3">이준호 (IT지원팀)</option>
+          <option value="u5">정하늘 (IT지원팀)</option>
+          <option value="u4">최서연 (시설관리팀)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">보고자 (파트장)</label>
+        <select class="form-select" id="assignReporter">
+          <option value="">선택해주세요</option>
+          <option value="u6">한동훈 (IT지원팀 파트장)</option>
+          <option value="u7">윤미래 (시설관리팀 파트장)</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('assignModal')">취소</button>
+      <button class="btn btn-danger" onclick="rejectRequest()" style="margin-right:auto">반려</button>
+      <button class="btn btn-primary" onclick="confirmAssign()">배정 확인</button>
+    </div>
   </div>
 </div>
 
+<!-- Dev Mode Panel -->
+<div class="dev-panel" id="devPanel">
+  <div class="dev-panel-header">
+    <div class="dev-panel-title">🛠 개발 모드</div>
+    <button class="modal-close" onclick="toggleDevPanel()">×</button>
+  </div>
+  <div id="devContent">
+    <div class="dev-section">
+      <p style="font-size:13px;color:var(--text-dim);line-height:1.6">
+        화면의 요소를 클릭하면 구조, 스타일 정보가 여기에 표시됩니다.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
 <script>
-function toggleTheme() {
-  document.body.classList.toggle('light');
+// ── State ──
+let currentRole = 'requester';
+let currentPage = 'list';
+let currentDetailId = null;
+let devMode = false;
+let devHighlighted = null;
+let scenarioActive = false;
+let scenarioStep = 0;
+
+const SIDEBAR_MENUS = {
+  requester: [
+    { id: 'list', icon: '📋', label: '내 요청 목록' },
+    { id: 'new', icon: '➕', label: '새 요청 등록' },
+  ],
+  manager: [
+    { id: 'dashboard', icon: '📊', label: '대시보드' },
+    { id: 'list', icon: '📋', label: '전체 요청 목록' },
+    { id: 'unassigned', icon: '⚠️', label: '미배정 요청', badge: () => REQUESTS.filter(r => !r.assignee).length },
+    { id: 'log', icon: '📈', label: '처리 현황' },
+  ],
+  worker: [
+    { id: 'list', icon: '📋', label: '내 담당 목록' },
+  ],
+};
+
+// ── Role Switch ──
+function switchRole(role) {
+  currentRole = role;
+  currentPage = role === 'manager' ? 'dashboard' : 'list';
+  currentDetailId = null;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.toggle('active', b.dataset.role === role));
+  renderSidebar();
+  renderPage();
+  renderNotiBadge();
 }
+
+// ── Sidebar ──
+function renderSidebar() {
+  const menus = SIDEBAR_MENUS[currentRole];
+  let html = `<div class="sidebar-section">${currentRole === 'requester' ? '요청자 메뉴' : currentRole === 'manager' ? '관리자 메뉴' : '실무자 메뉴'}</div>`;
+  menus.forEach(m => {
+    const badgeVal = m.badge ? m.badge() : 0;
+    html += `<div class="sidebar-item ${currentPage === m.id ? 'active' : ''}" onclick="navigateTo('${m.id}')">
+      <span class="icon">${m.icon}</span>${m.label}
+      ${badgeVal > 0 ? `<span class="badge-count">${badgeVal}</span>` : ''}
+    </div>`;
+  });
+  html += `<div class="sidebar-spacer"></div>`;
+  html += `<div class="sidebar-bottom">`;
+  html += `<div class="sidebar-item" onclick="startScenario()"><span class="icon">🎯</span>시나리오 모드</div>`;
+  html += `</div>`;
+  document.getElementById('sidebar').innerHTML = html;
+}
+
+function navigateTo(page) {
+  if (page === 'new') { openModal('newReqModal'); return; }
+  currentPage = page;
+  currentDetailId = null;
+  renderSidebar();
+  renderPage();
+}
+
+// ── Page Rendering ──
+function renderPage() {
+  const main = document.getElementById('mainContent');
+  switch (currentRole) {
+    case 'requester':
+      if (currentDetailId) renderDetail(main);
+      else renderRequesterList(main);
+      break;
+    case 'manager':
+      if (currentDetailId) renderDetail(main);
+      else if (currentPage === 'dashboard') renderDashboard(main);
+      else if (currentPage === 'log') renderLog(main);
+      else renderManagerList(main);
+      break;
+    case 'worker':
+      if (currentDetailId) renderDetail(main);
+      else renderWorkerList(main);
+      break;
+  }
+}
+
+// ── Requester List ──
+function renderRequesterList(el) {
+  const myReqs = [...REQUESTS].filter(r => r.requester.id === 'u1').sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
+  el.innerHTML = `
+    <div class="page-header">
+      <div><div class="page-title">내 요청 목록</div><div class="page-subtitle">등록한 업무 요청의 진행 상황을 확인합니다</div></div>
+      <button class="btn btn-primary" onclick="openModal('newReqModal')">➕ 새 요청</button>
+    </div>
+    ${renderFilterBar('requester')}
+    <div class="req-list-header"><span>ID</span><span>카테고리</span><span>제목</span><span>긴급도</span><span>상태</span><span>등록일</span><span>담당자</span></div>
+    <div class="req-list">${myReqs.map(r => renderReqRow(r)).join('')}</div>
+  `;
+}
+
+// ── Manager List ──
+function renderManagerList(el) {
+  let reqs = [...REQUESTS].sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
+  if (currentPage === 'unassigned') reqs = reqs.filter(r => !r.assignee);
+  const title = currentPage === 'unassigned' ? '미배정 요청' : '전체 요청 목록';
+  const subtitle = currentPage === 'unassigned' ? '담당자가 아직 배정되지 않은 요청입니다' : '모든 부서의 업무 요청을 관리합니다';
+
+  const kpiAlerts = reqs.filter(r => !r.assignee && getDaysSince(r.createdAt) >= 1.5);
+  let alertHtml = '';
+  kpiAlerts.forEach(r => {
+    const days = getDaysSince(r.createdAt);
+    alertHtml += `<div class="kpi-alert"><span class="icon">⚠️</span><span><strong>${r.id}</strong> ${r.title} — 접수 후 ${days.toFixed(0)}일 경과, 담당자 미배정 (KPI: 2일 이내)</span></div>`;
+  });
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div><div class="page-title">${title}</div><div class="page-subtitle">${subtitle}</div></div>
+    </div>
+    ${alertHtml}
+    ${renderFilterBar('manager')}
+    <div class="req-list-header"><span>ID</span><span>카테고리</span><span>제목</span><span>긴급도</span><span>상태</span><span>등록일</span><span>담당자</span></div>
+    <div class="req-list">${reqs.map(r => renderReqRow(r, true)).join('')}</div>
+  `;
+}
+
+// ── Worker List ──
+function renderWorkerList(el) {
+  const myReqs = [...REQUESTS].filter(r => r.assignee && r.assignee.id === 'u3').sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
+  el.innerHTML = `
+    <div class="page-header">
+      <div><div class="page-title">내 담당 목록</div><div class="page-subtitle">나에게 배정된 요청을 처리합니다 (이준호)</div></div>
+    </div>
+    ${renderFilterBar('worker')}
+    <div class="req-list-header"><span>ID</span><span>카테고리</span><span>제목</span><span>긴급도</span><span>상태</span><span>등록일</span><span>요청자</span></div>
+    <div class="req-list">${myReqs.map(r => renderReqRow(r, false, true)).join('')}</div>
+  `;
+}
+
+// ── Dashboard ──
+function renderDashboard(el) {
+  const total = REQUESTS.length;
+  const byStatus = {};
+  STATUSES.forEach(s => byStatus[s] = REQUESTS.filter(r => r.status === s).length);
+  const unassigned = REQUESTS.filter(r => !r.assignee).length;
+  const completed = REQUESTS.filter(r => r.status === '완료').length;
+  const avgDays = completed > 0 ? (REQUESTS.filter(r => r.status === '완료').reduce((sum, r) => {
+    const start = new Date(r.createdAt);
+    const end = new Date(r.timeline[r.timeline.length - 1].date);
+    return sum + (end - start) / (1000 * 60 * 60 * 24);
+  }, 0) / completed).toFixed(1) : '-';
+
+  const byCat = {};
+  CATEGORIES.forEach(c => byCat[c] = REQUESTS.filter(r => r.category === c).length);
+
+  const kpiAlerts = REQUESTS.filter(r => !r.assignee && getDaysSince(r.createdAt) >= 1.5);
+  let alertHtml = '';
+  kpiAlerts.forEach(r => {
+    alertHtml += `<div class="kpi-alert"><span class="icon">⚠️</span><span><strong>${r.id}</strong> ${r.title} — 담당자 미배정 ${getDaysSince(r.createdAt).toFixed(0)}일 경과</span></div>`;
+  });
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div><div class="page-title">대시보드</div><div class="page-subtitle">전체 업무 요청 현황을 한눈에 확인합니다</div></div>
+    </div>
+    ${alertHtml}
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">전체 요청</div><div class="stat-value">${total}</div><div class="stat-sub">건</div></div>
+      <div class="stat-card"><div class="stat-label">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div><div class="stat-sub">건 — 빠른 배정 필요</div></div>
+      <div class="stat-card"><div class="stat-label">진행중</div><div class="stat-value" style="color:var(--accent)">${byStatus['진행중'] || 0}</div><div class="stat-sub">건</div></div>
+      <div class="stat-card"><div class="stat-label">완료</div><div class="stat-value" style="color:var(--green)">${completed}</div><div class="stat-sub">건</div></div>
+      <div class="stat-card"><div class="stat-label">평균 처리 시간</div><div class="stat-value">${avgDays}</div><div class="stat-sub">일</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="card">
+        <div class="fw-600 mb-8">상태별 현황</div>
+        ${STATUSES.map(s => `<div class="flex items-center justify-between" style="padding:6px 0;border-bottom:1px solid var(--border)">
+          <span class="badge" style="background:${STATUS_COLORS[s].bg};color:${STATUS_COLORS[s].text}">${s}</span>
+          <span class="fw-600">${byStatus[s] || 0}건</span>
+        </div>`).join('')}
+      </div>
+      <div class="card">
+        <div class="fw-600 mb-8">카테고리별 현황</div>
+        ${CATEGORIES.map(c => `<div class="flex items-center justify-between" style="padding:6px 0;border-bottom:1px solid var(--border)">
+          <span>${c}</span>
+          <span class="fw-600">${byCat[c] || 0}건</span>
+        </div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ── Log ──
+function renderLog(el) {
+  const completed = REQUESTS.filter(r => r.status === '완료');
+  const urgent = completed.filter(r => r.priority === '긴급' || r.priority === '높음');
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div><div class="page-title">처리 현황</div><div class="page-subtitle">완료된 요청의 처리 이력을 확인합니다</div></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">총 처리 건수</div><div class="stat-value" style="color:var(--green)">${completed.length}</div></div>
+      <div class="stat-card"><div class="stat-label">주요 사항 (긴급/높음)</div><div class="stat-value" style="color:var(--yellow)">${urgent.length}</div></div>
+    </div>
+    <div class="card">
+      <div class="fw-600 mb-8">완료된 요청 목록</div>
+      <table class="stats-table">
+        <thead><tr><th>ID</th><th>카테고리</th><th>제목</th><th>긴급도</th><th>담당자</th><th>처리일</th></tr></thead>
+        <tbody>
+        ${completed.map(r => {
+          const doneDate = r.timeline[r.timeline.length - 1].date.split(' ')[0];
+          return `<tr style="cursor:pointer" onclick="openDetail('${r.id}')">
+            <td style="font-family:monospace;color:var(--text-dim)">${r.id}</td>
+            <td>${r.category}</td>
+            <td>${r.title}</td>
+            <td><span class="badge" style="background:${PRIORITY_COLORS[r.priority].bg};color:${PRIORITY_COLORS[r.priority].text}">${r.priority}</span></td>
+            <td>${r.assignee ? r.assignee.name : '-'}</td>
+            <td style="color:var(--text-dim)">${doneDate}</td>
+          </tr>`;
+        }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ── Detail ──
+function renderDetail(el) {
+  const req = REQUESTS.find(r => r.id === currentDetailId);
+  if (!req) return;
+  const statusIdx = STATUSES.indexOf(req.status);
+  const isWorker = currentRole === 'worker';
+  const isManager = currentRole === 'manager';
+
+  let actionButtons = '';
+  if (isWorker && req.status !== '완료' && req.status !== '반려') {
+    if (req.status === '배정완료') {
+      actionButtons = `<div class="mt-16">
+        <div class="form-group"><label class="form-label">작업 가능일</label><input type="date" class="form-input" id="estDate"></div>
+        <button class="btn btn-primary" onclick="startWork('${req.id}')">작업 시작 + 예정일 알림</button>
+      </div>`;
+    } else if (req.status === '진행중') {
+      actionButtons = `<div class="mt-16">
+        <div class="form-group"><label class="form-label">처리 내용</label><textarea class="form-textarea" id="completeNote" placeholder="처리 결과를 입력하세요"></textarea></div>
+        <button class="btn btn-primary" onclick="completeWork('${req.id}')">처리 완료</button>
+      </div>`;
+    }
+  }
+  if (isManager && !req.assignee) {
+    actionButtons = `<div class="mt-16"><button class="btn btn-primary" onclick="openAssignModal('${req.id}')">담당자 배정</button></div>`;
+  }
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="btn btn-sm btn-secondary" onclick="backToList()">← 목록</button>
+          <div class="page-title">${req.title}</div>
+        </div>
+        <div class="page-subtitle">${req.id} · ${req.category} · ${req.requester.name} (${req.requester.dept})</div>
+      </div>
+      <span class="badge" style="background:${STATUS_COLORS[req.status].bg};color:${STATUS_COLORS[req.status].text};font-size:13px;padding:4px 12px">${req.status}</span>
+    </div>
+
+    <div class="status-stepper">
+      ${STATUSES.filter(s => s !== '반려').map((s, i) => {
+        let cls = '';
+        if (req.status === '반려') cls = i === 0 ? 'done' : '';
+        else if (i < statusIdx) cls = 'done';
+        else if (i === statusIdx) cls = 'current';
+        return `<div class="step ${cls}"><div class="step-dot"></div><div class="step-label">${s}</div></div>`;
+      }).join('')}
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-left">
+        <div class="card">
+          <div class="fw-600 mb-8">요청 내용</div>
+          <div class="detail-content">${req.content}</div>
+          <div class="detail-info-row"><div class="detail-info-label">긴급도</div><div class="detail-info-value"><span class="badge" style="background:${PRIORITY_COLORS[req.priority].bg};color:${PRIORITY_COLORS[req.priority].text}">${req.priority}</span></div></div>
+          <div class="detail-info-row"><div class="detail-info-label">희망 완료일</div><div class="detail-info-value">${req.desiredDate || '-'}</div></div>
+          <div class="detail-info-row"><div class="detail-info-label">담당자</div><div class="detail-info-value">${req.assignee ? req.assignee.name + ' (' + req.assignee.dept + ')' : '<span style="color:var(--yellow)">⏳ 배정 대기</span>'}</div></div>
+          <div class="detail-info-row"><div class="detail-info-label">보고자</div><div class="detail-info-value">${req.reporter ? req.reporter.name + ' (' + (req.reporter.title || req.reporter.dept) + ')' : '-'}</div></div>
+          <div class="detail-info-row"><div class="detail-info-label">작업 예정일</div><div class="detail-info-value">${req.estimatedDate || '-'}</div></div>
+          ${actionButtons}
+        </div>
+
+        <div class="comments-section card mt-16">
+          <div class="comments-title">💬 댓글 <span class="text-dim">(${req.comments.length})</span></div>
+          ${req.comments.map(c => `<div class="comment-item">
+            <div class="comment-avatar">👤</div>
+            <div class="comment-body">
+              <div class="comment-header"><span class="comment-name">${c.by}</span><span class="comment-date">${c.date}</span></div>
+              <div class="comment-text">${c.text}</div>
+            </div>
+          </div>`).join('')}
+          <div class="comment-input-wrap">
+            <input class="comment-input" id="commentInput" placeholder="댓글을 입력하세요...">
+            <button class="btn btn-primary btn-sm" onclick="addComment('${req.id}')">전송</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-right">
+        <div class="card">
+          <div class="fw-600 mb-8">처리 타임라인</div>
+          <div class="timeline">
+            ${req.timeline.map(t => `<div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-action">${t.action}</div>
+                <div class="timeline-detail">${t.detail}</div>
+                <div class="timeline-meta">${t.by} · ${t.date}</div>
+              </div>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── Shared Components ──
+function renderReqRow(r, showAssignBtn, showRequester) {
+  const lastCol = showRequester
+    ? `<span class="req-assignee">${r.requester.name}</span>`
+    : `<span class="req-assignee">${r.assignee ? r.assignee.name : '<span style="color:var(--yellow)">미배정</span>'}</span>`;
+  return `<div class="req-item" onclick="openDetail('${r.id}')">
+    <span class="req-id">${r.id}</span>
+    <span class="req-category"><span class="badge" style="background:var(--surface3);color:var(--text-mid)">${r.category}</span></span>
+    <div class="req-title-cell"><div class="req-title">${r.title}</div></div>
+    <span class="req-priority"><span class="badge" style="background:${PRIORITY_COLORS[r.priority].bg};color:${PRIORITY_COLORS[r.priority].text}">${r.priority}</span></span>
+    <span class="req-status"><span class="badge" style="background:${STATUS_COLORS[r.status].bg};color:${STATUS_COLORS[r.status].text}">${r.status}</span></span>
+    <span class="req-date">${r.createdAt.split(' ')[0]}</span>
+    ${lastCol}
+  </div>`;
+}
+
+function renderFilterBar(role) {
+  return `<div class="filter-bar">
+    <button class="filter-btn active" onclick="filterStatus(this,'전체')">전체</button>
+    ${STATUSES.map(s => `<button class="filter-btn" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
+    <input class="search-input" placeholder="검색..." oninput="filterSearch(this.value)">
+  </div>`;
+}
+
+function filterStatus(btn, status) {
+  btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPage();
+}
+
+function filterSearch(val) {}
+
+// ── Actions ──
+function openDetail(id) {
+  currentDetailId = id;
+  renderPage();
+}
+
+function backToList() {
+  currentDetailId = null;
+  renderPage();
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function submitRequest() {
+  const cat = document.getElementById('formCategory').value;
+  const title = document.getElementById('formTitle').value;
+  const content = document.getElementById('formContent').value;
+  const priority = document.getElementById('formPriority').value;
+  const desiredDate = document.getElementById('formDesiredDate').value;
+  if (!cat || !title || !content) { alert('카테고리, 제목, 내용을 입력해주세요.'); return; }
+  const id = 'REQ-' + String(REQUESTS.length + 1).padStart(3, '0');
+  const now = new Date();
+  const nowStr = now.toISOString().slice(0, 16).replace('T', ' ');
+  REQUESTS.push({
+    id, category: cat, title, content,
+    requester: USERS.requester, priority, status: '접수',
+    createdAt: nowStr, desiredDate: desiredDate || null,
+    assignee: null, reporter: null, estimatedDate: null,
+    timeline: [{ date: nowStr, action: '요청 등록', by: USERS.requester.name, detail: title + ' 접수' }],
+    comments: [],
+  });
+  NOTIFICATIONS.manager.unshift({ id: 'n' + Date.now(), reqId: id, message: `[신규] ${title}`, time: nowStr, read: false });
+  closeModal('newReqModal');
+  document.getElementById('formCategory').value = '';
+  document.getElementById('formTitle').value = '';
+  document.getElementById('formContent').value = '';
+  document.getElementById('formPriority').value = '보통';
+  document.getElementById('formDesiredDate').value = '';
+  renderSidebar();
+  renderPage();
+  renderNotiBadge();
+}
+
+let assigningReqId = null;
+function openAssignModal(id) {
+  assigningReqId = id;
+  const req = REQUESTS.find(r => r.id === id);
+  document.getElementById('assignReqInfo').innerHTML = `
+    <div class="fw-600">${req.id} — ${req.title}</div>
+    <div class="text-dim" style="font-size:12px;margin-top:4px">${req.category} · ${req.requester.name} · 긴급도: ${req.priority}</div>
+  `;
+  openModal('assignModal');
+}
+
+function confirmAssign() {
+  const workerId = document.getElementById('assignWorker').value;
+  const reporterId = document.getElementById('assignReporter').value;
+  if (!workerId) { alert('실무 담당자를 선택해주세요.'); return; }
+  const req = REQUESTS.find(r => r.id === assigningReqId);
+  const worker = Object.values(USERS).find(u => u.id === workerId);
+  const reporter = reporterId ? Object.values(USERS).find(u => u.id === reporterId) : null;
+  req.assignee = worker;
+  req.reporter = reporter;
+  req.status = '배정완료';
+  const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  req.timeline.push({ date: now, action: '담당자 배정', by: USERS.manager.name, detail: `실무자: ${worker.name}${reporter ? ' / 보고자: ' + reporter.name : ''}` });
+  NOTIFICATIONS.requester.unshift({ id: 'n' + Date.now(), reqId: req.id, message: `담당자가 배정되었습니다 (${worker.name})`, time: now, read: false });
+  NOTIFICATIONS.worker.unshift({ id: 'n' + Date.now(), reqId: req.id, message: `[배정] ${req.title}`, time: now, read: false });
+  closeModal('assignModal');
+  renderSidebar();
+  renderPage();
+  renderNotiBadge();
+}
+
+function rejectRequest() {
+  const req = REQUESTS.find(r => r.id === assigningReqId);
+  req.status = '반려';
+  const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  req.timeline.push({ date: now, action: '반려', by: USERS.manager.name, detail: '요청이 반려되었습니다' });
+  NOTIFICATIONS.requester.unshift({ id: 'n' + Date.now(), reqId: req.id, message: `요청이 반려되었습니다`, time: now, read: false });
+  closeModal('assignModal');
+  renderPage();
+  renderNotiBadge();
+}
+
+function startWork(id) {
+  const req = REQUESTS.find(r => r.id === id);
+  const estDate = document.getElementById('estDate').value;
+  req.status = '진행중';
+  req.estimatedDate = estDate || null;
+  const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  req.timeline.push({ date: now, action: '진행중', by: USERS.worker1.name, detail: estDate ? `작업 예정일: ${estDate}` : '작업 시작' });
+  if (estDate) {
+    req.timeline.push({ date: now, action: '작업 예정일 확정', by: USERS.worker1.name, detail: `${estDate} 방문/처리 예정` });
+    NOTIFICATIONS.requester.unshift({ id: 'n' + Date.now(), reqId: req.id, message: `작업 예정일이 확정되었습니다 (${estDate})`, time: now, read: false });
+  }
+  renderPage();
+  renderNotiBadge();
+}
+
+function completeWork(id) {
+  const req = REQUESTS.find(r => r.id === id);
+  const note = document.getElementById('completeNote').value || '처리 완료';
+  req.status = '완료';
+  const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  req.timeline.push({ date: now, action: '완료', by: USERS.worker1.name, detail: note });
+  NOTIFICATIONS.requester.unshift({ id: 'n' + Date.now(), reqId: req.id, message: '요청이 처리 완료되었습니다', time: now, read: false });
+  if (req.reporter) {
+    NOTIFICATIONS.manager.unshift({ id: 'n' + Date.now(), reqId: req.id, message: `[완료] ${req.title} — 보고자: ${req.reporter.name}`, time: now, read: false });
+  }
+  renderPage();
+  renderNotiBadge();
+}
+
+function addComment(id) {
+  const input = document.getElementById('commentInput');
+  if (!input.value.trim()) return;
+  const req = REQUESTS.find(r => r.id === id);
+  const byUser = currentRole === 'requester' ? USERS.requester : currentRole === 'worker' ? USERS.worker1 : USERS.manager;
+  const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  req.comments.push({ by: byUser.name, date: now, text: input.value.trim() });
+  if (currentRole === 'requester') {
+    NOTIFICATIONS.worker.unshift({ id: 'n' + Date.now(), reqId: req.id, message: `${byUser.name}님이 댓글을 남겼습니다`, time: now, read: false });
+  } else {
+    NOTIFICATIONS.requester.unshift({ id: 'n' + Date.now(), reqId: req.id, message: `${byUser.name}님이 댓글을 남겼습니다`, time: now, read: false });
+  }
+  renderPage();
+  renderNotiBadge();
+}
+
+// ── Notifications ──
+function toggleNoti() {
+  const dd = document.getElementById('notiDropdown');
+  dd.classList.toggle('show');
+  if (dd.classList.contains('show')) renderNotiList();
+}
+
+function renderNotiList() {
+  const notis = NOTIFICATIONS[currentRole] || [];
+  document.getElementById('notiList').innerHTML = notis.length === 0
+    ? '<div style="padding:20px;text-align:center;color:var(--text-dim);font-size:13px">알림이 없습니다</div>'
+    : notis.map(n => `<div class="noti-item ${n.read ? '' : 'unread'} ${n.urgent ? 'urgent' : ''}" onclick="openDetail('${n.reqId}');toggleNoti()">
+        <div class="noti-dot"></div>
+        <div><div class="noti-msg">${n.message}</div><div class="noti-time">${n.time}</div></div>
+      </div>`).join('');
+}
+
+function renderNotiBadge() {
+  const notis = NOTIFICATIONS[currentRole] || [];
+  const unread = notis.filter(n => !n.read).length;
+  const badge = document.getElementById('notiBadge');
+  badge.textContent = unread;
+  badge.style.display = unread > 0 ? 'flex' : 'none';
+}
+
+function markAllRead() {
+  (NOTIFICATIONS[currentRole] || []).forEach(n => n.read = true);
+  renderNotiList();
+  renderNotiBadge();
+}
+
+// ── Theme ──
+function toggleTheme() { document.body.classList.toggle('light'); }
+
+// ── Dev Mode ──
+function toggleDevPanel() {
+  devMode = !devMode;
+  document.getElementById('devPanel').classList.toggle('open', devMode);
+  document.getElementById('devToggleBtn').style.color = devMode ? 'var(--accent)' : '';
+  if (devMode) {
+    document.addEventListener('click', devClickHandler, true);
+  } else {
+    document.removeEventListener('click', devClickHandler, true);
+    if (devHighlighted) { devHighlighted.classList.remove('dev-highlight'); devHighlighted = null; }
+  }
+}
+
+function devClickHandler(e) {
+  if (e.target.closest('.dev-panel') || e.target.closest('.header')) return;
+  if (!devMode) return;
+  e.preventDefault();
+  e.stopPropagation();
+  if (devHighlighted) devHighlighted.classList.remove('dev-highlight');
+  devHighlighted = e.target;
+  devHighlighted.classList.add('dev-highlight');
+  renderDevInfo(e.target);
+}
+
+function renderDevInfo(el) {
+  const tag = el.tagName.toLowerCase();
+  const id = el.id ? '#' + el.id : '';
+  const cls = el.className ? '.' + el.className.split(' ').filter(c => c !== 'dev-highlight').join('.') : '';
+  const computed = getComputedStyle(el);
+  const chain = getChain(el);
+  const selector = getSelector(el);
+
+  document.getElementById('devContent').innerHTML = `
+    <div class="dev-section">
+      <div class="dev-section-title"><span class="dot" style="background:var(--accent)"></span> 구조</div>
+      <div class="dev-tag">&lt;${tag}&gt; ${id}${cls}</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:4px">${tag} in ${el.parentElement ? el.parentElement.className.split(' ')[0] || el.parentElement.tagName.toLowerCase() : 'root'}</div>
+    </div>
+    <div class="dev-section">
+      <div class="dev-section-title"><span class="dot" style="background:var(--blue)"></span> 컴포넌트 체인</div>
+      <div class="dev-chain">${chain}</div>
+    </div>
+    <div class="dev-section">
+      <div class="dev-section-title"><span class="dot" style="background:var(--green)"></span> 파일</div>
+      <div class="dev-path">${selector}</div>
+      <button class="dev-copy-btn" onclick="copySelector()">📋 AI에게 경로 복사</button>
+    </div>
+    <div class="dev-section">
+      <div class="dev-section-title"><span class="dot" style="background:var(--red)"></span> 색상</div>
+      <div class="dev-color-row"><label>Background</label><div class="color-group"><input type="color" class="dev-color-input" value="${rgbToHex(computed.backgroundColor)}" onchange="applyColor(this,'backgroundColor')"><input class="dev-color-hex" value="${rgbToHex(computed.backgroundColor)}" readonly></div></div>
+      <div class="dev-color-row"><label>Text</label><div class="color-group"><input type="color" class="dev-color-input" value="${rgbToHex(computed.color)}" onchange="applyColor(this,'color')"><input class="dev-color-hex" value="${rgbToHex(computed.color)}" readonly></div></div>
+      <div class="dev-color-row"><label>Border</label><div class="color-group"><input type="color" class="dev-color-input" value="${rgbToHex(computed.borderColor)}" onchange="applyColor(this,'borderColor')"><input class="dev-color-hex" value="${rgbToHex(computed.borderColor)}" readonly></div></div>
+    </div>
+    <div class="dev-section">
+      <div class="dev-section-title"><span class="dot" style="background:var(--yellow)"></span> 타이포그래피</div>
+      <div class="dev-slider-row"><label>크기</label><input type="range" min="10" max="36" value="${parseInt(computed.fontSize)}" oninput="applyFont(this,'fontSize')"><input class="val" value="${parseInt(computed.fontSize)}" readonly> px</div>
+      <div class="dev-slider-row"><label>자간</label><input type="range" min="-2" max="5" step="0.5" value="${parseFloat(computed.letterSpacing) || 0}" oninput="applyFont(this,'letterSpacing')"><input class="val" value="${parseFloat(computed.letterSpacing) || 0}" readonly> px</div>
+      <div style="font-size:12px;color:var(--text-dim);margin:6px 0 4px">굵기</div>
+      <div class="dev-weight-btns">
+        ${[['R',400],['M',500],['SB',600],['B',700]].map(([l,w]) =>
+          `<button class="dev-weight-btn ${parseInt(computed.fontWeight)===w?'active':''}" onclick="applyWeight(${w},this)">${l}</button>`
+        ).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function getChain(el) {
+  const parts = [];
+  let cur = el;
+  while (cur && cur !== document.body) {
+    const tag = cur.tagName.toLowerCase();
+    const id = cur.id ? ' #' + cur.id : '';
+    const cls = cur.className ? '.' + cur.className.split(' ').filter(c=>c!=='dev-highlight').slice(0,1).join('.') : '';
+    parts.unshift({ label: `${tag}${id}${cls}`, isCurrent: cur === el });
+    cur = cur.parentElement;
+  }
+  return parts.map((p, i) => {
+    const indent = '│ '.repeat(i);
+    return `${indent}${p.isCurrent ? `<span class="active-node">${p.label}</span>` : p.label}`;
+  }).join('<br>');
+}
+
+function getSelector(el) {
+  const parts = [];
+  let cur = el;
+  while (cur && cur !== document.body) {
+    const tag = cur.tagName.toLowerCase();
+    const cls = cur.className ? '.' + cur.className.split(' ').filter(c=>c!=='dev-highlight').slice(0,1).join('.') : '';
+    parts.unshift(tag + cls);
+    cur = cur.parentElement;
+  }
+  return parts.join(' > ');
+}
+
+function copySelector() {
+  const path = document.querySelector('.dev-path').textContent;
+  navigator.clipboard.writeText(path).then(() => {
+    const btn = document.querySelector('.dev-copy-btn');
+    btn.textContent = '✅ 복사됨!';
+    setTimeout(() => btn.textContent = '📋 AI에게 경로 복사', 1500);
+  });
+}
+
+function applyColor(input, prop) {
+  if (!devHighlighted) return;
+  devHighlighted.style[prop] = input.value;
+  input.nextElementSibling.value = input.value;
+}
+
+function applyFont(input, prop) {
+  if (!devHighlighted) return;
+  devHighlighted.style[prop] = input.value + 'px';
+  input.nextElementSibling.value = input.value;
+}
+
+function applyWeight(w, btn) {
+  if (!devHighlighted) return;
+  devHighlighted.style.fontWeight = w;
+  btn.parentElement.querySelectorAll('.dev-weight-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function rgbToHex(rgb) {
+  if (!rgb || rgb === 'transparent' || rgb === 'rgba(0, 0, 0, 0)') return '#000000';
+  const match = rgb.match(/\d+/g);
+  if (!match || match.length < 3) return '#000000';
+  return '#' + match.slice(0, 3).map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+}
+
+// ── Scenario Mode ──
+const SCENARIOS = [
+  { role: 'requester', page: 'list', detail: null, text: '<strong>Step 1/6 — 요청자:</strong> 요청 목록을 확인합니다. 현재 등록된 요청들과 상태를 볼 수 있습니다.' },
+  { role: 'requester', page: 'new', detail: null, text: '<strong>Step 2/6 — 요청자:</strong> "새 요청" 버튼을 눌러 업무 요청을 등록합니다. 카테고리, 긴급도, 희망 완료일을 입력하세요.' },
+  { role: 'manager', page: 'dashboard', detail: null, text: '<strong>Step 3/6 — 관리자:</strong> 대시보드에서 전체 현황과 KPI 경고를 확인합니다.' },
+  { role: 'manager', page: 'unassigned', detail: null, text: '<strong>Step 4/6 — 관리자:</strong> 미배정 요청을 확인하고 실무자와 보고자를 배정합니다.' },
+  { role: 'worker', page: 'list', detail: null, text: '<strong>Step 5/6 — 실무자:</strong> 배정된 요청 목록을 확인합니다.' },
+  { role: 'worker', page: 'list', detail: 'REQ-001', text: '<strong>Step 6/6 — 실무자:</strong> 요청 상세에서 작업 예정일을 입력하고, 처리 완료까지 진행합니다.' },
+];
+
+function startScenario() {
+  scenarioActive = true;
+  scenarioStep = 0;
+  document.getElementById('scenarioBar').classList.add('show');
+  applyScenarioStep();
+}
+
+function exitScenario() {
+  scenarioActive = false;
+  document.getElementById('scenarioBar').classList.remove('show');
+}
+
+function nextScenarioStep() {
+  if (scenarioStep < SCENARIOS.length - 1) { scenarioStep++; applyScenarioStep(); }
+}
+
+function prevScenarioStep() {
+  if (scenarioStep > 0) { scenarioStep--; applyScenarioStep(); }
+}
+
+function applyScenarioStep() {
+  const s = SCENARIOS[scenarioStep];
+  switchRole(s.role);
+  if (s.detail) { currentDetailId = s.detail; renderPage(); }
+  else if (s.page === 'new') { openModal('newReqModal'); }
+  else { currentPage = s.page; currentDetailId = null; renderSidebar(); renderPage(); }
+  document.getElementById('scenarioText').innerHTML = s.text;
+  document.getElementById('scenarioProgress').innerHTML = SCENARIOS.map((_, i) =>
+    `<div class="scenario-dot-sm ${i < scenarioStep ? 'done' : ''} ${i === scenarioStep ? 'current' : ''}"></div>`
+  ).join('');
+}
+
+// ── Helpers ──
+function getDaysSince(dateStr) {
+  return (new Date() - new Date(dateStr)) / (1000 * 60 * 60 * 24);
+}
+
+// ── Close dropdowns on outside click ──
+document.addEventListener('click', e => {
+  if (!e.target.closest('.noti-wrap')) {
+    document.getElementById('notiDropdown').classList.remove('show');
+  }
+});
+
+// ── Init ──
+renderSidebar();
+renderPage();
+renderNotiBadge();
 </script>
 
 </body>
