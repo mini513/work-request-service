@@ -3139,7 +3139,8 @@ function openIAMap() {
   const html = `<div class="ia-service">
     <div class="ia-root">📋 사내 업무 요청 서비스</div>
     <div class="ia-vline"></div>
-    <div class="ia-roles-row">
+    <div class="ia-hline-wrap"><div class="ia-hline" id="iaHline"></div></div>
+    <div class="ia-roles-row" id="iaRolesRow">
       ${roles.map(r => `<div class="ia-role-col">
         <div class="ia-vline"></div>
         <div class="ia-role-box ${roleClass[r]}">${IA[r].label}</div>
@@ -3160,6 +3161,18 @@ function openIAMap() {
 
   document.getElementById('iaMapBody').innerHTML = html;
   openModal('iaMapModal');
+  requestAnimationFrame(() => {
+    const row = document.getElementById('iaRolesRow');
+    const cols = row ? row.querySelectorAll('.ia-role-col') : [];
+    if (cols.length >= 2) {
+      const first = cols[0], last = cols[cols.length - 1];
+      const rowRect = row.getBoundingClientRect();
+      const left = first.getBoundingClientRect().left + first.offsetWidth / 2 - rowRect.left;
+      const right = last.getBoundingClientRect().left + last.offsetWidth / 2 - rowRect.left;
+      const hline = document.getElementById('iaHline');
+      if (hline) { hline.style.left = left + 'px'; hline.style.width = (right - left) + 'px'; }
+    }
+  });
 }
 
 function openScenarioMap() {
