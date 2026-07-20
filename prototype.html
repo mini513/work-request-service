@@ -433,7 +433,24 @@ body {
   margin-bottom: 12px;
   flex-wrap: wrap;
   align-items: center;
+  background: var(--surface1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
 }
+.filter-search-btn {
+  padding: 6px 16px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.filter-search-btn:hover { background: #4a7ae0; }
 .filter-group {
   display: flex;
   align-items: center;
@@ -803,7 +820,6 @@ body {
 .req-list { display: flex; flex-direction: column; gap: 8px; }
 .req-item {
   display: grid;
-  grid-template-columns: 80px 80px 1fr 100px 100px 90px 100px;
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
@@ -827,7 +843,6 @@ body {
 
 .req-list-header {
   display: grid;
-  grid-template-columns: 80px 80px 1fr 100px 100px 90px 100px;
   gap: 12px;
   padding: 8px 16px;
   font-size: 11px;
@@ -2247,8 +2262,7 @@ function renderRequesterList(el) {
       <button class="btn btn-primary" onclick="openModal('newReqModal')">➕ 새 요청</button>
     </div>
     ${renderFilterBar('requester')}
-    ${renderSortableHeader([{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'status',label:'상태'},{key:'date',label:'등록일'},{key:'assignee',label:'담당자'}])}
-    <div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경하거나 새 요청을 등록해 보세요')}</div>
+    ${(() => { const cols = [{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'status',label:'상태'},{key:'date',label:'등록일'},{key:'assignee',label:'담당자'}]; return renderSortableHeader(cols) + `<div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경하거나 새 요청을 등록해 보세요')}</div>`; })()}
   `;
 }
 
@@ -2276,8 +2290,7 @@ function renderManagerList(el) {
     </div>
     ${renderFilterBar('manager')}
     ${alertHtml}
-    ${renderSortableHeader([{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'status',label:'상태'},{key:'date',label:'등록일'},{key:'assignee',label:'담당자'}])}
-    <div class="req-list">${reqs.length ? reqs.map(r => renderReqRow(r, isUnassignedFilter)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경해 보세요')}</div>
+    ${(() => { const cols = [{key:'status',label:'상태'},{key:'priority',label:'긴급도'},{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'date',label:'등록일'},{key:'assignee',label:'담당자'}]; return renderSortableHeader(cols) + `<div class="req-list">${reqs.length ? reqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경해 보세요')}</div>`; })()}
   `;
 }
 
@@ -2356,8 +2369,7 @@ function renderWorkerList(el) {
       <div><div class="page-title">내 담당 목록</div><div class="page-subtitle">나에게 배정된 요청을 처리합니다 (이준호)</div></div>
     </div>
     ${renderFilterBar('worker')}
-    ${renderSortableHeader([{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'status',label:'상태'},{key:'date',label:'등록일'},{key:'requester',label:'요청자'}])}
-    <div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, false, true)).join('') : renderEmptyState('배정된 요청이 없습니다', '새로운 요청이 배정되면 알림으로 통보됩니다')}</div>
+    ${(() => { const cols = [{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'status',label:'상태'},{key:'date',label:'등록일'},{key:'requester',label:'요청자'}]; return renderSortableHeader(cols) + `<div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('배정된 요청이 없습니다', '새로운 요청이 배정되면 알림으로 통보됩니다')}</div>`; })()}
   `;
 }
 
@@ -2852,18 +2864,25 @@ function quickChangeStatus(id, newStatus) {
   if (scenarioMode) setTimeout(() => nextScenarioStep(), 300);
 }
 
-function renderReqRow(r, showAssignBtn, showRequester) {
-  const lastCol = showRequester
-    ? `<span class="req-assignee">${r.requester.name}</span>`
-    : `<span class="req-assignee">${r.assignee ? r.assignee.name : '<span style="color:var(--yellow)">미배정</span>'}</span>`;
-  return `<div class="req-item" onclick="openDetail('${r.id}')">
-    <span class="req-id">${r.id}</span>
-    <span class="req-category"><span class="badge" style="background:var(--surface3);color:var(--text-mid)">${r.category}</span></span>
-    <div class="req-title-cell"><div class="req-title">${r.title}</div></div>
-    <span class="req-priority"><span class="badge" style="background:${PRIORITY_COLORS[r.priority].bg};color:${PRIORITY_COLORS[r.priority].text}">${r.priority}</span></span>
-    <span class="req-status">${renderStatusBadge(r)}</span>
-    <span class="req-date">${r.createdAt.split(' ')[0]}</span>
-    ${lastCol}
+const COL_DEFS = {
+  id:       { width: '80px',  render: r => `<span class="req-id">${r.id}</span>` },
+  category: { width: '80px',  render: r => `<span class="req-category"><span class="badge" style="background:var(--surface3);color:var(--text-mid)">${r.category}</span></span>` },
+  title:    { width: '1fr',   render: r => `<div class="req-title-cell"><div class="req-title">${r.title}</div></div>` },
+  priority: { width: '80px',  render: r => `<span class="req-priority"><span class="badge" style="background:${PRIORITY_COLORS[r.priority].bg};color:${PRIORITY_COLORS[r.priority].text}">${r.priority}</span></span>` },
+  status:   { width: '90px',  render: r => `<span class="req-status">${renderStatusBadge(r)}</span>` },
+  date:     { width: '90px',  render: r => `<span class="req-date">${r.createdAt.split(' ')[0]}</span>` },
+  assignee: { width: '80px',  render: r => `<span class="req-assignee">${r.assignee ? r.assignee.name : '<span style="color:var(--yellow)">미배정</span>'}</span>` },
+  requester:{ width: '80px',  render: r => `<span class="req-assignee">${r.requester.name}</span>` },
+};
+
+function getGridTemplate(columns) {
+  return columns.map(c => COL_DEFS[c.key].width).join(' ');
+}
+
+function renderReqRow(r, columns) {
+  const gridCss = getGridTemplate(columns);
+  return `<div class="req-item" style="grid-template-columns:${gridCss}" onclick="openDetail('${r.id}')">
+    ${columns.map(c => COL_DEFS[c.key].render(r)).join('')}
   </div>`;
 }
 
@@ -2896,35 +2915,35 @@ function renderFilterBar(role) {
     </div>`;
   }
 
-  const hasAdvFilter = filterCategory !== '전체' || filterPriority !== '전체' || filterAssignee !== '전체';
+  const hasAdvFilter = filterCategory !== '전체' || filterPriority !== '전체' || filterAssignee !== '전체' || currentSearch;
   const conditionRow = `<div class="filter-row">
     <div class="filter-group">
       <label>카테고리</label>
-      <select class="filter-select" onchange="filterCategory=this.value;renderPage()">
+      <select class="filter-select" id="selCategory">
         <option value="전체"${filterCategory==='전체'?' selected':''}>전체</option>
         ${CATEGORIES.map(c => `<option value="${c}"${filterCategory===c?' selected':''}>${c}</option>`).join('')}
       </select>
     </div>
     <div class="filter-group">
       <label>긴급도</label>
-      <select class="filter-select" onchange="filterPriority=this.value;renderPage()">
+      <select class="filter-select" id="selPriority">
         <option value="전체"${filterPriority==='전체'?' selected':''}>전체</option>
         ${PRIORITIES.map(p => `<option value="${p}"${filterPriority===p?' selected':''}>${p}</option>`).join('')}
       </select>
     </div>
     <div class="filter-group">
       <label>담당자</label>
-      <select class="filter-select" onchange="filterAssignee=this.value;renderPage()">
+      <select class="filter-select" id="selAssignee">
         <option value="전체"${filterAssignee==='전체'?' selected':''}>전체</option>
         <option value="미배정"${filterAssignee==='미배정'?' selected':''}>미배정</option>
         ${getAssigneeList().map(n => `<option value="${n}"${filterAssignee===n?' selected':''}>${n}</option>`).join('')}
       </select>
     </div>
-    ${hasAdvFilter ? '<button class="filter-reset-btn" onclick="resetAdvFilters()">필터 초기화</button>' : ''}
-    <div class="search-wrap" style="margin-left:auto">
-      <input class="search-input" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')execSearch(this.value)">
-      <button class="search-btn" onclick="execSearch(this.previousElementSibling.value)" title="검색">🔍</button>
+    <div class="search-wrap">
+      <input class="search-input" id="searchInput" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')applyManagerFilter()">
     </div>
+    <button class="filter-search-btn" onclick="applyManagerFilter()">검색</button>
+    ${hasAdvFilter ? '<button class="filter-reset-btn" onclick="resetAdvFilters()">초기화</button>' : ''}
   </div>`;
 
   const statusRow = `<div class="filter-bar">
@@ -2954,10 +2973,23 @@ function execSearch(val) {
   renderPage();
 }
 
+function applyManagerFilter() {
+  const cat = document.getElementById('selCategory');
+  const pri = document.getElementById('selPriority');
+  const asgn = document.getElementById('selAssignee');
+  const search = document.getElementById('searchInput');
+  if (cat) filterCategory = cat.value;
+  if (pri) filterPriority = pri.value;
+  if (asgn) filterAssignee = asgn.value;
+  if (search) currentSearch = search.value.trim().toLowerCase();
+  renderPage();
+}
+
 function resetAdvFilters() {
   filterCategory = '전체';
   filterPriority = '전체';
   filterAssignee = '전체';
+  currentSearch = '';
   renderPage();
 }
 
@@ -3022,7 +3054,8 @@ function sortArrow(key) {
 }
 
 function renderSortableHeader(columns) {
-  return '<div class="req-list-header">' + columns.map(c =>
+  const gridCss = getGridTemplate(columns);
+  return `<div class="req-list-header" style="grid-template-columns:${gridCss}">` + columns.map(c =>
     c.key ? `<span class="sortable" onclick="toggleSort('${c.key}')">${c.label}${sortArrow(c.key)}</span>` : `<span>${c.label}</span>`
   ).join('') + '</div>';
 }
