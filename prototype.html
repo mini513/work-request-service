@@ -764,6 +764,21 @@ body {
 .sh-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-mid); }
 .sh-legend-color { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.1); }
 
+/* ── Kanban Board ── */
+.kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+.kanban-col { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px; min-height: 200px; }
+.kanban-col-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+.kanban-col-title { font-weight: 700; font-size: 13px; color: var(--text); }
+.kanban-col-count { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+.kanban-cards { display: flex; flex-direction: column; gap: 8px; }
+.kanban-card { padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
+.kanban-card:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(91,141,239,0.15); }
+.kanban-card-id { font-size: 11px; color: var(--text-dim); font-weight: 600; }
+.kanban-card-title { font-size: 13px; font-weight: 600; color: var(--text); margin: 4px 0; line-height: 1.4; }
+.kanban-card-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+.kanban-card-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+.kanban-empty { text-align: center; color: var(--text-dim); font-size: 12px; padding: 24px 0; }
+
 /* ── Service Blueprint ── */
 .bp-wrap { padding: 16px; overflow-x: auto; }
 .bp-table { border-collapse: collapse; width: 100%; min-width: 900px; }
@@ -2064,20 +2079,6 @@ function renderWorkerDashboard(el) {
 
   const urgentReqs = myReqs.filter(r => r.status !== '완료' && (r.priority === '긴급' || r.priority === '높음'));
 
-  const statusData = [
-    { name: '배정완료', count: byStatus['배정완료'] || 0, color: '#5b8def' },
-    { name: '진행중', count: byStatus['진행중'] || 0, color: '#a78bfa' },
-    { name: '완료', count: byStatus['완료'] || 0, color: '#22c55e' },
-  ];
-  const donutTotal = Math.max(statusData.reduce((s, d) => s + d.count, 0), 1);
-  let donutOffset = 0;
-  const donutSegments = statusData.filter(d => d.count > 0).map(d => {
-    const pct = (d.count / donutTotal) * 100;
-    const seg = { ...d, pct, offset: donutOffset };
-    donutOffset += pct;
-    return seg;
-  });
-
   let urgentHtml = '';
   if (urgentReqs.length > 0) {
     urgentHtml = urgentReqs.map(r => {
@@ -2088,6 +2089,39 @@ function renderWorkerDashboard(el) {
       </div>`;
     }).join('');
   }
+
+  const kanbanCols = [
+    { status: '배정완료', label: '대기', color: 'var(--blue)', bg: 'var(--blue-bg)' },
+    { status: '진행중', label: '진행중', color: 'var(--accent)', bg: 'var(--accent-bg)' },
+    { status: '완료', label: '완료', color: 'var(--green)', bg: 'var(--green-bg)' },
+  ];
+
+  function renderKanbanCard(r) {
+    const pc = PRIORITY_COLORS[r.priority] || {};
+    const sc = STATUS_COLORS[r.status] || {};
+    return `<div class="kanban-card" onclick="currentDetailId='${r.id}';renderPage()">
+      <div class="kanban-card-id">${r.id}</div>
+      <div class="kanban-card-title">${r.title}</div>
+      <div class="kanban-card-meta">
+        <span class="kanban-card-tag" style="background:${pc.bg};color:${pc.text}">${r.priority}</span>
+        <span class="kanban-card-tag" style="background:var(--surface3);color:var(--text-mid)">${r.category}</span>
+        <span style="font-size:10px;color:var(--text-dim);margin-left:auto">${r.requester.name}</span>
+      </div>
+    </div>`;
+  }
+
+  const kanbanHtml = kanbanCols.map(col => {
+    const cards = myReqs.filter(r => r.status === col.status).sort((a, b) => (PRIORITY_ORDER[a.priority] || 9) - (PRIORITY_ORDER[b.priority] || 9));
+    return `<div class="kanban-col">
+      <div class="kanban-col-header">
+        <span class="kanban-col-title">${col.label}</span>
+        <span class="kanban-col-count" style="background:${col.bg};color:${col.color}">${cards.length}</span>
+      </div>
+      <div class="kanban-cards">
+        ${cards.length ? cards.map(r => renderKanbanCard(r)).join('') : '<div class="kanban-empty">일감 없음</div>'}
+      </div>
+    </div>`;
+  }).join('');
 
   el.innerHTML = `
     <div class="page-header">
@@ -2100,35 +2134,7 @@ function renderWorkerDashboard(el) {
       <div class="stat-card" style="cursor:pointer" onclick="navigateWithFilter('진행중')"><div class="stat-label">진행중</div><div class="stat-value" style="color:var(--accent)">${byStatus['진행중'] || 0}</div></div>
       <div class="stat-card" style="cursor:pointer" onclick="navigateWithFilter('완료')"><div class="stat-label">완료</div><div class="stat-value" style="color:var(--green)">${byStatus['완료'] || 0}</div></div>
     </div>
-    <div class="chart-grid">
-      <div class="chart-card">
-        <div class="chart-card-title">내 업무 상태 분포</div>
-        <div class="donut-wrap">
-          <svg class="donut-svg" viewBox="0 0 42 42">
-            <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--surface2)" stroke-width="5"/>
-            ${donutSegments.map(d => `<circle cx="21" cy="21" r="15.9" fill="none" stroke="${d.color}" stroke-width="5" stroke-dasharray="${d.pct} ${100-d.pct}" stroke-dashoffset="${-d.offset}" stroke-linecap="round"/>`).join('')}
-          </svg>
-          <div class="donut-legend">
-            ${statusData.map(d => `<div class="donut-legend-item"><div class="donut-legend-dot" style="background:${d.color}"></div><span>${d.name}</span><span class="donut-legend-count">${d.count}</span></div>`).join('')}
-          </div>
-        </div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-card-title">긴급도별 미완료 건수</div>
-        <div class="bar-chart">
-          ${PRIORITIES.map(p => {
-            const cnt = myReqs.filter(r => r.priority === p && r.status !== '완료').length;
-            const maxP = Math.max(...PRIORITIES.map(pp => myReqs.filter(r => r.priority === pp && r.status !== '완료').length), 1);
-            const pc = PRIORITY_COLORS[p] || {};
-            return `<div class="bar-row">
-              <div class="bar-label">${p}</div>
-              <div class="bar-track"><div class="bar-fill" style="width:${(cnt/maxP)*100}%;background:${pc.text}"></div></div>
-              <div class="bar-value">${cnt}</div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>
-    </div>
+    <div class="kanban-board">${kanbanHtml}</div>
   `;
 }
 
@@ -3462,7 +3468,7 @@ function openIAMap() {
     worker: {
       label: '🔧 실무자',
       pages: [
-        { name: '대시보드', features: ['담당 건수 카드 (배정완료/진행중/완료)', '긴급 일감 하이라이트', '상태 분포 차트', '긴급도별 미완료 차트'] },
+        { name: '대시보드', features: ['담당 건수 카드 (배정완료/진행중/완료)', '긴급 일감 하이라이트', '칸반 보드 (대기/진행중/완료)'] },
         { name: '내 담당 목록', features: ['상태 필터', '검색 · 정렬', '상태 전환 드롭다운 (배정완료↔진행중↔완료)'] },
         { name: '요청 상세', features: ['작업 시작 + 예정일 알림', '처리 완료 + 처리 내용 기록', '상태 되돌리기', '댓글'] },
       ]
