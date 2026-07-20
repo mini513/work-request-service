@@ -1138,28 +1138,6 @@ body {
 .kpi-alert:hover { text-decoration: underline; }
 .kpi-alert .icon { font-size: 12px; }
 
-/* ── Dashboard Layout with Side Alert ── */
-.dashboard-body {
-  display: flex; gap: 16px;
-}
-.dashboard-main {
-  flex: 1; min-width: 0;
-}
-.dashboard-side {
-  width: 200px; flex-shrink: 0;
-}
-.dashboard-side .kpi-alert-wrap {
-  margin-bottom: 0; position: sticky; top: 16px;
-}
-.dashboard-side .kpi-alert-title {
-  font-size: 12px; margin-bottom: 8px;
-}
-.dashboard-side .kpi-alert {
-  padding: 6px 0; border-bottom: 1px dashed rgba(239,68,68,0.2);
-}
-.dashboard-side .kpi-alert:last-child {
-  border-bottom: none;
-}
 
 /* ── Log / Stats Table ── */
 .stats-table {
@@ -2255,12 +2233,28 @@ function renderPage() {
 
 // ── Requester List ──
 function renderRequesterList(el) {
-  const myReqs = applyFilters([...REQUESTS].filter(r => r.requester.id === 'u1'));
+  const allMyReqs = REQUESTS.filter(r => r.requester.id === 'u1');
+  const myReqs = applyFilters([...allMyReqs]);
+
+  const delayedReqs = allMyReqs.filter(r => r.status === '접수' && getDaysSince(r.createdAt) >= 2);
+  let delayHtml = '';
+  if (delayedReqs.length) {
+    delayHtml = `<div class="kpi-alert-wrap" style="background:var(--accent-bg);border-color:var(--accent)">
+      <div class="kpi-alert-title" style="color:var(--accent)">⏳ 접수 대기 중 (${delayedReqs.length}건)</div>`;
+    delayedReqs.forEach(r => {
+      delayHtml += `<div class="kpi-alert" style="color:var(--text);cursor:pointer" onclick="openDetail('${r.id}')">
+        <span>• <strong>${r.id}</strong> ${r.title} — ${getDaysSince(r.createdAt).toFixed(0)}일째 대기 중</span>
+      </div>`;
+    });
+    delayHtml += '</div>';
+  }
+
   el.innerHTML = `
     <div class="page-header">
       <div><div class="page-title">내 요청 목록</div><div class="page-subtitle">등록한 업무 요청의 진행 상황을 확인합니다</div></div>
       <button class="btn btn-primary" onclick="openModal('newReqModal')">➕ 새 요청</button>
     </div>
+    ${delayHtml}
     ${renderFilterBar('requester')}
     ${(() => { const cols = [{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'status',label:'상태'},{key:'date',label:'등록일'},{key:'assignee',label:'담당자'}]; return renderSortableHeader(cols) + `<div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경하거나 새 요청을 등록해 보세요')}</div>`; })()}
   `;
@@ -2305,13 +2299,15 @@ function renderWorkerDashboard(el) {
 
   let urgentHtml = '';
   if (urgentReqs.length > 0) {
-    urgentHtml = urgentReqs.map(r => {
+    urgentHtml = `<div class="kpi-alert-wrap" style="background:var(--yellow-bg,#fff8e1);border-color:var(--yellow,#ff8c00)">
+      <div class="kpi-alert-title" style="color:var(--yellow,#ff8c00)">🔥 긴급/높음 우선 처리 (${urgentReqs.length}건)</div>`;
+    urgentReqs.forEach(r => {
       const pc = PRIORITY_COLORS[r.priority] || {};
-      return `<div class="kpi-alert" style="cursor:pointer" onclick="currentDetailId='${r.id}';renderPage()">
-        <span class="icon">🔥</span>
-        <span><strong>${r.id}</strong> ${r.title} — <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:11px;padding:2px 6px">${r.priority}</span> · ${r.status}</span>
+      urgentHtml += `<div class="kpi-alert" style="color:var(--text);cursor:pointer" onclick="currentDetailId='${r.id}';renderPage()">
+        <span>• <strong>${r.id}</strong> ${r.title} — <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:11px;padding:2px 6px">${r.priority}</span> · ${r.status}</span>
       </div>`;
-    }).join('');
+    });
+    urgentHtml += '</div>';
   }
 
   const kanbanCols = [
@@ -2401,55 +2397,51 @@ function renderDashboard(el) {
     <div class="page-header">
       <div><div class="page-title">대시보드</div><div class="page-subtitle">지금 조치가 필요한 항목을 확인합니다</div></div>
     </div>
-    <div class="dashboard-body">
-      <div class="dashboard-main">
-        <div class="stats-row">
-          <div class="stat-card" style="cursor:pointer" onclick="navigateTo('list')"><div class="stat-label">전체 요청</div><div class="stat-value">${total}</div></div>
-          <div class="stat-card" style="cursor:pointer" onclick="navigateWithFilter('미배정')"><div class="stat-label">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div></div>
-          <div class="stat-card"><div class="stat-label">진행중</div><div class="stat-value" style="color:var(--accent)">${inProgressCount}</div></div>
-          <div class="stat-card" style="cursor:pointer" onclick="navigateTo('log')"><div class="stat-label">완료</div><div class="stat-value" style="color:var(--green)">${completed}</div></div>
+    ${alertHtml}
+    <div class="stats-row">
+      <div class="stat-card" style="cursor:pointer" onclick="navigateTo('list')"><div class="stat-label">전체 요청</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card" style="cursor:pointer" onclick="navigateWithFilter('미배정')"><div class="stat-label">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div></div>
+      <div class="stat-card"><div class="stat-label">진행중</div><div class="stat-value" style="color:var(--accent)">${inProgressCount}</div></div>
+      <div class="stat-card" style="cursor:pointer" onclick="navigateTo('log')"><div class="stat-label">완료</div><div class="stat-value" style="color:var(--green)">${completed}</div></div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-card-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>📥 최근 접수된 요청</span>
+          <span style="font-size:11px;color:var(--text-dim);font-weight:400;cursor:pointer" onclick="navigateWithFilter('접수')">전체 보기 →</span>
         </div>
-        <div class="chart-grid">
-          <div class="chart-card">
-            <div class="chart-card-title" style="display:flex;justify-content:space-between;align-items:center">
-              <span>📥 최근 접수된 요청</span>
-              <span style="font-size:11px;color:var(--text-dim);font-weight:400;cursor:pointer" onclick="navigateWithFilter('접수')">전체 보기 →</span>
-            </div>
-            ${recentReceived.length ? `<div style="display:flex;flex-direction:column;gap:6px">
-              ${recentReceived.map(r => {
-                const pc = PRIORITY_COLORS[r.priority] || {};
-                const days = getDaysSince(r.createdAt).toFixed(0);
-                return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface1);border-radius:6px;cursor:pointer;font-size:13px" onclick="openDetail('${r.id}')">
-                  <span style="font-family:monospace;color:var(--text-dim);font-size:11px;min-width:56px">${r.id}</span>
-                  <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:10px;padding:1px 6px">${r.priority}</span>
-                  <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</span>
-                  <span style="font-size:11px;color:var(--text-dim);white-space:nowrap">${days}일 전</span>
-                  ${!r.assignee ? `<button class="btn btn-sm btn-primary" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();openAssignModal('${r.id}')">배정</button>` : ''}
-                </div>`;
-              }).join('')}
-            </div>` : `<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:13px">접수 대기 중인 요청이 없습니다</div>`}
-          </div>
-          <div class="chart-card">
-            <div class="chart-card-title" style="display:flex;justify-content:space-between;align-items:center">
-              <span>🔧 처리 중인 요청</span>
-              <span style="font-size:11px;color:var(--text-dim);font-weight:400;cursor:pointer" onclick="navigateWithFilter('진행중')">전체 보기 →</span>
-            </div>
-            ${inProgressReqs.length ? `<div style="display:flex;flex-direction:column;gap:6px">
-              ${inProgressReqs.map(r => {
-                const pc = PRIORITY_COLORS[r.priority] || {};
-                const sc = STATUS_COLORS[r.status] || {};
-                return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface1);border-radius:6px;cursor:pointer;font-size:13px" onclick="openDetail('${r.id}')">
-                  <span style="font-family:monospace;color:var(--text-dim);font-size:11px;min-width:56px">${r.id}</span>
-                  <span class="badge" style="background:${sc.bg};color:${sc.text};font-size:10px;padding:1px 6px">${r.status}</span>
-                  <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</span>
-                  <span style="font-size:11px;color:var(--text-dim);white-space:nowrap">${r.assignee ? r.assignee.name : '미배정'}</span>
-                </div>`;
-              }).join('')}
-            </div>` : `<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:13px">처리 중인 요청이 없습니다</div>`}
-          </div>
-        </div>
+        ${recentReceived.length ? `<div style="display:flex;flex-direction:column;gap:6px">
+          ${recentReceived.map(r => {
+            const pc = PRIORITY_COLORS[r.priority] || {};
+            const days = getDaysSince(r.createdAt).toFixed(0);
+            return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface1);border-radius:6px;cursor:pointer;font-size:13px" onclick="openDetail('${r.id}')">
+              <span style="font-family:monospace;color:var(--text-dim);font-size:11px;min-width:56px">${r.id}</span>
+              <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:10px;padding:1px 6px">${r.priority}</span>
+              <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</span>
+              <span style="font-size:11px;color:var(--text-dim);white-space:nowrap">${days}일 전</span>
+              ${!r.assignee ? `<button class="btn btn-sm btn-primary" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();openAssignModal('${r.id}')">배정</button>` : ''}
+            </div>`;
+          }).join('')}
+        </div>` : `<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:13px">접수 대기 중인 요청이 없습니다</div>`}
       </div>
-      ${kpiAlerts.length ? `<div class="dashboard-side">${alertHtml}</div>` : ''}
+      <div class="chart-card">
+        <div class="chart-card-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>🔧 처리 중인 요청</span>
+          <span style="font-size:11px;color:var(--text-dim);font-weight:400;cursor:pointer" onclick="navigateWithFilter('진행중')">전체 보기 →</span>
+        </div>
+        ${inProgressReqs.length ? `<div style="display:flex;flex-direction:column;gap:6px">
+          ${inProgressReqs.map(r => {
+            const pc = PRIORITY_COLORS[r.priority] || {};
+            const sc = STATUS_COLORS[r.status] || {};
+            return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface1);border-radius:6px;cursor:pointer;font-size:13px" onclick="openDetail('${r.id}')">
+              <span style="font-family:monospace;color:var(--text-dim);font-size:11px;min-width:56px">${r.id}</span>
+              <span class="badge" style="background:${sc.bg};color:${sc.text};font-size:10px;padding:1px 6px">${r.status}</span>
+              <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</span>
+              <span style="font-size:11px;color:var(--text-dim);white-space:nowrap">${r.assignee ? r.assignee.name : '미배정'}</span>
+            </div>`;
+          }).join('')}
+        </div>` : `<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:13px">처리 중인 요청이 없습니다</div>`}
+      </div>
     </div>
   `;
 }
