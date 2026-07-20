@@ -1674,9 +1674,109 @@ body.light .scenario-target {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+/* Landing Page */
+.landing-overlay {
+  position: fixed; inset: 0; z-index: 99999;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.4s, visibility 0.4s;
+}
+.landing-overlay.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+.landing-inner {
+  text-align: center;
+  max-width: 720px; width: 100%; padding: 40px 24px;
+}
+.landing-icon { font-size: 48px; margin-bottom: 12px; }
+.landing-title {
+  font-size: 28px; font-weight: 700; color: var(--text);
+  margin-bottom: 6px; letter-spacing: -0.5px;
+}
+.landing-subtitle {
+  font-size: 14px; color: var(--text-dim); margin-bottom: 8px;
+}
+.landing-badge {
+  display: inline-block; font-size: 11px; font-weight: 600;
+  color: var(--accent); background: var(--accent-bg);
+  padding: 3px 10px; border-radius: 10px; margin-bottom: 32px;
+}
+.landing-desc {
+  font-size: 13px; color: var(--text-mid); margin-bottom: 40px; line-height: 1.6;
+}
+.landing-cards {
+  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+}
+.landing-card {
+  flex: 1; min-width: 180px; max-width: 220px;
+  background: var(--surface); border: 2px solid var(--border);
+  border-radius: 16px; padding: 28px 20px 24px;
+  cursor: pointer; transition: all 0.2s;
+  text-align: center;
+}
+.landing-card:hover {
+  border-color: var(--accent); transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(91,141,239,0.15);
+}
+.landing-card-icon { font-size: 36px; margin-bottom: 12px; }
+.landing-card-role {
+  font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 4px;
+}
+.landing-card-name {
+  font-size: 12px; color: var(--text-dim); margin-bottom: 12px;
+}
+.landing-card-desc {
+  font-size: 12px; color: var(--text-mid); line-height: 1.5;
+}
+.landing-card.requester:hover { border-color: var(--blue); }
+.landing-card.manager:hover { border-color: var(--yellow); }
+.landing-card.worker:hover { border-color: var(--green); }
+.landing-card.requester .landing-card-icon { color: var(--blue); }
+.landing-card.manager .landing-card-icon { color: var(--yellow); }
+.landing-card.worker .landing-card-icon { color: var(--green); }
+.landing-footer {
+  margin-top: 40px; font-size: 11px; color: var(--text-dim); line-height: 1.8;
+}
 </style>
 </head>
 <body class="light">
+
+<!-- Landing Page -->
+<div class="landing-overlay" id="landingPage">
+  <div class="landing-inner">
+    <div class="landing-icon">📋</div>
+    <div class="landing-title">사내 업무 요청 서비스</div>
+    <div class="landing-subtitle">Internal Work Request Service</div>
+    <div class="landing-badge">PoC Prototype</div>
+    <div class="landing-desc">
+      사내 업무 요청의 등록부터 처리 완료까지,<br>
+      역할별 업무 흐름을 체험할 수 있는 프로토타입입니다.<br>
+      접속할 역할을 선택해주세요.
+    </div>
+    <div class="landing-cards">
+      <div class="landing-card requester" onclick="enterAs('requester')">
+        <div class="landing-card-icon">👤</div>
+        <div class="landing-card-role">요청자</div>
+        <div class="landing-card-name">김민수 · 영업팀</div>
+        <div class="landing-card-desc">업무 요청을 등록하고<br>처리 현황을 추적합니다</div>
+      </div>
+      <div class="landing-card manager" onclick="enterAs('manager')">
+        <div class="landing-card-icon">👔</div>
+        <div class="landing-card-role">관리자</div>
+        <div class="landing-card-name">박지영 · 경영지원팀</div>
+        <div class="landing-card-desc">요청을 검토하고<br>담당자를 배정합니다</div>
+      </div>
+      <div class="landing-card worker" onclick="enterAs('worker')">
+        <div class="landing-card-icon">🔧</div>
+        <div class="landing-card-role">실무자</div>
+        <div class="landing-card-name">이준호 · IT지원팀</div>
+        <div class="landing-card-desc">배정된 업무를 처리하고<br>결과를 보고합니다</div>
+      </div>
+    </div>
+    <div class="landing-footer">
+      햄버거 메뉴(☰)에서 역할 전환 · 시나리오 모드 · 서비스 기획 산출물을 확인할 수 있습니다
+    </div>
+  </div>
+</div>
 
 <!-- Scenario Bar -->
 <div class="scenario-bar" id="scenarioBar">
@@ -3675,6 +3775,12 @@ document.addEventListener('click', e => {
     document.getElementById('hamburgerDropdown').classList.remove('show');
   }
 });
+
+// ── Landing Page ──
+function enterAs(role) {
+  switchRole(role);
+  document.getElementById('landingPage').classList.add('hide');
+}
 
 // ── Init ──
 renderSidebar();
