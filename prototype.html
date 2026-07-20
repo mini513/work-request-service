@@ -1123,6 +1123,29 @@ body {
 .kpi-alert:hover { text-decoration: underline; }
 .kpi-alert .icon { font-size: 12px; }
 
+/* ── Dashboard Layout with Side Alert ── */
+.dashboard-body {
+  display: flex; gap: 16px;
+}
+.dashboard-main {
+  flex: 1; min-width: 0;
+}
+.dashboard-side {
+  width: 200px; flex-shrink: 0;
+}
+.dashboard-side .kpi-alert-wrap {
+  margin-bottom: 0; position: sticky; top: 16px;
+}
+.dashboard-side .kpi-alert-title {
+  font-size: 12px; margin-bottom: 8px;
+}
+.dashboard-side .kpi-alert {
+  padding: 6px 0; border-bottom: 1px dashed rgba(239,68,68,0.2);
+}
+.dashboard-side .kpi-alert:last-child {
+  border-bottom: none;
+}
+
 /* ── Log / Stats Table ── */
 .stats-table {
   width: 100%;
@@ -2316,36 +2339,40 @@ function renderDashboard(el) {
     <div class="page-header">
       <div><div class="page-title">대시보드</div><div class="page-subtitle">전체 업무 요청 현황을 한눈에 확인합니다</div></div>
     </div>
-    ${alertHtml}
-    <div class="stats-row">
-      <div class="stat-card" style="cursor:pointer" onclick="navigateTo('list')"><div class="stat-label">전체 요청</div><div class="stat-value">${total}</div></div>
-      <div class="stat-card" style="cursor:pointer" onclick="navigateWithFilter('미배정')"><div class="stat-label">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div></div>
-      <div class="stat-card"><div class="stat-label">진행중</div><div class="stat-value" style="color:var(--accent)">${inProgressCount}</div></div>
-      <div class="stat-card" style="cursor:pointer" onclick="navigateTo('log')"><div class="stat-label">완료</div><div class="stat-value" style="color:var(--green)">${completed}</div></div>
-    </div>
-    <div class="chart-grid">
-      <div class="chart-card">
-        <div class="chart-card-title">상태별 분포</div>
-        <div class="donut-wrap">
-          <svg class="donut-svg" viewBox="0 0 42 42">
-            <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--surface2)" stroke-width="5"/>
-            ${donutSegments.map(d => `<circle cx="21" cy="21" r="15.9" fill="none" stroke="${d.color}" stroke-width="5" stroke-dasharray="${d.pct} ${100-d.pct}" stroke-dashoffset="${-d.offset}" stroke-linecap="round"/>`).join('')}
-          </svg>
-          <div class="donut-legend">
-            ${statusData.map(d => `<div class="donut-legend-item"><div class="donut-legend-dot" style="background:${d.color}"></div><span>${d.name}</span><span class="donut-legend-count">${d.count}</span></div>`).join('')}
+    <div class="dashboard-body">
+      <div class="dashboard-main">
+        <div class="stats-row">
+          <div class="stat-card" style="cursor:pointer" onclick="navigateTo('list')"><div class="stat-label">전체 요청</div><div class="stat-value">${total}</div></div>
+          <div class="stat-card" style="cursor:pointer" onclick="navigateWithFilter('미배정')"><div class="stat-label">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div></div>
+          <div class="stat-card"><div class="stat-label">진행중</div><div class="stat-value" style="color:var(--accent)">${inProgressCount}</div></div>
+          <div class="stat-card" style="cursor:pointer" onclick="navigateTo('log')"><div class="stat-label">완료</div><div class="stat-value" style="color:var(--green)">${completed}</div></div>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-card-title">상태별 분포</div>
+            <div class="donut-wrap">
+              <svg class="donut-svg" viewBox="0 0 42 42">
+                <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--surface2)" stroke-width="5"/>
+                ${donutSegments.map(d => `<circle cx="21" cy="21" r="15.9" fill="none" stroke="${d.color}" stroke-width="5" stroke-dasharray="${d.pct} ${100-d.pct}" stroke-dashoffset="${-d.offset}" stroke-linecap="round"/>`).join('')}
+              </svg>
+              <div class="donut-legend">
+                ${statusData.map(d => `<div class="donut-legend-item"><div class="donut-legend-dot" style="background:${d.color}"></div><span>${d.name}</span><span class="donut-legend-count">${d.count}</span></div>`).join('')}
+              </div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-title">카테고리별 요청 현황</div>
+            <div class="bar-chart">
+              ${CATEGORIES.map(c => `<div class="bar-row">
+                <div class="bar-label">${c}</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${(byCat[c]/maxCat)*100}%;background:${catColors[c]}"></div></div>
+                <div class="bar-value">${byCat[c]}</div>
+              </div>`).join('')}
+            </div>
           </div>
         </div>
       </div>
-      <div class="chart-card">
-        <div class="chart-card-title">카테고리별 요청 현황</div>
-        <div class="bar-chart">
-          ${CATEGORIES.map(c => `<div class="bar-row">
-            <div class="bar-label">${c}</div>
-            <div class="bar-track"><div class="bar-fill" style="width:${(byCat[c]/maxCat)*100}%;background:${catColors[c]}"></div></div>
-            <div class="bar-value">${byCat[c]}</div>
-          </div>`).join('')}
-        </div>
-      </div>
+      ${kpiAlerts.length ? `<div class="dashboard-side">${alertHtml}</div>` : ''}
     </div>
   `;
 }
