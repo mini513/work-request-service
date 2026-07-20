@@ -3655,7 +3655,7 @@ function applyScenarioStep() {
   });
   document.getElementById('scenarioProgress').innerHTML = progressHtml;
 
-  const highlightDelay = needsModal ? 300 : 100;
+  const highlightDelay = (needsModal || s.action === 'openNoti') ? 300 : 100;
   setTimeout(() => highlightScenarioTargets(s), highlightDelay);
 }
 
