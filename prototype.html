@@ -1194,6 +1194,24 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: default;
+  transition: background 0.15s;
+}
+.bar-row:hover {
+  background: var(--surface2);
+}
+.bar-row:hover .bar-label {
+  color: var(--text);
+  font-weight: 600;
+}
+.bar-row:hover .bar-fill {
+  filter: brightness(1.1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.bar-row:hover .bar-value {
+  color: var(--accent);
 }
 .bar-label {
   width: 60px;
@@ -1201,6 +1219,7 @@ body {
   color: var(--text-mid);
   text-align: right;
   flex-shrink: 0;
+  transition: color 0.15s, font-weight 0.15s;
 }
 .bar-track {
   flex: 1;
@@ -1213,16 +1232,18 @@ body {
 .bar-fill {
   height: 100%;
   border-radius: 4px;
-  transition: width 0.5s ease;
+  transition: width 0.5s ease, filter 0.15s, box-shadow 0.15s;
   min-width: 2px;
 }
 .bar-value {
-  width: 32px;
+  min-width: 60px;
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
   text-align: left;
   flex-shrink: 0;
+  transition: color 0.15s;
+  white-space: nowrap;
 }
 .donut-wrap {
   display: flex;
@@ -1235,6 +1256,42 @@ body {
   height: 120px;
   transform: rotate(-90deg);
 }
+.donut-svg circle[data-name] {
+  cursor: pointer;
+  transition: stroke-width 0.2s, opacity 0.2s;
+}
+.donut-svg:hover circle[data-name] {
+  opacity: 0.4;
+}
+.donut-svg circle[data-name]:hover {
+  stroke-width: 7;
+  opacity: 1;
+}
+.donut-tooltip {
+  position: absolute;
+  background: var(--text);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 100;
+  transform: translate(-50%, -100%);
+  margin-top: -8px;
+}
+.donut-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--text);
+}
 .donut-legend {
   display: flex;
   flex-direction: column;
@@ -1246,6 +1303,16 @@ body {
   gap: 8px;
   font-size: 12px;
   color: var(--text-mid);
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: default;
+  transition: background 0.15s;
+}
+.donut-legend-item:hover {
+  background: var(--surface2);
+}
+.donut-legend-item:hover .donut-legend-count {
+  color: var(--accent);
 }
 .donut-legend-dot {
   width: 10px;
@@ -2486,24 +2553,28 @@ function renderLog(el) {
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-title">상태별 분포</div>
-        <div class="donut-wrap">
+        <div class="donut-wrap" style="position:relative">
           <svg class="donut-svg" viewBox="0 0 42 42">
             <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--surface2)" stroke-width="5"/>
-            ${donutSegments.map(d => `<circle cx="21" cy="21" r="15.9" fill="none" stroke="${d.color}" stroke-width="5" stroke-dasharray="${d.pct} ${100-d.pct}" stroke-dashoffset="${-d.offset}" stroke-linecap="round"/>`).join('')}
+            ${donutSegments.map(d => `<circle cx="21" cy="21" r="15.9" fill="none" stroke="${d.color}" stroke-width="5" stroke-dasharray="${d.pct} ${100-d.pct}" stroke-dashoffset="${-d.offset}" stroke-linecap="round" data-name="${d.name}" data-count="${d.count}" data-pct="${d.pct.toFixed(1)}"/>`).join('')}
           </svg>
+          <div class="donut-tooltip" id="donutTooltip"></div>
           <div class="donut-legend">
-            ${statusData.map(d => `<div class="donut-legend-item"><div class="donut-legend-dot" style="background:${d.color}"></div><span>${d.name}</span><span class="donut-legend-count">${d.count}</span></div>`).join('')}
+            ${statusData.map(d => `<div class="donut-legend-item" data-donut="${d.name}"><div class="donut-legend-dot" style="background:${d.color}"></div><span>${d.name}</span><span class="donut-legend-count">${d.count}건 (${donutTotal > 0 ? ((d.count/donutTotal)*100).toFixed(0) : 0}%)</span></div>`).join('')}
           </div>
         </div>
       </div>
       <div class="chart-card">
         <div class="chart-card-title">카테고리별 요청 현황</div>
         <div class="bar-chart">
-          ${CATEGORIES.map(c => `<div class="bar-row">
+          ${CATEGORIES.map(c => {
+            const pct = all.length > 0 ? ((byCat[c]/all.length)*100).toFixed(0) : 0;
+            return `<div class="bar-row">
             <div class="bar-label">${c}</div>
             <div class="bar-track"><div class="bar-fill" style="width:${(byCat[c]/maxCat)*100}%;background:${catColors[c]}"></div></div>
-            <div class="bar-value">${byCat[c]}</div>
-          </div>`).join('')}
+            <div class="bar-value">${byCat[c]}건 <span style="font-size:11px;color:var(--text-dim);font-weight:400">(${pct}%)</span></div>
+          </div>`;
+          }).join('')}
         </div>
       </div>
     </div>
@@ -2511,11 +2582,14 @@ function renderLog(el) {
       <div class="chart-card">
         <div class="chart-card-title">긴급도별 요청 분포</div>
         <div class="bar-chart">
-          ${PRIORITIES.map(p => `<div class="bar-row">
+          ${PRIORITIES.map(p => {
+            const pct = all.length > 0 ? ((byPriority[p]/all.length)*100).toFixed(0) : 0;
+            return `<div class="bar-row">
             <div class="bar-label">${p}</div>
             <div class="bar-track"><div class="bar-fill" style="width:${(byPriority[p]/maxPri)*100}%;background:${priColors[p]}"></div></div>
-            <div class="bar-value">${byPriority[p]}</div>
-          </div>`).join('')}
+            <div class="bar-value">${byPriority[p]}건 <span style="font-size:11px;color:var(--text-dim);font-weight:400">(${pct}%)</span></div>
+          </div>`;
+          }).join('')}
         </div>
       </div>
       <div class="chart-card">
@@ -2566,6 +2640,28 @@ function renderLog(el) {
       </table>` : renderEmptyState('완료된 요청이 없습니다', '처리가 완료되면 이곳에 표시됩니다')}
     </div>
   `;
+
+  const tooltip = document.getElementById('donutTooltip');
+  if (tooltip) {
+    el.querySelectorAll('.donut-svg circle[data-name]').forEach(circle => {
+      circle.addEventListener('mouseenter', function(e) {
+        const name = this.getAttribute('data-name');
+        const count = this.getAttribute('data-count');
+        const pct = this.getAttribute('data-pct');
+        tooltip.textContent = `${name}: ${count}건 (${pct}%)`;
+        tooltip.style.opacity = '1';
+      });
+      circle.addEventListener('mousemove', function(e) {
+        const wrap = tooltip.parentElement;
+        const rect = wrap.getBoundingClientRect();
+        tooltip.style.left = (e.clientX - rect.left) + 'px';
+        tooltip.style.top = (e.clientY - rect.top - 12) + 'px';
+      });
+      circle.addEventListener('mouseleave', function() {
+        tooltip.style.opacity = '0';
+      });
+    });
+  }
 }
 
 // ── Detail ──
