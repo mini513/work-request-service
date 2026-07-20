@@ -3065,127 +3065,130 @@ function rgbToHex(rgb) {
 
 // ── Scenario Mode ──
 const SCENARIOS = [
-  // ── 요청자 시나리오 1: 새 요청 등록 ──
-  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '.btn-primary',
-    text: '<strong>요청 등록 ①</strong> "새 요청" 버튼을 클릭합니다.' },
-  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '#formCategory', action: 'openNewReq',
-    text: '<strong>요청 등록 ②</strong> <em>카테고리</em>를 선택합니다 (IT 장애, 비품 요청, 시설 보수, 기타).' },
-  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '#formTitle', action: 'keepModal',
-    text: '<strong>요청 등록 ③</strong> 요청 <em>제목</em>을 입력합니다.' },
-  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '#formContent', action: 'keepModal',
-    text: '<strong>요청 등록 ④</strong> <em>상세 내용</em>을 작성합니다. 증상, 위치, 긴급 사유 등을 구체적으로 기재합니다.' },
-  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '#formPriority', action: 'keepModal',
-    text: '<strong>요청 등록 ⑤</strong> <em>긴급도</em>를 선택합니다 (긴급 > 높음 > 보통 > 낮음).' },
-  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '#formDesiredDate', action: 'keepModal',
-    text: '<strong>요청 등록 ⑥</strong> <em>희망 완료일</em>을 지정합니다. 실무자가 일정을 참고합니다.' },
-  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '#newReqModal .btn-primary', action: 'keepModal',
-    text: '<strong>요청 등록 ⑦</strong> 모든 항목을 확인한 후 "요청 등록" 버튼을 클릭합니다.' },
-  { role: 'requester', group: '새 요청 등록', page: 'list', detail: null, target: '.req-item',
-    text: '<strong>요청 등록 ⑧</strong> 등록 완료! 내 요청 목록에 새 건이 추가되고, 관리자에게 알림이 전송됩니다.' },
+  // ═══════════════════════════════════════════════════════════════
+  // 요청자 S1: 긴급 요청 등록
+  // Story: "새로운 IT 장애가 발생했다! 긴급 요청을 등록하자"
+  // 서비스 사이클: ① 요청자 등록 → 관리자 배정 → 실무자 시작 → ...
+  // ═══════════════════════════════════════════════════════════════
+  { role: 'requester', group: '긴급 요청 등록', page: 'list', detail: null, target: '.btn-primary',
+    text: '<strong>등록 ①</strong> 새로운 장애가 발생했습니다! "새 요청" 버튼을 클릭합니다.' },
+  { role: 'requester', group: '긴급 요청 등록', page: 'list', detail: null, target: '#formCategory', action: 'openNewReq',
+    text: '<strong>등록 ②</strong> <em>카테고리</em>를 선택합니다. IT 장애로 분류합니다.' },
+  { role: 'requester', group: '긴급 요청 등록', page: 'list', detail: null, target: '#formTitle', action: 'keepModal',
+    text: '<strong>등록 ③</strong> 요청 <em>제목</em>을 입력합니다.' },
+  { role: 'requester', group: '긴급 요청 등록', page: 'list', detail: null, target: '#formContent', action: 'keepModal',
+    text: '<strong>등록 ④</strong> <em>상세 내용</em>을 작성합니다. 증상, 위치, 긴급 사유 등을 구체적으로 기재합니다.' },
+  { role: 'requester', group: '긴급 요청 등록', page: 'list', detail: null, target: '#formPriority', action: 'keepModal',
+    text: '<strong>등록 ⑤</strong> <em>긴급도</em>를 "긴급"으로 선택합니다. 업무 중단 상황이므로 가장 높은 우선순위를 지정합니다.' },
+  { role: 'requester', group: '긴급 요청 등록', page: 'list', detail: null, target: '#formDesiredDate', action: 'keepModal',
+    text: '<strong>등록 ⑥</strong> <em>희망 완료일</em>을 지정합니다. 긴급이므로 가능한 빠른 날짜를 선택합니다.' },
+  { role: 'requester', group: '긴급 요청 등록', page: 'list', detail: null, target: '#newReqModal .btn-primary', action: 'keepModal',
+    text: '<strong>등록 ⑦</strong> 모든 항목을 확인한 후 "요청 등록" 버튼을 클릭합니다.' },
+  { role: 'requester', group: '긴급 요청 등록', page: 'list', detail: null, target: '.req-item',
+    text: '<strong>등록 ⑧</strong> 등록 완료! 내 요청 목록에 새 건이 추가되었습니다. 관리자에게 접수 알림이 전송됩니다.' },
 
-  // ── 요청자 시나리오 2: 요청 상태 추적 ──
-  { role: 'requester', group: '요청 상태 추적', page: 'list', detail: null, target: '.req-item',
-    text: '<strong>상태 추적 ①</strong> 목록에서 추적할 요청을 클릭합니다.' },
-  { role: 'requester', group: '요청 상태 추적', page: 'list', detail: 'REQ-001', target: '.status-stepper',
-    text: '<strong>상태 추적 ②</strong> 상단 <em>상태 스텝퍼</em>에서 현재 진행 단계(접수→배정→진행→완료)를 확인합니다.' },
-  { role: 'requester', group: '요청 상태 추적', page: 'list', detail: 'REQ-001', target: '.timeline-item',
-    text: '<strong>상태 추적 ③</strong> 타임라인에서 각 단계별 처리 이력(일시, 담당자, 상세 내용)을 확인합니다.' },
+  // ═══════════════════════════════════════════════════════════════
+  // 요청자 S2: 배정 알림 확인 + 긴급 소통
+  // Story: "알림이 왔네! 담당자가 지정됐구나. 근데 일정이 급해졌는데…
+  //         빠뜨렸던 정보도 같이 전달해야겠다!"
+  // 서비스 사이클: ... → ④ 요청자 소통 → 실무자 완료 → ...
+  // ═══════════════════════════════════════════════════════════════
+  { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: null, target: '.noti-btn',
+    text: '<strong>소통 ①</strong> 🔔 알림이 도착했습니다! 알림 벨을 클릭합니다.' },
+  { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: null, target: '.noti-item', action: 'openNoti',
+    text: '<strong>소통 ②</strong> "담당자가 배정되었습니다" 알림을 클릭하여 해당 요청 상세로 이동합니다.' },
+  { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.status-stepper',
+    text: '<strong>소통 ③</strong> 상태 스테퍼에서 "배정완료" 단계를 확인합니다. 담당자가 지정되었네요!' },
+  { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.detail-info-value',
+    text: '<strong>소통 ④</strong> 배정된 담당자(이준호)와 보고자(한동훈 파트장) 정보를 확인합니다.' },
+  { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.comment-item', targetLabel: false,
+    text: '<strong>소통 ⑤</strong> 기존 댓글에서 실무자의 진행 메시지를 확인합니다.' },
+  { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.comment-input',
+    text: '<strong>소통 ⑥</strong> 일정이 급해졌습니다! 댓글로 긴급 사항과 빠뜨렸던 정보를 함께 전달합니다.' },
 
-  // ── 요청자 시나리오 3: 실무자와 소통 ──
-  { role: 'requester', group: '실무자와 소통', page: 'list', detail: 'REQ-001', target: '.comment-item',
-    text: '<strong>소통 ①</strong> 기존 댓글 이력에서 실무자의 진행 상황을 확인합니다.' },
-  { role: 'requester', group: '실무자와 소통', page: 'list', detail: 'REQ-001', target: '.comment-input',
-    text: '<strong>소통 ②</strong> 댓글 입력란에 추가 정보나 문의 사항을 작성하고 전송합니다.' },
+  // ═══════════════════════════════════════════════════════════════
+  // 요청자 S3: 처리 완료 확인
+  // Story: "완료 알림이 왔다! 처리 결과를 확인하고 감사 인사를 남기자"
+  // 서비스 사이클: ... → ⑥ 요청자 확인 (사이클 종료)
+  // ═══════════════════════════════════════════════════════════════
+  { role: 'requester', group: '처리 완료 확인', page: 'list', detail: null, target: '.noti-btn',
+    text: '<strong>확인 ①</strong> 🔔 처리 완료 알림이 도착했습니다! 알림 벨을 클릭합니다.' },
+  { role: 'requester', group: '처리 완료 확인', page: 'list', detail: null, target: '.noti-item', action: 'openNoti',
+    text: '<strong>확인 ②</strong> "요청이 처리 완료되었습니다" 알림을 클릭합니다.' },
+  { role: 'requester', group: '처리 완료 확인', page: 'list', detail: 'REQ-004', target: '.status-stepper',
+    text: '<strong>확인 ③</strong> 상태 스테퍼에서 "완료" 단계를 확인합니다. 처리가 완료되었네요!' },
+  { role: 'requester', group: '처리 완료 확인', page: 'list', detail: 'REQ-004', target: '.timeline-item', targetLabel: false,
+    text: '<strong>확인 ④</strong> 타임라인에서 전체 처리 이력(접수→배정→진행→완료)을 확인합니다.' },
+  { role: 'requester', group: '처리 완료 확인', page: 'list', detail: 'REQ-004', target: '.comment-input',
+    text: '<strong>확인 ⑤</strong> 댓글로 감사 인사나 추가 피드백을 남깁니다.' },
 
-  // ── 요청자 시나리오 4: 미배정 요청 확인 ──
-  { role: 'requester', group: '미배정 요청 확인', page: 'list', detail: 'REQ-003', target: '.detail-info-value',
-    text: '<strong>미배정 확인 ①</strong> 담당자가 미배정인 요청은 <em>"⏳ 배정 대기"</em>로 표시됩니다.' },
-  { role: 'requester', group: '미배정 요청 확인', page: 'list', detail: 'REQ-003', target: '.status-stepper',
-    text: '<strong>미배정 확인 ②</strong> 상태 스텝퍼에서 "접수" 단계에 머물러 있음을 확인합니다. 배정 완료 시 알림을 받습니다.' },
+  // ═══════════════════════════════════════════════════════════════
+  // 관리자 S1: 신규 요청 접수 + 담당자 배정
+  // Story: "대시보드에서 미배정 경고를 발견! 빠르게 담당자를 배정하자"
+  // 서비스 사이클: ① 요청자 등록 → ② 관리자 배정 → 실무자 시작 → ...
+  // ═══════════════════════════════════════════════════════════════
+  { role: 'manager', group: '신규 요청 접수 + 배정', page: 'dashboard', detail: null, target: '.stats-row',
+    text: '<strong>접수 ①</strong> 대시보드에서 현황을 파악합니다. 미배정 건수가 눈에 띕니다.' },
+  { role: 'manager', group: '신규 요청 접수 + 배정', page: 'dashboard', detail: null, target: '.kpi-alert',
+    text: '<strong>접수 ②</strong> ⚠️ KPI 경고를 확인합니다. 2일 이상 미배정된 요청이 있습니다!' },
+  { role: 'manager', group: '신규 요청 접수 + 배정', page: 'list', detail: null, target: '.req-item', beforeAction: () => { currentFilter = '미배정'; renderPage(); },
+    text: '<strong>접수 ③</strong> 요청 목록에서 "미배정" 필터를 선택하고, 배정할 요청을 클릭합니다.' },
+  { role: 'manager', group: '신규 요청 접수 + 배정', page: 'list', detail: 'REQ-003', target: '.btn-primary',
+    text: '<strong>접수 ④</strong> 요청 내용을 확인한 후 "담당자 배정" 버튼을 클릭합니다.' },
+  { role: 'manager', group: '신규 요청 접수 + 배정', page: 'list', detail: 'REQ-003', target: '#assignModal .btn-primary', action: 'openAssign',
+    text: '<strong>접수 ⑤</strong> 적합한 실무 담당자와 보고자를 선택한 후 "배정 확인" 버튼을 클릭합니다.' },
 
-  // ── 요청자 시나리오 5: 알림 확인 ──
-  { role: 'requester', group: '알림 확인', page: 'list', detail: null, target: '.noti-btn',
-    text: '<strong>알림 ①</strong> 🔔 알림 벨을 클릭합니다. 뱃지 숫자는 읽지 않은 알림 수입니다.' },
-  { role: 'requester', group: '알림 확인', page: 'list', detail: null, target: '.noti-item', action: 'openNoti',
-    text: '<strong>알림 ②</strong> 알림 항목을 클릭하면 해당 요청 상세로 이동합니다. 담당자 배정, 상태 변화 등 모든 알림을 확인할 수 있습니다.' },
+  // ═══════════════════════════════════════════════════════════════
+  // 관리자 S2: 부적합 요청 반려
+  // Story: "이 요청은 서비스 범위 밖이라 반려 처리가 필요하다"
+  // ═══════════════════════════════════════════════════════════════
+  { role: 'manager', group: '부적합 요청 반려', page: 'list', detail: 'REQ-005', target: '.btn-danger',
+    text: '<strong>반려 ①</strong> 요청 내용을 검토합니다. 서비스 범위에 해당하지 않으므로 "반려" 버튼을 클릭합니다.' },
+  { role: 'manager', group: '부적합 요청 반려', page: 'list', detail: 'REQ-005', target: '#rejectReason', action: 'openReject',
+    text: '<strong>반려 ②</strong> 반려 사유를 구체적으로 입력합니다. 요청자가 이해할 수 있도록 명확히 작성합니다.' },
+  { role: 'manager', group: '부적합 요청 반려', page: 'list', detail: 'REQ-005', target: '.status-stepper',
+    text: '<strong>반려 ③</strong> 상태가 "반려"로 변경됩니다. 요청자에게 반려 사유와 함께 알림이 전송됩니다.' },
 
-  // ── 요청자 시나리오 6: 상태별 필터링 ──
-  { role: 'requester', group: '상태별 필터링', page: 'list', detail: null, target: '.filter-bar',
-    text: '<strong>필터 ①</strong> 상단 필터 버튼(전체/대기중/진행중/완료/반려)을 클릭하여 원하는 상태만 봅니다. 대기중은 접수+배정완료를 포함합니다.' },
-  { role: 'requester', group: '상태별 필터링', page: 'list', detail: null, target: '.search-input',
-    text: '<strong>필터 ②</strong> 검색창에 키워드를 입력하면 제목/내용에서 검색됩니다.' },
+  // ═══════════════════════════════════════════════════════════════
+  // 관리자 S3: 처리 현황 점검
+  // Story: "이번 주 팀의 업무 처리 현황을 점검하자"
+  // ═══════════════════════════════════════════════════════════════
+  { role: 'manager', group: '처리 현황 점검', page: 'log', detail: null, target: '.stats-row',
+    text: '<strong>점검 ①</strong> 처리 현황 페이지에서 완료 건수, 처리율, 평균 처리일을 확인합니다.' },
+  { role: 'manager', group: '처리 현황 점검', page: 'log', detail: null, target: '.chart-card', targetLabel: false,
+    text: '<strong>점검 ②</strong> 긴급도별 분포와 담당자별 완료율 차트를 확인하여 업무 부하를 점검합니다.' },
+  { role: 'manager', group: '처리 현황 점검', page: 'log', detail: null, target: '.stats-table',
+    text: '<strong>점검 ③</strong> 완료 목록에서 카테고리·긴급도·담당자별 처리 내역을 점검하여 팀 성과를 파악합니다.' },
 
-  // ── 관리자 시나리오 1: 전체 현황 파악 ──
-  { role: 'manager', group: '전체 현황 파악', page: 'dashboard', detail: null, target: '.stats-row',
-    text: '<strong>현황 파악 ①</strong> 대시보드에서 전체/미배정/진행중/완료 건수를 확인합니다.' },
-  { role: 'manager', group: '전체 현황 파악', page: 'dashboard', detail: null, target: '.card',
-    text: '<strong>현황 파악 ②</strong> 카테고리별(IT/비품/시설/기타) 요청 분포를 확인합니다.' },
+  // ═══════════════════════════════════════════════════════════════
+  // 실무자 S1: 배정 알림 + 작업 시작
+  // Story: "새 업무가 배정됐다! 내용을 파악하고 작업을 시작하자"
+  // 서비스 사이클: ... → ② 관리자 배정 → ③ 실무자 시작 → 요청자 소통 → ...
+  // ═══════════════════════════════════════════════════════════════
+  { role: 'worker', group: '배정 알림 + 작업 시작', page: 'list', detail: null, target: '.noti-btn',
+    text: '<strong>시작 ①</strong> 🔔 새 업무가 배정되었습니다! 알림 벨을 클릭합니다.' },
+  { role: 'worker', group: '배정 알림 + 작업 시작', page: 'list', detail: null, target: '.noti-item', action: 'openNoti',
+    text: '<strong>시작 ②</strong> "[배정] 노트북 충전기 고장" 알림을 클릭하여 상세로 이동합니다.' },
+  { role: 'worker', group: '배정 알림 + 작업 시작', page: 'list', detail: 'REQ-008', target: '.detail-info-row', targetLabel: false,
+    text: '<strong>시작 ③</strong> 요청 내용, 카테고리, 긴급도, 희망 완료일을 파악합니다.' },
+  { role: 'worker', group: '배정 알림 + 작업 시작', page: 'list', detail: 'REQ-008', target: '#estDate',
+    text: '<strong>시작 ④</strong> <em>작업 예정일</em>을 입력합니다. 요청자에게 예정일이 알림됩니다.' },
+  { role: 'worker', group: '배정 알림 + 작업 시작', page: 'list', detail: 'REQ-008', target: '.btn-primary',
+    text: '<strong>시작 ⑤</strong> "작업 시작 + 예정일 알림" 버튼을 클릭합니다. 상태가 "진행중"으로 변경됩니다.' },
 
-  // ── 관리자 시나리오 2: KPI 경고 확인 ──
-  { role: 'manager', group: 'KPI 경고 확인', page: 'dashboard', detail: null, target: '.kpi-alert',
-    text: '<strong>KPI ①</strong> ⚠️ 접수 후 2일 이내 미배정 시 긴급 경고가 표시됩니다.' },
-  { role: 'manager', group: 'KPI 경고 확인', page: 'list', detail: null, target: '.kpi-alert', beforeAction: () => { currentFilter = '미배정'; renderPage(); },
-    text: '<strong>KPI ②</strong> 전체 요청 목록에서 "미배정" 필터를 선택하면 경고를 확인하고 즉시 배정할 수 있습니다.' },
-
-  // ── 관리자 시나리오 3: 담당자 배정 ──
-  { role: 'manager', group: '담당자 배정', page: 'list', detail: null, target: '.req-item', beforeAction: () => { currentFilter = '미배정'; renderPage(); },
-    text: '<strong>배정 ①</strong> "미배정" 필터에서 배정할 요청을 클릭합니다.' },
-  { role: 'manager', group: '담당자 배정', page: 'list', detail: 'REQ-003', target: '.btn-primary',
-    text: '<strong>배정 ②</strong> "담당자 배정" 버튼을 클릭합니다.' },
-  { role: 'manager', group: '담당자 배정', page: 'list', detail: 'REQ-003', target: '#assignModal .btn-primary', action: 'openAssign',
-    text: '<strong>배정 ③</strong> 실무 담당자와 보고자를 지정한 후 "배정 확인" 버튼을 클릭합니다.' },
-
-  // ── 관리자 시나리오 4: 요청 반려 ──
-  { role: 'manager', group: '요청 반려', page: 'list', detail: 'REQ-005', target: '.btn-danger',
-    text: '<strong>반려 ①</strong> 부적절한 요청의 상세 화면에서 "반려" 버튼을 클릭합니다.' },
-  { role: 'manager', group: '요청 반려', page: 'list', detail: 'REQ-005', target: '#rejectReason', action: 'openReject',
-    text: '<strong>반려 ②</strong> 반려 사유를 입력합니다.' },
-  { role: 'manager', group: '요청 반려', page: 'list', detail: 'REQ-005', target: '.status-stepper',
-    text: '<strong>반려 ③</strong> 반려 처리 후 상태가 "반려"로 변경되고, 요청자에게 알림이 전송됩니다.' },
-
-  // ── 관리자 시나리오 5: 처리 현황 로그 ──
-  { role: 'manager', group: '처리 현황 로그', page: 'log', detail: null, target: '.stats-row',
-    text: '<strong>로그 ①</strong> 총 처리 건수와 주요 사항(긴급/높음) 건수를 확인합니다.' },
-  { role: 'manager', group: '처리 현황 로그', page: 'log', detail: null, target: '.stats-table',
-    text: '<strong>로그 ②</strong> 완료된 요청 목록에서 카테고리, 긴급도, 담당자, 처리일을 확인하여 팀 성과를 파악합니다.' },
-
-  // ── 관리자 시나리오 6: 신규 요청 알림 ──
-  { role: 'manager', group: '신규 요청 알림', page: 'dashboard', detail: null, target: '.noti-btn',
-    text: '<strong>알림 ①</strong> 🔔 신규 요청과 KPI 경고 알림을 확인합니다.' },
-
-  // ── 실무자 시나리오 1: 배정 알림 확인 ──
-  { role: 'worker', group: '배정 알림 확인', page: 'list', detail: null, target: '.noti-btn',
-    text: '<strong>알림 확인 ①</strong> 새 요청이 배정되면 🔔 알림으로 즉시 통보됩니다. 알림 벨을 클릭합니다.' },
-  { role: 'worker', group: '배정 알림 확인', page: 'list', detail: null, target: '.noti-item', action: 'openNoti',
-    text: '<strong>알림 확인 ②</strong> 알림 항목을 클릭하면 해당 요청 상세로 이동합니다. 배정 내역, 요청자 댓글 등을 확인합니다.' },
-
-  // ── 실무자 시나리오 2: 내 담당 목록 확인 ──
-  { role: 'worker', group: '내 담당 목록 확인', page: 'list', detail: null, target: '.req-item',
-    text: '<strong>목록 확인 ①</strong> 우선순위(긴급→높음→보통→낮음) 순으로 정렬된 내 담당 목록을 확인합니다.' },
-  { role: 'worker', group: '내 담당 목록 확인', page: 'list', detail: null, target: '.filter-bar',
-    text: '<strong>목록 확인 ②</strong> 필터를 사용하여 진행중/배정완료 등 특정 상태만 볼 수 있습니다.' },
-
-  // ── 실무자 시나리오 3: 목록에서 빠른 상태 전환 ──
-  { role: 'worker', group: '빠른 상태 전환', page: 'list', detail: null, target: '.status-badge-btn',
-    text: '<strong>상태 전환 ①</strong> 목록의 상태 뱃지에 ▼ 표시가 있는 항목은 클릭하여 상태를 바로 변경할 수 있습니다.' },
-  { role: 'worker', group: '빠른 상태 전환', page: 'list', detail: null, target: '.status-badge-btn',
-    text: '<strong>상태 전환 ②</strong> 배정완료 → 진행중 → 완료 순서로 전환하며, 역방향 전환도 가능합니다.' },
-
-  // ── 실무자 시나리오 4: 상세 화면에서 작업 시작 ──
-  { role: 'worker', group: '작업 시작 (상세)', page: 'list', detail: 'REQ-008', target: '#estDate',
-    text: '<strong>작업 시작 ①</strong> 상세 화면에서 <em>작업 가능일</em>을 입력합니다. 요청자에게 예정일이 알림됩니다.' },
-  { role: 'worker', group: '작업 시작 (상세)', page: 'list', detail: 'REQ-008', target: '.btn-primary',
-    text: '<strong>작업 시작 ②</strong> "작업 시작 + 예정일 알림" 버튼을 클릭하면 상태가 "진행중"으로 변경됩니다.' },
-
-  // ── 실무자 시나리오 5: 요청자와 소통 ──
-  { role: 'worker', group: '요청자와 소통', page: 'list', detail: 'REQ-001', target: '.comment-input',
-    text: '<strong>소통 ①</strong> 댓글로 요청자에게 진행 상황을 공유합니다.' },
-
-  // ── 실무자 시나리오 6: 처리 완료 ──
-  { role: 'worker', group: '처리 완료 (상세)', page: 'list', detail: 'REQ-001', target: '#completeNote',
-    text: '<strong>완료 ①</strong> 처리 내용을 입력합니다. 어떤 작업을 수행했는지 기록합니다.' },
-  { role: 'worker', group: '처리 완료 (상세)', page: 'list', detail: 'REQ-001', target: '.btn-primary',
-    text: '<strong>완료 ②</strong> "처리 완료" 버튼을 클릭하면 요청자와 보고자(파트장)에게 완료 알림이 전송됩니다.' },
+  // ═══════════════════════════════════════════════════════════════
+  // 실무자 S2: 작업 진행 + 완료 처리
+  // Story: "요청자 댓글을 확인하고, 작업을 마무리하자"
+  // 서비스 사이클: ... → ④ 요청자 소통 → ⑤ 실무자 완료 → 요청자 확인
+  // ═══════════════════════════════════════════════════════════════
+  { role: 'worker', group: '작업 진행 + 완료 처리', page: 'list', detail: 'REQ-001', target: '.comment-item', targetLabel: false,
+    text: '<strong>완료 ①</strong> 요청자가 남긴 긴급 댓글을 확인합니다. 추가 요청 사항을 파악합니다.' },
+  { role: 'worker', group: '작업 진행 + 완료 처리', page: 'list', detail: 'REQ-001', target: '.comment-input',
+    text: '<strong>완료 ②</strong> 댓글로 요청자에게 진행 상황을 공유합니다.' },
+  { role: 'worker', group: '작업 진행 + 완료 처리', page: 'list', detail: 'REQ-001', target: '#completeNote',
+    text: '<strong>완료 ③</strong> 작업이 끝났습니다! 처리 내용을 기록합니다. 수행한 작업을 구체적으로 작성합니다.' },
+  { role: 'worker', group: '작업 진행 + 완료 처리', page: 'list', detail: 'REQ-001', target: '.btn-primary',
+    text: '<strong>완료 ④</strong> "처리 완료" 버튼을 클릭합니다. 요청자와 보고자(파트장)에게 완료 알림이 전송됩니다.' },
 ];
 
 let scenarioClickTargets = [];
@@ -3279,16 +3282,16 @@ function openBlueprintMap() {
 
   const layers = [
     { key: 'user', label: '사용자 행동', class: 'user', rows: [
-      ['카테고리·제목·내용 작성\n긴급도·희망완료일 선택', '알림 확인\n요청 목록에서 상태 확인', '—', '—', '—', '완료 알림 확인\n처리 내용 확인\n댓글로 소통'],
+      ['카테고리·제목·내용 작성\n긴급도·희망완료일 선택', '알림 확인\n요청 목록에서 상태 확인', '—', '댓글로 긴급 사항 전달\n추가 정보·누락 내용 보완', '—', '완료 알림 확인\n처리 내용·타임라인 확인\n감사 댓글 작성'],
     ]},
     { key: 'front', label: '프론트스테이지\n(화면)', class: 'front', rows: [
-      ['새 요청 등록 모달\n입력 폼 표시', '요청 상세 화면\n상태 스테퍼 표시', '담당자 배정 모달\n실무자 선택 드롭다운\n보고자 지정', '내 담당 목록\n상태 전환 드롭다운\n작업 예정일 입력', '처리 완료 버튼\n처리 내용 입력 폼', '요청 상세 화면\n타임라인 표시\n댓글 입력'],
+      ['새 요청 등록 모달\n입력 폼 표시', '요청 상세 화면\n상태 스테퍼 표시', '담당자 배정 모달\n실무자 선택 드롭다운\n보고자 지정', '요청 상세 화면\n댓글 입력·목록\n작업 예정일 표시', '처리 완료 버튼\n처리 내용 입력 폼\n댓글 입력', '요청 상세 화면\n타임라인 표시\n댓글 입력'],
     ]},
     { key: 'back', label: '백스테이지\n(시스템)', class: 'back', rows: [
-      ['요청 데이터 저장\n요청 ID 자동 생성\n상태: 접수', '관리자 알림 생성\n대시보드 카운트 갱신', '상태 → 배정완료\n실무자 연결\n보고자 연결', '상태 → 진행중\n타임라인 기록 추가\n예정일 저장', '상태 → 완료\n처리 내용 저장\n완료일 기록', '타임라인 최종 갱신\n댓글 데이터 저장'],
+      ['요청 데이터 저장\n요청 ID 자동 생성\n상태: 접수', '관리자 알림 생성\n대시보드 카운트 갱신', '상태 → 배정완료\n실무자 연결\n보고자 연결', '댓글 데이터 저장\n실무자 알림 생성\n상태 → 진행중\n예정일 저장', '상태 → 완료\n처리 내용 저장\n완료일 기록', '타임라인 최종 갱신\n댓글 데이터 저장'],
     ]},
     { key: 'support', label: '지원 프로세스', class: 'support', rows: [
-      ['—', '관리자에게 알림 발송\n(신규 요청 접수)', '실무자에게 알림 발송\n(업무 배정 알림)\n보고자에게 알림 발송', '관리자에게 알림 발송\n(상태 변경 알림)', '요청자에게 알림 발송\n(처리 완료 알림)\n관리자에게 알림 발송', '—'],
+      ['—', '관리자에게 알림 발송\n(신규 요청 접수)', '실무자에게 알림 발송\n(업무 배정 알림)\n보고자에게 알림 발송', '실무자에게 댓글 알림\n(요청자 긴급 소통)\n관리자에게 상태 변경 알림', '요청자에게 알림 발송\n(처리 완료 알림)\n관리자에게 알림 발송', '—'],
     ]},
   ];
 
@@ -3349,6 +3352,7 @@ function openStakeholderMap() {
     { from: '관리자', to: '실무자', label: '담당자 배정', detail: '적합한 실무자를 선택하여 업무 배정', fromColor: 'var(--yellow)', toColor: 'var(--green)' },
     { from: '실무자', to: '관리자', label: '상태 변경 보고', detail: '작업 시작 · 완료 등 진행 상태를 관리자에게 보고', fromColor: 'var(--green)', toColor: 'var(--yellow)' },
     { from: '실무자', to: '요청자', label: '처리 완료 알림', detail: '요청 처리 완료 시 요청자에게 결과 통보', fromColor: 'var(--green)', toColor: 'var(--blue)' },
+    { from: '요청자', to: '실무자', label: '댓글 소통', detail: '긴급 사항·추가 정보를 댓글로 실무자에게 전달', fromColor: 'var(--blue)', toColor: 'var(--green)' },
     { from: '관리자', to: '보고자', label: '처리 현황 보고', detail: '팀별 업무 처리 현황을 상급 관리자에게 보고', fromColor: 'var(--yellow)', toColor: '#7c3aed' },
   ];
 
@@ -3420,8 +3424,12 @@ function openStakeholderMap() {
         <text x="375" y="320" text-anchor="middle" font-size="10" fill="var(--green)" font-weight="600">상태 보고</text>
 
         <!-- 실무자 → 요청자: 완료 알림 -->
-        <line x1="200" y1="400" x2="200" y2="210" stroke="var(--green)" stroke-width="2" marker-end="url(#ah-green)" opacity="0.7"/>
-        <text x="188" y="310" text-anchor="end" font-size="10" fill="var(--green)" font-weight="600">완료 알림</text>
+        <line x1="190" y1="400" x2="190" y2="210" stroke="var(--green)" stroke-width="2" marker-end="url(#ah-green)" opacity="0.7"/>
+        <text x="178" y="310" text-anchor="end" font-size="10" fill="var(--green)" font-weight="600">완료 알림</text>
+
+        <!-- 요청자 → 실무자: 댓글 소통 -->
+        <line x1="215" y1="210" x2="215" y2="400" stroke="var(--blue)" stroke-width="2" marker-end="url(#ah-blue)" opacity="0.7" stroke-dasharray="6,3"/>
+        <text x="228" y="310" font-size="10" fill="var(--blue)" font-weight="600">댓글 소통</text>
 
         <!-- 관리자 → 보고자: 현황 보고 -->
         <line x1="460" y1="160" x2="460" y2="90" stroke="var(--yellow)" stroke-width="2" marker-end="url(#ah-purple)" opacity="0.7"/>
@@ -3506,6 +3514,8 @@ function openIAMap() {
       <span class="ia-common-item">🎯 시나리오 모드</span>
       <span class="ia-common-item">📊 시나리오 흐름도</span>
       <span class="ia-common-item">🗂 IA 구조도</span>
+      <span class="ia-common-item">🤝 이해관계자맵</span>
+      <span class="ia-common-item">📐 서비스 블루프린트</span>
       <span class="ia-common-item">🌙 다크/라이트 모드</span>
     </div>
   </div>`;
