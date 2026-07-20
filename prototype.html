@@ -918,6 +918,12 @@ body {
   background: var(--accent);
   box-shadow: 0 0 0 4px var(--accent-bg);
 }
+.step.current::after {
+  content: ''; position: absolute; top: 14px;
+  left: 50%; right: 0; height: 3px;
+  background: var(--border);
+}
+.step.current:last-child::after { display: none; }
 .step-label {
   font-size: 11px;
   color: var(--text-dim);
