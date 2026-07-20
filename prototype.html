@@ -1685,57 +1685,63 @@ body.light .scenario-target {
 .landing-overlay.hide { opacity: 0; visibility: hidden; pointer-events: none; }
 .landing-inner {
   text-align: center;
-  max-width: 720px; width: 100%; padding: 40px 24px;
+  max-width: 400px; width: 100%; padding: 40px 24px;
 }
 .landing-icon { font-size: 48px; margin-bottom: 12px; }
 .landing-title {
-  font-size: 28px; font-weight: 700; color: var(--text);
-  margin-bottom: 6px; letter-spacing: -0.5px;
+  font-size: 24px; font-weight: 700; color: var(--text);
+  margin-bottom: 4px; letter-spacing: -0.5px;
 }
 .landing-subtitle {
-  font-size: 14px; color: var(--text-dim); margin-bottom: 8px;
+  font-size: 13px; color: var(--text-dim); margin-bottom: 24px;
 }
-.landing-badge {
-  display: inline-block; font-size: 11px; font-weight: 600;
-  color: var(--accent); background: var(--accent-bg);
-  padding: 3px 10px; border-radius: 10px; margin-bottom: 32px;
+.login-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 28px 24px; text-align: left;
 }
-.landing-desc {
-  font-size: 13px; color: var(--text-mid); margin-bottom: 40px; line-height: 1.6;
+.login-field { margin-bottom: 16px; }
+.login-field label {
+  display: block; font-size: 12px; font-weight: 600;
+  color: var(--text-mid); margin-bottom: 6px;
 }
-.landing-cards {
-  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+.login-field input {
+  width: 100%; padding: 10px 12px; font-size: 14px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); color: var(--text);
+  outline: none; transition: border-color 0.2s;
+  box-sizing: border-box;
 }
-.landing-card {
-  flex: 1; min-width: 180px; max-width: 220px;
-  background: var(--surface); border: 2px solid var(--border);
-  border-radius: 16px; padding: 28px 20px 24px;
-  cursor: pointer; transition: all 0.2s;
-  text-align: center;
+.login-field input:focus { border-color: var(--accent); }
+.login-field input::placeholder { color: var(--text-dim); }
+.login-btn {
+  width: 100%; padding: 12px; font-size: 15px; font-weight: 600;
+  background: var(--accent); color: #fff; border: none;
+  border-radius: 8px; cursor: pointer; transition: opacity 0.2s;
+  margin-top: 4px;
 }
-.landing-card:hover {
-  border-color: var(--accent); transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(91,141,239,0.15);
+.login-btn:hover { opacity: 0.9; }
+.login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.login-error {
+  font-size: 12px; color: var(--red); margin-top: 8px;
+  display: none; text-align: center;
 }
-.landing-card-icon { font-size: 36px; margin-bottom: 12px; }
-.landing-card-role {
-  font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 4px;
+.login-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0 16px; font-size: 11px; color: var(--text-dim);
 }
-.landing-card-name {
-  font-size: 12px; color: var(--text-dim); margin-bottom: 12px;
+.login-divider::before, .login-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
 }
-.landing-card-desc {
-  font-size: 12px; color: var(--text-mid); line-height: 1.5;
+.test-accounts { display: flex; gap: 8px; }
+.test-account {
+  flex: 1; padding: 10px 8px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 8px;
+  cursor: pointer; transition: all 0.2s; text-align: center;
 }
-.landing-card.requester:hover { border-color: var(--blue); }
-.landing-card.manager:hover { border-color: var(--yellow); }
-.landing-card.worker:hover { border-color: var(--green); }
-.landing-card.requester .landing-card-icon { color: var(--blue); }
-.landing-card.manager .landing-card-icon { color: var(--yellow); }
-.landing-card.worker .landing-card-icon { color: var(--green); }
-.landing-footer {
-  margin-top: 40px; font-size: 11px; color: var(--text-dim); line-height: 1.8;
-}
+.test-account:hover { border-color: var(--accent); background: var(--accent-bg); }
+.test-account-icon { font-size: 20px; margin-bottom: 4px; }
+.test-account-role { font-size: 11px; font-weight: 600; color: var(--text); }
+.test-account-id { font-size: 10px; color: var(--text-dim); font-family: monospace; }
 </style>
 </head>
 <body class="light">
@@ -1746,34 +1752,35 @@ body.light .scenario-target {
     <div class="landing-icon">📋</div>
     <div class="landing-title">사내 업무 요청 서비스</div>
     <div class="landing-subtitle">Internal Work Request Service</div>
-    <div class="landing-badge">PoC Prototype</div>
-    <div class="landing-desc">
-      사내 업무 요청의 등록부터 처리 완료까지,<br>
-      역할별 업무 흐름을 체험할 수 있는 프로토타입입니다.<br>
-      접속할 역할을 선택해주세요.
-    </div>
-    <div class="landing-cards">
-      <div class="landing-card requester" onclick="enterAs('requester')">
-        <div class="landing-card-icon">👤</div>
-        <div class="landing-card-role">요청자</div>
-        <div class="landing-card-name">김민수 · 영업팀</div>
-        <div class="landing-card-desc">업무 요청을 등록하고<br>처리 현황을 추적합니다</div>
+    <div class="login-box">
+      <div class="login-field">
+        <label>사번 / 아이디</label>
+        <input type="text" id="loginId" placeholder="사번 또는 아이디를 입력하세요" autocomplete="off">
       </div>
-      <div class="landing-card manager" onclick="enterAs('manager')">
-        <div class="landing-card-icon">👔</div>
-        <div class="landing-card-role">관리자</div>
-        <div class="landing-card-name">박지영 · 경영지원팀</div>
-        <div class="landing-card-desc">요청을 검토하고<br>담당자를 배정합니다</div>
+      <div class="login-field">
+        <label>비밀번호</label>
+        <input type="password" id="loginPw" placeholder="비밀번호를 입력하세요" value="">
       </div>
-      <div class="landing-card worker" onclick="enterAs('worker')">
-        <div class="landing-card-icon">🔧</div>
-        <div class="landing-card-role">실무자</div>
-        <div class="landing-card-name">이준호 · IT지원팀</div>
-        <div class="landing-card-desc">배정된 업무를 처리하고<br>결과를 보고합니다</div>
+      <button class="login-btn" id="loginBtn" onclick="handleLogin()">로그인</button>
+      <div class="login-error" id="loginError">등록되지 않은 계정입니다.</div>
+      <div class="login-divider">테스트 계정</div>
+      <div class="test-accounts">
+        <div class="test-account" onclick="fillTestAccount('kimms','1234')">
+          <div class="test-account-icon">👤</div>
+          <div class="test-account-role">요청자</div>
+          <div class="test-account-id">kimms</div>
+        </div>
+        <div class="test-account" onclick="fillTestAccount('parkjy','1234')">
+          <div class="test-account-icon">👔</div>
+          <div class="test-account-role">관리자</div>
+          <div class="test-account-id">parkjy</div>
+        </div>
+        <div class="test-account" onclick="fillTestAccount('leejh','1234')">
+          <div class="test-account-icon">🔧</div>
+          <div class="test-account-role">실무자</div>
+          <div class="test-account-id">leejh</div>
+        </div>
       </div>
-    </div>
-    <div class="landing-footer">
-      햄버거 메뉴(☰)에서 역할 전환 · 시나리오 모드 · 서비스 기획 산출물을 확인할 수 있습니다
     </div>
   </div>
 </div>
@@ -3777,10 +3784,37 @@ document.addEventListener('click', e => {
 });
 
 // ── Landing Page ──
-function enterAs(role) {
-  switchRole(role);
+const LOGIN_ACCOUNTS = {
+  kimms:  { role: 'requester', name: '김민수', dept: '영업팀' },
+  parkjy: { role: 'manager',   name: '박지영', dept: '경영지원팀' },
+  leejh:  { role: 'worker',    name: '이준호', dept: 'IT지원팀' },
+};
+
+function fillTestAccount(id, pw) {
+  document.getElementById('loginId').value = id;
+  document.getElementById('loginPw').value = pw;
+  document.getElementById('loginError').style.display = 'none';
+}
+
+function handleLogin() {
+  const id = document.getElementById('loginId').value.trim().toLowerCase();
+  const pw = document.getElementById('loginPw').value;
+  const account = LOGIN_ACCOUNTS[id];
+  if (!account || !pw) {
+    document.getElementById('loginError').style.display = 'block';
+    return;
+  }
+  document.getElementById('loginError').style.display = 'none';
+  switchRole(account.role);
   document.getElementById('landingPage').classList.add('hide');
 }
+
+document.getElementById('loginPw').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+document.getElementById('loginId').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('loginPw').focus();
+});
 
 // ── Init ──
 renderSidebar();
