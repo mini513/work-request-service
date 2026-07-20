@@ -2571,7 +2571,18 @@ function getAssigneeList() {
 }
 
 function renderFilterBar(role) {
-  if (role !== 'manager') {
+  if (role === 'requester') {
+    const reqStatuses = ['대기중', '진행중', '완료', '반려'];
+    return `<div class="filter-bar">
+      <button class="filter-btn ${currentFilter==='전체'?'active':''}" onclick="filterStatus(this,'전체')">전체</button>
+      ${reqStatuses.map(s => `<button class="filter-btn ${currentFilter===s?'active':''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
+      <div class="search-wrap">
+        <input class="search-input" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')execSearch(this.value)">
+        <button class="search-btn" onclick="execSearch(this.previousElementSibling.value)" title="검색">🔍</button>
+      </div>
+    </div>`;
+  }
+  if (role === 'worker') {
     return `<div class="filter-bar">
       <button class="filter-btn ${currentFilter==='전체'?'active':''}" onclick="filterStatus(this,'전체')">전체</button>
       ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active':''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
@@ -2651,6 +2662,8 @@ function applyFilters(reqs) {
   let filtered = reqs;
   if (currentFilter === '미배정') {
     filtered = filtered.filter(r => !r.assignee);
+  } else if (currentFilter === '대기중') {
+    filtered = filtered.filter(r => r.status === '접수' || r.status === '배정완료');
   } else if (currentFilter !== '전체') {
     filtered = filtered.filter(r => r.status === currentFilter);
   }
@@ -3092,7 +3105,7 @@ const SCENARIOS = [
 
   // ── 요청자 시나리오 6: 상태별 필터링 ──
   { role: 'requester', group: '상태별 필터링', page: 'list', detail: null, target: '.filter-bar',
-    text: '<strong>필터 ①</strong> 상단 필터 버튼(전체/접수/배정완료/진행중/완료/반려)을 클릭하여 원하는 상태만 봅니다.' },
+    text: '<strong>필터 ①</strong> 상단 필터 버튼(전체/대기중/진행중/완료/반려)을 클릭하여 원하는 상태만 봅니다. 대기중은 접수+배정완료를 포함합니다.' },
   { role: 'requester', group: '상태별 필터링', page: 'list', detail: null, target: '.search-input',
     text: '<strong>필터 ②</strong> 검색창에 키워드를 입력하면 제목/내용에서 검색됩니다.' },
 
@@ -3432,7 +3445,7 @@ function openIAMap() {
     requester: {
       label: '👤 요청자',
       pages: [
-        { name: '내 요청 목록', features: ['상태 필터 (전체/접수/배정완료/진행중/완료/반려)', '검색', '정렬 (ID/카테고리/제목/긴급도/상태/등록일/담당자)', '새 요청 등록 버튼'] },
+        { name: '내 요청 목록', features: ['상태 필터 (전체/대기중/진행중/완료/반려)', '검색', '정렬 (ID/카테고리/제목/긴급도/상태/등록일/담당자)', '새 요청 등록 버튼'] },
         { name: '요청 상세', features: ['요청 내용 · 긴급도 · 희망완료일', '상태 스테퍼 (접수→배정완료→진행중→완료)', '담당자 · 보고자 · 작업 예정일', '처리 타임라인', '댓글'] },
         { name: '새 요청 등록 (모달)', features: ['카테고리 · 제목 · 상세 내용', '긴급도 · 희망 완료일'] },
       ]
