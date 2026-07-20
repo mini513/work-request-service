@@ -764,6 +764,26 @@ body {
 .sh-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-mid); }
 .sh-legend-color { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.1); }
 
+/* ── Service Blueprint ── */
+.bp-wrap { padding: 16px; overflow-x: auto; }
+.bp-table { border-collapse: collapse; width: 100%; min-width: 900px; }
+.bp-table th, .bp-table td { padding: 10px 14px; text-align: center; vertical-align: top; font-size: 12px; border: 1px solid var(--border); }
+.bp-table th { font-weight: 700; font-size: 11px; white-space: nowrap; }
+.bp-layer-label { writing-mode: vertical-rl; text-orientation: mixed; font-weight: 700; font-size: 11px; letter-spacing: 1px; padding: 8px 6px !important; white-space: nowrap; min-width: 36px; }
+.bp-layer-label.user { background: var(--blue-bg); color: var(--blue); }
+.bp-layer-label.front { background: var(--accent-bg); color: var(--accent); }
+.bp-layer-label.back { background: var(--yellow-bg); color: var(--yellow); }
+.bp-layer-label.support { background: var(--green-bg); color: var(--green); }
+.bp-step-header { background: var(--surface2); font-weight: 700; font-size: 12px; color: var(--text); }
+.bp-cell { background: var(--surface); color: var(--text-mid); font-size: 11px; line-height: 1.5; }
+.bp-cell.empty { background: var(--bg); color: var(--text-dim); font-style: italic; }
+.bp-divider-row td { height: 4px; padding: 0 !important; border: none; }
+.bp-line-label { font-size: 10px; font-weight: 700; color: var(--text-dim); text-align: right; padding: 2px 8px !important; border: none; background: transparent; letter-spacing: 0.5px; }
+.bp-phase-header { background: var(--accent); color: #fff; font-weight: 700; font-size: 12px; text-align: center; padding: 8px !important; }
+.bp-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+.bp-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-mid); }
+.bp-legend-bar { width: 14px; height: 14px; border-radius: 3px; }
+
 /* ── Request List ── */
 .req-list { display: flex; flex-direction: column; gap: 8px; }
 .req-item {
@@ -1679,6 +1699,7 @@ body.light .scenario-target {
         <button class="ham-action-btn" onclick="openScenarioMap();toggleHamburger()">시나리오 흐름도</button>
         <button class="ham-action-btn" onclick="openIAMap();toggleHamburger()" style="margin-top:4px">IA 구조도</button>
         <button class="ham-action-btn" onclick="openStakeholderMap();toggleHamburger()" style="margin-top:4px">이해관계자맵</button>
+        <button class="ham-action-btn" onclick="openBlueprintMap();toggleHamburger()" style="margin-top:4px">서비스 블루프린트</button>
         <div class="ham-toggle-row" style="margin-top:4px">
           <span class="ham-toggle-label">개발 모드</span>
           <label class="toggle-switch"><input type="checkbox" id="devModeToggle" onchange="toggleDevPanel()"><span class="toggle-slider"></span></label>
@@ -1854,6 +1875,16 @@ body.light .scenario-target {
       <button class="modal-close" onclick="closeModal('stakeholderMapModal')">×</button>
     </div>
     <div class="modal-body" id="stakeholderMapBody" style="overflow:auto;max-height:calc(90vh - 80px)"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="blueprintModal">
+  <div class="modal" style="max-width:95vw;width:1400px;max-height:90vh">
+    <div class="modal-header">
+      <h3>서비스 블루프린트 (Service Blueprint)</h3>
+      <button class="modal-close" onclick="closeModal('blueprintModal')">×</button>
+    </div>
+    <div class="modal-body" id="blueprintBody" style="overflow:auto;max-height:calc(90vh - 80px)"></div>
   </div>
 </div>
 
@@ -3216,6 +3247,81 @@ function getScenarioGroups(steps) {
 }
 
 let filteredScenarios = [];
+
+function openBlueprintMap() {
+  const phases = [
+    { name: '요청 등록', actor: '요청자' },
+    { name: '요청 접수', actor: '관리자' },
+    { name: '담당자 배정', actor: '관리자' },
+    { name: '작업 수행', actor: '실무자' },
+    { name: '처리 완료', actor: '실무자' },
+    { name: '결과 확인', actor: '요청자' },
+  ];
+
+  const layers = [
+    { key: 'user', label: '사용자 행동', class: 'user', rows: [
+      ['카테고리·제목·내용 작성\n긴급도·희망완료일 선택', '알림 확인\n요청 목록에서 상태 확인', '—', '—', '—', '완료 알림 확인\n처리 내용 확인\n댓글로 소통'],
+    ]},
+    { key: 'front', label: '프론트스테이지\n(화면)', class: 'front', rows: [
+      ['새 요청 등록 모달\n입력 폼 표시', '요청 상세 화면\n상태 스테퍼 표시', '담당자 배정 모달\n실무자 선택 드롭다운\n보고자 지정', '내 담당 목록\n상태 전환 드롭다운\n작업 예정일 입력', '처리 완료 버튼\n처리 내용 입력 폼', '요청 상세 화면\n타임라인 표시\n댓글 입력'],
+    ]},
+    { key: 'back', label: '백스테이지\n(시스템)', class: 'back', rows: [
+      ['요청 데이터 저장\n요청 ID 자동 생성\n상태: 접수', '관리자 알림 생성\n대시보드 카운트 갱신', '상태 → 배정완료\n실무자 연결\n보고자 연결', '상태 → 진행중\n타임라인 기록 추가\n예정일 저장', '상태 → 완료\n처리 내용 저장\n완료일 기록', '타임라인 최종 갱신\n댓글 데이터 저장'],
+    ]},
+    { key: 'support', label: '지원 프로세스', class: 'support', rows: [
+      ['—', '관리자에게 알림 발송\n(신규 요청 접수)', '실무자에게 알림 발송\n(업무 배정 알림)\n보고자에게 알림 발송', '관리자에게 알림 발송\n(상태 변경 알림)', '요청자에게 알림 발송\n(처리 완료 알림)\n관리자에게 알림 발송', '—'],
+    ]},
+  ];
+
+  const lineLabels = [
+    { label: 'Line of Interaction', desc: '사용자와 화면의 접점' },
+    { label: 'Line of Visibility', desc: '사용자에게 보이는 영역과 보이지 않는 영역의 경계' },
+    { label: 'Line of Internal Interaction', desc: '백엔드 시스템과 지원 프로세스의 경계' },
+  ];
+
+  let tableHtml = '<table class="bp-table">';
+  tableHtml += '<tr><th></th>';
+  phases.forEach((p, i) => {
+    tableHtml += `<th class="bp-step-header">${i + 1}. ${p.name}<br><span style="font-weight:400;color:var(--text-dim)">${p.actor}</span></th>`;
+  });
+  tableHtml += '</tr>';
+
+  layers.forEach((layer, li) => {
+    const rowCount = layer.rows.length;
+    layer.rows.forEach((row, ri) => {
+      tableHtml += '<tr>';
+      if (ri === 0) {
+        tableHtml += `<td class="bp-layer-label ${layer.class}" rowspan="${rowCount}">${layer.label.replace(/\n/g, '<br>')}</td>`;
+      }
+      row.forEach(cell => {
+        const isEmpty = cell === '—';
+        tableHtml += `<td class="bp-cell${isEmpty ? ' empty' : ''}">${isEmpty ? '—' : cell.replace(/\n/g, '<br>')}</td>`;
+      });
+      tableHtml += '</tr>';
+    });
+
+    if (li < layers.length - 1) {
+      const ll = lineLabels[li];
+      tableHtml += `<tr class="bp-divider-row"><td class="bp-line-label" colspan="${phases.length + 1}" style="text-align:center;height:auto;padding:4px 8px !important;border-top:2px dashed var(--text-dim);border-bottom:none"><span style="background:var(--surface);padding:0 8px">${ll.label}</span> <span style="font-weight:400;font-size:9px">${ll.desc}</span></td></tr>`;
+    }
+  });
+
+  tableHtml += '</table>';
+
+  const html = `<div class="bp-wrap">
+    ${tableHtml}
+    <div class="bp-legend">
+      <div class="bp-legend-item"><div class="bp-legend-bar" style="background:var(--blue-bg);border:1px solid var(--blue)"></div>사용자 행동</div>
+      <div class="bp-legend-item"><div class="bp-legend-bar" style="background:var(--accent-bg);border:1px solid var(--accent)"></div>프론트스테이지 (화면 UI)</div>
+      <div class="bp-legend-item"><div class="bp-legend-bar" style="background:var(--yellow-bg);border:1px solid var(--yellow)"></div>백스테이지 (시스템 처리)</div>
+      <div class="bp-legend-item"><div class="bp-legend-bar" style="background:var(--green-bg);border:1px solid var(--green)"></div>지원 프로세스 (알림 등)</div>
+      <div class="bp-legend-item" style="margin-left:auto;color:var(--text-dim)">- - - 경계선 (Line of ~)</div>
+    </div>
+  </div>`;
+
+  document.getElementById('blueprintBody').innerHTML = html;
+  openModal('blueprintModal');
+}
 
 function openStakeholderMap() {
   const flows = [
