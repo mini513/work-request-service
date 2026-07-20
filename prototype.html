@@ -3234,9 +3234,11 @@ function highlightScenarioTargets(s) {
           const isFormField = el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA';
           if (isFormField) {
             const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+            let inputTimer = null;
             const handler = function() {
               if (el.value && el.value.trim() !== '') {
-                setTimeout(() => nextScenarioStep(), 400);
+                if (inputTimer) clearTimeout(inputTimer);
+                inputTimer = setTimeout(() => { inputTimer = null; nextScenarioStep(); }, 400);
               }
             };
             el.addEventListener(evt, handler);
