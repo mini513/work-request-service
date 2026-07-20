@@ -2413,7 +2413,6 @@ function applyCustomDate() {
 }
 
 function renderLog(el) {
-  const range = getLogDateRange();
   const all = filterByPeriod(REQUESTS);
   const completed = all.filter(r => r.status === '완료');
   const urgentDone = completed.filter(r => r.priority === '긴급' || r.priority === '높음');
