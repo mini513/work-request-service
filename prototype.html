@@ -2294,15 +2294,13 @@ function renderWorkerList(el) {
   `;
 }
 
-// ── Dashboard (현황 요약 + KPI 경고 + 분포 차트) ──
+// ── Dashboard (액션 센터 — 지금 조치 필요한 항목) ──
 function renderDashboard(el) {
   const all = REQUESTS;
   const total = all.length;
-  const byStatus = {};
-  STATUSES.forEach(s => byStatus[s] = all.filter(r => r.status === s).length);
   const unassigned = all.filter(r => !r.assignee).length;
   const completed = all.filter(r => r.status === '완료').length;
-  const inProgressCount = byStatus['진행중'] || 0;
+  const inProgressCount = all.filter(r => r.status === '진행중').length;
 
   const kpiAlerts = all.filter(r => !r.assignee && getDaysSince(r.createdAt) >= 1.5);
   let alertHtml = '';
@@ -2314,30 +2312,15 @@ function renderDashboard(el) {
     alertHtml += '</div>';
   }
 
-  const statusData = [
-    { name: '접수', count: byStatus['접수'] || 0, color: '#ff8c00' },
-    { name: '배정완료', count: byStatus['배정완료'] || 0, color: '#5b8def' },
-    { name: '진행중', count: inProgressCount, color: '#a78bfa' },
-    { name: '완료', count: completed, color: '#22c55e' },
-    { name: '반려', count: byStatus['반려'] || 0, color: '#f55' },
-  ];
-  const donutTotal = Math.max(statusData.reduce((s, d) => s + d.count, 0), 1);
-  let donutOffset = 0;
-  const donutSegments = statusData.filter(d => d.count > 0).map(d => {
-    const pct = (d.count / donutTotal) * 100;
-    const seg = { ...d, pct, offset: donutOffset };
-    donutOffset += pct;
-    return seg;
-  });
-
-  const byCat = {};
-  CATEGORIES.forEach(c => byCat[c] = all.filter(r => r.category === c).length);
-  const maxCat = Math.max(...Object.values(byCat), 1);
-  const catColors = { 'IT 장애': '#5b8def', '비품 요청': '#22c55e', '시설 보수': '#ff8c00', '기타': '#a78bfa' };
+  const recentReceived = all.filter(r => r.status === '접수' || (r.status === '배정완료' && !r.assignee)).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+  const inProgressReqs = all.filter(r => r.status === '진행중' || r.status === '배정완료').sort((a, b) => {
+    const pa = { '긴급': 0, '높음': 1, '보통': 2, '낮음': 3 };
+    return (pa[a.priority] ?? 9) - (pa[b.priority] ?? 9);
+  }).slice(0, 5);
 
   el.innerHTML = `
     <div class="page-header">
-      <div><div class="page-title">대시보드</div><div class="page-subtitle">전체 업무 요청 현황을 한눈에 확인합니다</div></div>
+      <div><div class="page-title">대시보드</div><div class="page-subtitle">지금 조치가 필요한 항목을 확인합니다</div></div>
     </div>
     <div class="dashboard-body">
       <div class="dashboard-main">
@@ -2349,26 +2332,41 @@ function renderDashboard(el) {
         </div>
         <div class="chart-grid">
           <div class="chart-card">
-            <div class="chart-card-title">상태별 분포</div>
-            <div class="donut-wrap">
-              <svg class="donut-svg" viewBox="0 0 42 42">
-                <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--surface2)" stroke-width="5"/>
-                ${donutSegments.map(d => `<circle cx="21" cy="21" r="15.9" fill="none" stroke="${d.color}" stroke-width="5" stroke-dasharray="${d.pct} ${100-d.pct}" stroke-dashoffset="${-d.offset}" stroke-linecap="round"/>`).join('')}
-              </svg>
-              <div class="donut-legend">
-                ${statusData.map(d => `<div class="donut-legend-item"><div class="donut-legend-dot" style="background:${d.color}"></div><span>${d.name}</span><span class="donut-legend-count">${d.count}</span></div>`).join('')}
-              </div>
+            <div class="chart-card-title" style="display:flex;justify-content:space-between;align-items:center">
+              <span>📥 최근 접수된 요청</span>
+              <span style="font-size:11px;color:var(--text-dim);font-weight:400;cursor:pointer" onclick="navigateWithFilter('접수')">전체 보기 →</span>
             </div>
+            ${recentReceived.length ? `<div style="display:flex;flex-direction:column;gap:6px">
+              ${recentReceived.map(r => {
+                const pc = PRIORITY_COLORS[r.priority] || {};
+                const days = getDaysSince(r.createdAt).toFixed(0);
+                return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface1);border-radius:6px;cursor:pointer;font-size:13px" onclick="openDetail('${r.id}')">
+                  <span style="font-family:monospace;color:var(--text-dim);font-size:11px;min-width:56px">${r.id}</span>
+                  <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:10px;padding:1px 6px">${r.priority}</span>
+                  <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</span>
+                  <span style="font-size:11px;color:var(--text-dim);white-space:nowrap">${days}일 전</span>
+                  ${!r.assignee ? `<button class="btn btn-sm btn-primary" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();openAssignModal('${r.id}')">배정</button>` : ''}
+                </div>`;
+              }).join('')}
+            </div>` : `<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:13px">접수 대기 중인 요청이 없습니다</div>`}
           </div>
           <div class="chart-card">
-            <div class="chart-card-title">카테고리별 요청 현황</div>
-            <div class="bar-chart">
-              ${CATEGORIES.map(c => `<div class="bar-row">
-                <div class="bar-label">${c}</div>
-                <div class="bar-track"><div class="bar-fill" style="width:${(byCat[c]/maxCat)*100}%;background:${catColors[c]}"></div></div>
-                <div class="bar-value">${byCat[c]}</div>
-              </div>`).join('')}
+            <div class="chart-card-title" style="display:flex;justify-content:space-between;align-items:center">
+              <span>🔧 처리 중인 요청</span>
+              <span style="font-size:11px;color:var(--text-dim);font-weight:400;cursor:pointer" onclick="navigateWithFilter('진행중')">전체 보기 →</span>
             </div>
+            ${inProgressReqs.length ? `<div style="display:flex;flex-direction:column;gap:6px">
+              ${inProgressReqs.map(r => {
+                const pc = PRIORITY_COLORS[r.priority] || {};
+                const sc = STATUS_COLORS[r.status] || {};
+                return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface1);border-radius:6px;cursor:pointer;font-size:13px" onclick="openDetail('${r.id}')">
+                  <span style="font-family:monospace;color:var(--text-dim);font-size:11px;min-width:56px">${r.id}</span>
+                  <span class="badge" style="background:${sc.bg};color:${sc.text};font-size:10px;padding:1px 6px">${r.status}</span>
+                  <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</span>
+                  <span style="font-size:11px;color:var(--text-dim);white-space:nowrap">${r.assignee ? r.assignee.name : '미배정'}</span>
+                </div>`;
+              }).join('')}
+            </div>` : `<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:13px">처리 중인 요청이 없습니다</div>`}
           </div>
         </div>
       </div>
@@ -2431,11 +2429,34 @@ function renderLog(el) {
   const maxPri = Math.max(...Object.values(byPriority), 1);
   const priColors = { '긴급': '#f55', '높음': '#ff8c00', '보통': '#5b8def', '낮음': '#22c55e' };
 
+  const byStatus = {};
+  STATUSES.forEach(s => byStatus[s] = all.filter(r => r.status === s).length);
+  const statusData = [
+    { name: '접수', count: byStatus['접수'] || 0, color: '#ff8c00' },
+    { name: '배정완료', count: byStatus['배정완료'] || 0, color: '#5b8def' },
+    { name: '진행중', count: byStatus['진행중'] || 0, color: '#a78bfa' },
+    { name: '완료', count: completed.length, color: '#22c55e' },
+    { name: '반려', count: byStatus['반려'] || 0, color: '#f55' },
+  ];
+  const donutTotal = Math.max(statusData.reduce((s, d) => s + d.count, 0), 1);
+  let donutOffset = 0;
+  const donutSegments = statusData.filter(d => d.count > 0).map(d => {
+    const pct = (d.count / donutTotal) * 100;
+    const seg = { ...d, pct, offset: donutOffset };
+    donutOffset += pct;
+    return seg;
+  });
+
+  const byCat = {};
+  CATEGORIES.forEach(c => byCat[c] = all.filter(r => r.category === c).length);
+  const maxCat = Math.max(...Object.values(byCat), 1);
+  const catColors = { 'IT 장애': '#5b8def', '비품 요청': '#22c55e', '시설 보수': '#ff8c00', '기타': '#a78bfa' };
+
   const periodLabel = logPeriod === 'all' ? '전체' : logPeriod === 'day' ? '오늘' : logPeriod === 'week' ? '최근 7일' : logPeriod === 'month' ? '이번 달' : `${logCustomFrom} ~ ${logCustomTo}`;
 
   el.innerHTML = `
     <div class="page-header">
-      <div><div class="page-title">처리 현황</div><div class="page-subtitle">처리 성과와 완료 이력을 분석합니다</div></div>
+      <div><div class="page-title">처리 현황</div><div class="page-subtitle">기간별 처리 성과와 분포를 분석합니다</div></div>
     </div>
     <div class="card" style="padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <span style="font-size:13px;font-weight:600;color:var(--text-mid);margin-right:4px">기간</span>
@@ -2458,6 +2479,30 @@ function renderLog(el) {
       <div class="stat-card"><div class="stat-label">긴급/높음 처리</div><div class="stat-value" style="color:var(--yellow)">${urgentDone.length}</div></div>
     </div>
 
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-card-title">상태별 분포</div>
+        <div class="donut-wrap">
+          <svg class="donut-svg" viewBox="0 0 42 42">
+            <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--surface2)" stroke-width="5"/>
+            ${donutSegments.map(d => `<circle cx="21" cy="21" r="15.9" fill="none" stroke="${d.color}" stroke-width="5" stroke-dasharray="${d.pct} ${100-d.pct}" stroke-dashoffset="${-d.offset}" stroke-linecap="round"/>`).join('')}
+          </svg>
+          <div class="donut-legend">
+            ${statusData.map(d => `<div class="donut-legend-item"><div class="donut-legend-dot" style="background:${d.color}"></div><span>${d.name}</span><span class="donut-legend-count">${d.count}</span></div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">카테고리별 요청 현황</div>
+        <div class="bar-chart">
+          ${CATEGORIES.map(c => `<div class="bar-row">
+            <div class="bar-label">${c}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${(byCat[c]/maxCat)*100}%;background:${catColors[c]}"></div></div>
+            <div class="bar-value">${byCat[c]}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-title">긴급도별 요청 분포</div>
