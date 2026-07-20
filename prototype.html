@@ -2931,6 +2931,7 @@ function renderFilterBar(role) {
         ${getAssigneeList().map(n => `<option value="${n}"${filterAssignee===n?' selected':''}>${n}</option>`).join('')}
       </select>
     </div>
+    <span style="color:var(--border);margin:0 2px">|</span>
     <div class="search-wrap">
       <input class="search-input" id="searchInput" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')applyManagerFilter()">
     </div>
