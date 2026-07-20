@@ -3212,7 +3212,7 @@ function highlightScenarioTargets(s) {
   if (!s.target) return;
     const selectors = s.target.split(',').map(t => t.trim());
     selectors.forEach(sel => {
-      const el = Array.from(document.querySelectorAll(sel)).find(e => !e.closest('#scenarioBar') && (!e.closest('.header') || e.classList.contains('noti-btn')));
+      const el = Array.from(document.querySelectorAll(sel)).find(e => !e.closest('#scenarioBar') && (!e.closest('.header') || e.classList.contains('noti-btn') || e.classList.contains('noti-item')));
       if (el) {
         const isClickable = s.targetLabel !== false;
         const cls = isClickable ? 'scenario-target' : 'scenario-target-no-label';
