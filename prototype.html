@@ -2009,7 +2009,7 @@ body.light .scenario-target {
       </div>
     </div>
   </div>
-  <div class="header-logo">📋 업무요청</div>
+  <div class="header-logo">📋 업무 요청 서비스</div>
   <span class="current-role-badge" id="currentRoleBadge">요청자</span>
   <div class="header-spacer"></div>
   <div class="noti-wrap">
@@ -2443,7 +2443,7 @@ function renderWorkerDashboard(el) {
   }).join('');
 
   const kanbanCols = [
-    { status: 'TO-DO', label: 'TO-DO', color: 'var(--blue)', bg: 'var(--blue-bg)' },
+    { status: 'TO-DO', label: '배정 완료', color: 'var(--blue)', bg: 'var(--blue-bg)' },
     { status: '진행중', label: '진행중', color: 'var(--accent)', bg: 'var(--accent-bg)' },
     { status: '완료', label: '완료', color: 'var(--green)', bg: 'var(--green-bg)' },
   ];
@@ -2513,7 +2513,7 @@ function renderWorkerList(el) {
     ['TO-DO','진행중','완료'].forEach(s => byStatus[s] = myReqsAll.filter(r => r.status === s).length);
 
     const kanbanCols = [
-      { status: 'TO-DO', label: 'TO-DO', color: 'var(--blue)', bg: 'var(--blue-bg)' },
+      { status: 'TO-DO', label: '배정 완료', color: 'var(--blue)', bg: 'var(--blue-bg)' },
       { status: '진행중', label: '진행중', color: 'var(--accent)', bg: 'var(--accent-bg)' },
       { status: '완료', label: '완료', color: 'var(--green)', bg: 'var(--green-bg)' },
     ];
@@ -2551,7 +2551,7 @@ function renderWorkerList(el) {
       </div>
       <div class="stats-row">
         <div class="stat-card" style="border:1.5px solid #D5D5D5"><div class="stat-label">전체</div><div class="stat-value">${total}</div></div>
-        <div class="stat-card" style="border:1.5px solid #D5D5D5"><div class="stat-label" style="color:var(--blue)">TO-DO</div><div class="stat-value" style="color:var(--blue)">${byStatus['TO-DO'] || 0}</div></div>
+        <div class="stat-card" style="border:1.5px solid #D5D5D5"><div class="stat-label" style="color:var(--blue)">배정 완료</div><div class="stat-value" style="color:var(--blue)">${byStatus['TO-DO'] || 0}</div></div>
         <div class="stat-card" style="border:1.5px solid #D5D5D5"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${byStatus['진행중'] || 0}</div></div>
         <div class="stat-card" style="border:1.5px solid #D5D5D5"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${byStatus['완료'] || 0}</div></div>
       </div>
@@ -2828,7 +2828,7 @@ function renderLog(el) {
   STATUSES.forEach(s => byStatus[s] = all.filter(r => r.status === s).length);
   const statusData = [
     { name: '미배정', count: byStatus['미배정'] || 0, color: '#e53935' },
-    { name: 'TO-DO', count: byStatus['TO-DO'] || 0, color: '#5b8def' },
+    { name: '배정 완료', count: byStatus['TO-DO'] || 0, color: '#5b8def' },
     { name: '진행중', count: byStatus['진행중'] || 0, color: '#a78bfa' },
     { name: '완료', count: completed.length, color: '#22c55e' },
     { name: '반려', count: byStatus['반려'] || 0, color: '#f55' },
@@ -3061,7 +3061,7 @@ function renderDetail(el) {
         <div class="form-group"><label class="form-label">처리 내용</label><textarea class="form-textarea" id="completeNote" placeholder="처리 결과를 입력하세요"></textarea></div>
         <div style="display:flex;gap:8px">
           <button class="btn btn-primary" onclick="completeWork('${req.id}')">처리 완료</button>
-          <button class="btn btn-secondary" onclick="quickChangeStatus('${req.id}','TO-DO')">← TO-DO로 되돌리기</button>
+          <button class="btn btn-secondary" onclick="quickChangeStatus('${req.id}','TO-DO')">← 배정 완료로 되돌리기</button>
         </div>
       </div>`;
     } else if (req.status === '완료') {
@@ -3185,7 +3185,7 @@ function toggleStatusDropdown(e, reqId) {
 
   const rect = e.currentTarget.getBoundingClientRect();
   const dd = document.getElementById('statusDropdown');
-  const actionLabel = { 'TO-DO': '← TO-DO로 되돌리기', '진행중': '→ 작업 시작', '완료': '→ 처리 완료' };
+  const actionLabel = { 'TO-DO': '← 배정 완료로 되돌리기', '진행중': '→ 작업 시작', '완료': '→ 처리 완료' };
   const fromComplete = req.status === '완료';
   if (fromComplete) actionLabel['진행중'] = '← 진행중으로 되돌리기';
   dd.innerHTML = `<div class="status-dropdown-item current" style="pointer-events:none">
@@ -3214,7 +3214,7 @@ function quickChangeStatus(id, newStatus) {
   const timelineActions = {
     '진행중': { action: '진행중', detail: oldStatus === '완료' ? '완료 → 진행중으로 상태 변경' : '작업 시작' },
     '완료': { action: '완료', detail: '처리 완료' },
-    'TO-DO': { action: '상태 변경', detail: '진행중 → TO-DO로 상태 변경' },
+    'TO-DO': { action: '상태 변경', detail: '진행중 → 배정 완료로 상태 변경' },
   };
   const ta = timelineActions[newStatus];
   if (ta) req.timeline.push({ date: now, action: ta.action, by: USERS.worker1.name, detail: ta.detail });
@@ -3910,7 +3910,7 @@ const SCENARIOS = [
   { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: null, target: '.noti-item', action: 'openNoti',
     text: '<strong>소통 ②</strong> "담당자가 배정되었습니다" 알림을 클릭하여 해당 요청 상세로 이동합니다.' },
   { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.status-stepper',
-    text: '<strong>소통 ③</strong> 상태 스테퍼에서 "TO-DO" 단계를 확인합니다. 담당자가 지정되었네요!' },
+    text: '<strong>소통 ③</strong> 상태 스테퍼에서 "배정 완료" 단계를 확인합니다. 담당자가 지정되었네요!' },
   { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.detail-info-value',
     text: '<strong>소통 ④</strong> 배정된 담당자(이준호)와 보고자(한동훈 파트장) 정보를 확인합니다.' },
   { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.comment-item',
@@ -3930,7 +3930,7 @@ const SCENARIOS = [
   { role: 'requester', group: '처리 완료 확인', page: 'list', detail: 'REQ-004', target: '.status-stepper',
     text: '<strong>확인 ③</strong> 상태 스테퍼에서 "완료" 단계를 확인합니다. 처리가 완료되었네요!' },
   { role: 'requester', group: '처리 완료 확인', page: 'list', detail: 'REQ-004', target: '.timeline-item', targetLabel: false,
-    text: '<strong>확인 ④</strong> 타임라인에서 전체 처리 이력(미배정→TO-DO→진행중→완료)을 확인합니다.' },
+    text: '<strong>확인 ④</strong> 타임라인에서 전체 처리 이력(미배정→배정 완료→진행중→완료)을 확인합니다.' },
   { role: 'requester', group: '처리 완료 확인', page: 'list', detail: 'REQ-004', target: '.comment-input',
     text: '<strong>확인 ⑤</strong> 댓글로 감사 인사나 추가 피드백을 남깁니다.' },
 
@@ -4102,7 +4102,7 @@ function openBlueprintMap() {
       ['새 요청 등록 모달\n입력 폼 표시', '요청 상세 화면\n상태 스테퍼 표시', '담당자 배정 모달\n실무자 선택 드롭다운\n보고자 지정', '요청 상세 화면\n댓글 입력·목록\n작업 예정일 표시', '처리 완료 버튼\n처리 내용 입력 폼\n댓글 입력', '요청 상세 화면\n타임라인 표시\n댓글 입력'],
     ]},
     { key: 'back', label: '백스테이지\n(시스템)', class: 'back', rows: [
-      ['요청 데이터 저장\n요청 ID 자동 생성\n상태: 미배정', '관리자 알림 생성\n모니터링 카운트 갱신', '상태 → TO-DO\n실무자 연결\n보고자 연결', '댓글 데이터 저장\n실무자 알림 생성\n상태 → 진행중\n예정일 저장', '상태 → 완료\n처리 내용 저장\n완료일 기록', '타임라인 최종 갱신\n댓글 데이터 저장'],
+      ['요청 데이터 저장\n요청 ID 자동 생성\n상태: 미배정', '관리자 알림 생성\n모니터링 카운트 갱신', '상태 → 배정 완료\n실무자 연결\n보고자 연결', '댓글 데이터 저장\n실무자 알림 생성\n상태 → 진행중\n예정일 저장', '상태 → 완료\n처리 내용 저장\n완료일 기록', '타임라인 최종 갱신\n댓글 데이터 저장'],
     ]},
     { key: 'support', label: '지원 프로세스', class: 'support', rows: [
       ['—', '관리자에게 알림 발송\n(신규 요청 알림)', '실무자에게 알림 발송\n(업무 배정 알림)\n보고자에게 알림 발송', '실무자에게 댓글 알림\n(요청자 긴급 소통)\n관리자에게 상태 변경 알림', '요청자에게 알림 발송\n(처리 완료 알림)\n관리자에게 알림 발송', '—'],
@@ -4274,7 +4274,7 @@ function openIAMap() {
       label: '👤 요청자',
       pages: [
         { name: '내 요청 목록', features: ['상태 필터 (전체/대기중/진행중/완료/반려)', '검색', '정렬 (ID/카테고리/제목/긴급도/상태/등록일/담당자)', '새 요청 등록 버튼'] },
-        { name: '요청 상세', features: ['요청 내용 · 긴급도 · 희망완료일', '상태 스테퍼 (미배정→TO-DO→진행중→완료)', '담당자 · 보고자 · 작업 예정일', '처리 타임라인', '댓글'] },
+        { name: '요청 상세', features: ['요청 내용 · 긴급도 · 희망완료일', '상태 스테퍼 (미배정→배정 완료→진행중→완료)', '담당자 · 보고자 · 작업 예정일', '처리 타임라인', '댓글'] },
         { name: '새 요청 등록 (모달)', features: ['카테고리 · 제목 · 상세 내용', '긴급도 · 희망 완료일'] },
       ]
     },
@@ -4290,8 +4290,8 @@ function openIAMap() {
     worker: {
       label: '🔧 실무자',
       pages: [
-        { name: '대시보드', features: ['담당 건수 카드 (TO-DO/진행중/완료)', '긴급 일감 하이라이트', '칸반 보드 (TO-DO/진행중/완료)'] },
-        { name: '내 담당 목록', features: ['상태 필터', '검색 · 정렬', '상태 전환 드롭다운 (TO-DO↔진행중↔완료)'] },
+        { name: '대시보드', features: ['담당 건수 카드 (배정 완료/진행중/완료)', '긴급 일감 하이라이트', '칸반 보드 (배정 완료/진행중/완료)'] },
+        { name: '내 담당 목록', features: ['상태 필터', '검색 · 정렬', '상태 전환 드롭다운 (배정 완료↔진행중↔완료)'] },
         { name: '요청 상세', features: ['작업 시작 + 예정일 알림', '처리 완료 + 처리 내용 기록', '상태 되돌리기', '댓글'] },
       ]
     }
@@ -4479,7 +4479,7 @@ function applyScenarioStep() {
 
 // ── Helpers ──
 function statusLabel(status) {
-  if (status === 'TO-DO' && currentRole === 'requester') return '배정 완료';
+  if (status === 'TO-DO') return '배정 완료';
   return status;
 }
 
