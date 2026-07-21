@@ -2581,7 +2581,7 @@ function renderDashboard(el) {
     .sort((a, b) => getDaysSince(b.createdAt) - getDaysSince(a.createdAt));
   let alertHtml = '';
   if (kpiAlerts.length) {
-    const showAlerts = kpiAlerts.slice(0, 4);
+    const showAlerts = kpiAlerts.slice(0, 5);
     const moreCount = kpiAlerts.length - showAlerts.length;
     alertHtml = `<div style="margin-bottom:20px">
       <div style="display:flex;align-items:center;margin-bottom:12px">
@@ -2589,7 +2589,7 @@ function renderDashboard(el) {
         <span style="background:var(--red);color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:8px">${kpiAlerts.length}건</span>
         ${moreCount > 0 ? `<span style="margin-left:auto;font-size:12px;color:var(--text-dim);cursor:pointer;text-decoration:underline" onclick="navigateWithFilter('미배정')">외 ${moreCount}건 더보기 →</span>` : ''}
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
         ${showAlerts.map(r => {
           const days = Math.floor(getDaysSince(r.createdAt));
           const pc = PRIORITY_COLORS[r.priority] || {};
