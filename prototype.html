@@ -2363,7 +2363,7 @@ function renderRequesterList(el) {
     </div>
     ${delayHtml}
     ${renderFilterBar('requester')}
-    ${(() => { const cols = [{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'status',label:'상태'},{key:'date',label:'등록일'},{key:'assignee',label:'담당자'}]; return renderSortableHeader(cols) + `<div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경하거나 새 요청을 등록해 보세요')}</div>`; })()}
+    ${(() => { const cols = [{key:'priority',label:'긴급도'},{key:'status',label:'상태'},{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'date',label:'등록일'},{key:'assignee',label:'담당자'}]; return renderSortableHeader(cols) + `<div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경하거나 새 요청을 등록해 보세요')}</div>`; })()}
   `;
 }
 
@@ -2376,7 +2376,7 @@ function renderManagerList(el) {
       <div><div class="page-title">전체 요청 목록</div><div class="page-subtitle">모든 부서의 업무 요청을 관리합니다</div></div>
     </div>
     ${renderFilterBar('manager')}
-    ${(() => { const cols = [{key:'status',label:'상태'},{key:'priority',label:'긴급도'},{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'date',label:'등록일'},{key:'assigneeAction',label:'담당자'}]; return renderSortableHeader(cols) + `<div class="req-list">${reqs.length ? reqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경해 보세요')}</div>`; })()}
+    ${(() => { const cols = [{key:'priority',label:'긴급도'},{key:'status',label:'상태'},{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'date',label:'등록일'},{key:'assigneeAction',label:'담당자'}]; return renderSortableHeader(cols) + `<div class="req-list">${reqs.length ? reqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경해 보세요')}</div>`; })()}
   `;
 }
 
@@ -2571,7 +2571,7 @@ function renderWorkerList(el) {
         ${viewToggle}
       </div>
       ${renderFilterBar('worker')}
-      ${(() => { const cols = [{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'statusAction',label:'상태'},{key:'date',label:'등록일'},{key:'requester',label:'요청자'}]; return renderSortableHeader(cols) + `<div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('배정된 요청이 없습니다', '새로운 요청이 배정되면 알림으로 통보됩니다')}</div>`; })()}
+      ${(() => { const cols = [{key:'priority',label:'긴급도'},{key:'statusAction',label:'상태'},{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'date',label:'등록일'},{key:'requester',label:'요청자'}]; return renderSortableHeader(cols) + `<div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('배정된 요청이 없습니다', '새로운 요청이 배정되면 알림으로 통보됩니다')}</div>`; })()}
     `;
   }
 }
