@@ -2363,15 +2363,23 @@ function renderManagerList(el) {
 
 // ── Worker Views ──
 let workerListViewMode = 'list';
+let workerDashFilter = 'all';
+
+function setWorkerDashFilter(id) {
+  workerDashFilter = id;
+  renderPage();
+}
 
 function renderWorkerDashboard(el) {
   const allAssigned = REQUESTS.filter(r => r.assignee);
   const workers = [USERS.worker1, USERS.worker2, USERS.worker3];
-  const total = allAssigned.length;
+  const filtered = workerDashFilter === 'all' ? allAssigned : allAssigned.filter(r => r.assignee.id === workerDashFilter);
+  const filterWorker = workers.find(w => w.id === workerDashFilter);
+  const total = filtered.length;
   const byStatus = {};
-  ['접수','배정완료','진행중','완료','반려'].forEach(s => byStatus[s] = allAssigned.filter(r => r.status === s).length);
+  ['배정완료','진행중','완료'].forEach(s => byStatus[s] = filtered.filter(r => r.status === s).length);
 
-  const urgentReqs = allAssigned.filter(r => r.status !== '완료' && r.status !== '반려' && (r.priority === '긴급' || r.priority === '높음'));
+  const urgentReqs = filtered.filter(r => r.status !== '완료' && r.status !== '반려' && (r.priority === '긴급' || r.priority === '높음'));
   let urgentHtml = '';
   if (urgentReqs.length > 0) {
     urgentHtml = `<div class="kpi-alert-wrap" style="background:var(--yellow-bg,#fff8e1);border-color:var(--yellow,#ff8c00)">
@@ -2379,7 +2387,7 @@ function renderWorkerDashboard(el) {
     urgentReqs.forEach(r => {
       const pc = PRIORITY_COLORS[r.priority] || {};
       urgentHtml += `<div class="kpi-alert" style="color:var(--text);cursor:pointer" onclick="currentDetailId='${r.id}';renderPage()">
-        <span>• <strong>${r.id}</strong> ${r.title} — <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:11px;padding:2px 6px">${r.priority}</span> · ${r.status} · ${r.assignee ? r.assignee.name : '미배정'}</span>
+        <span>• <strong>${r.id}</strong> ${r.title} — <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:11px;padding:2px 6px">${r.priority}</span> · ${r.status}${workerDashFilter === 'all' ? ' · ' + r.assignee.name : ''}</span>
       </div>`;
     });
     urgentHtml += '</div>';
@@ -2390,7 +2398,8 @@ function renderWorkerDashboard(el) {
     const waiting = wReqs.filter(r => r.status === '배정완료').length;
     const prog = wReqs.filter(r => r.status === '진행중').length;
     const done = wReqs.filter(r => r.status === '완료').length;
-    return `<div class="stat-card" style="border:1.5px solid var(--border);padding:16px">
+    const isActive = workerDashFilter === w.id;
+    return `<div class="stat-card" style="border:1.5px solid ${isActive ? 'var(--accent)' : 'var(--border)'};padding:16px;cursor:pointer;${isActive ? 'background:var(--accent-bg)' : ''}" onclick="setWorkerDashFilter('${isActive ? 'all' : w.id}')">
       <div style="font-weight:600;font-size:14px;margin-bottom:10px">${w.name} <span style="font-weight:400;font-size:11px;color:var(--text-dim)">(${wReqs.length}건)</span></div>
       <div style="display:flex;gap:12px;font-size:12px">
         <span style="color:var(--blue)">대기 ${waiting}</span>
@@ -2420,7 +2429,7 @@ function renderWorkerDashboard(el) {
   }
 
   const kanbanHtml = kanbanCols.map(col => {
-    const cards = allAssigned.filter(r => r.status === col.status).sort((a, b) => (PRIORITY_ORDER[a.priority] || 9) - (PRIORITY_ORDER[b.priority] || 9));
+    const cards = filtered.filter(r => r.status === col.status).sort((a, b) => (PRIORITY_ORDER[a.priority] || 9) - (PRIORITY_ORDER[b.priority] || 9));
     return `<div class="kanban-col">
       <div class="kanban-col-header">
         <span class="kanban-col-title">${col.label}</span>
@@ -2432,19 +2441,24 @@ function renderWorkerDashboard(el) {
     </div>`;
   }).join('');
 
+  const subtitle = filterWorker ? `${filterWorker.name}의 업무 현황을 확인합니다` : '실무자 전체 업무 현황을 한눈에 확인합니다';
+
   el.innerHTML = `
     <div class="page-header">
-      <div><div class="page-title">전체 대시보드</div><div class="page-subtitle">실무자 전체 업무 현황을 한눈에 확인합니다</div></div>
+      <div>
+        <div class="page-title">전체 대시보드${filterWorker ? ` <span style="font-size:14px;font-weight:400;color:var(--accent);margin-left:6px">${filterWorker.name}</span>` : ''}</div>
+        <div class="page-subtitle">${subtitle}</div>
+      </div>
     </div>
+    <div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--text-mid)">실무자별 현황 <span style="font-weight:400;font-size:11px;color:var(--text-dim)">클릭하여 필터링</span></div>
+    <div class="stats-row" style="margin-bottom:20px">${workerSummaryHtml}</div>
     ${urgentHtml}
     <div class="stats-row">
-      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--text-mid)" onclick="navigateWithFilter('전체')"><div class="stat-label">전체 배정</div><div class="stat-value">${total}</div></div>
-      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--blue)" onclick="navigateWithFilter('배정완료')"><div class="stat-label" style="color:var(--blue)">배정완료</div><div class="stat-value" style="color:var(--blue)">${byStatus['배정완료'] || 0}</div></div>
-      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--accent)" onclick="navigateWithFilter('진행중')"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${byStatus['진행중'] || 0}</div></div>
-      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--green)" onclick="navigateWithFilter('완료')"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${byStatus['완료'] || 0}</div></div>
+      <div class="stat-card" style="border:1.5px solid var(--text-mid)"><div class="stat-label">전체</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card" style="border:1.5px solid var(--blue)"><div class="stat-label" style="color:var(--blue)">대기</div><div class="stat-value" style="color:var(--blue)">${byStatus['배정완료'] || 0}</div></div>
+      <div class="stat-card" style="border:1.5px solid var(--accent)"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${byStatus['진행중'] || 0}</div></div>
+      <div class="stat-card" style="border:1.5px solid var(--green)"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${byStatus['완료'] || 0}</div></div>
     </div>
-    <div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--text-mid)">실무자별 현황</div>
-    <div class="stats-row" style="margin-bottom:20px">${workerSummaryHtml}</div>
     <div class="kanban-board">${kanbanHtml}</div>
   `;
 }
