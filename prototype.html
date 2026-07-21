@@ -2499,7 +2499,7 @@ function toggleWorkerView(mode) {
 }
 
 function renderWorkerList(el) {
-  const myReqsAll = REQUESTS.filter(r => r.assignee && r.assignee.id === 'u3');
+  const myReqsAll = REQUESTS.filter(r => r.assignee && r.assignee.id === 'u3' && ['TO-DO','진행중','완료'].includes(r.status));
   const myReqs = applyFilters([...myReqsAll]);
 
   const viewToggle = `<div style="display:flex;gap:4px;border-radius:6px;padding:2px;background:var(--surface2)">
@@ -3297,9 +3297,10 @@ function renderFilterBar(role) {
     </div>`;
   }
   if (role === 'worker') {
+    const workerStatuses = ['TO-DO', '진행중', '완료'];
     return `<div class="filter-bar">
       <button class="filter-btn ${currentFilter==='전체'?'active f-default':''}" onclick="filterStatus(this,'전체')">전체</button>
-      ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${statusLabel(s)}</button>`).join('')}
+      ${workerStatuses.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${statusLabel(s)}</button>`).join('')}
       <div class="search-wrap">
         <input class="search-input" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')execSearch(this.value)">
         <button class="search-btn" onclick="execSearch(this.previousElementSibling.value)" title="검색">🔍</button>
