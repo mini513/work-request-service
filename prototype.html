@@ -2628,14 +2628,12 @@ function renderDashboard(el) {
       <div><div class="page-title">대시보드</div><div class="page-subtitle">지금 조치가 필요한 항목을 확인합니다</div></div>
     </div>
 
-    <div class="card" style="padding:20px 24px;margin-bottom:16px">
-      <div class="stats-row" style="margin-bottom:${alertHtml ? '20px' : '0'}">
-        <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--text-mid)" onclick="navigateWithFilter('전체')"><div class="stat-label">전체 요청</div><div class="stat-value">${total}</div></div>
-        <div id="kpiUnassigned" class="stat-card" style="cursor:pointer;border:1.5px solid var(--red)" onclick="navigateWithFilter('미배정')"><div class="stat-label" style="color:var(--red)">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div></div>
-        <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--accent)" onclick="navigateWithFilter('진행중')"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${inProgressCount}</div></div>
-        <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--green)" onclick="navigateWithFilter('완료')"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${completed}</div></div>
-      </div>
-      ${alertHtml}
+    ${alertHtml ? `<div class="card" style="padding:20px 24px;margin-bottom:16px">${alertHtml}</div>` : ''}
+    <div class="stats-row">
+      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--text-mid)" onclick="navigateWithFilter('전체')"><div class="stat-label">전체 요청</div><div class="stat-value">${total}</div></div>
+      <div id="kpiUnassigned" class="stat-card" style="cursor:pointer;border:1.5px solid var(--red)" onclick="navigateWithFilter('미배정')"><div class="stat-label" style="color:var(--red)">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div></div>
+      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--accent)" onclick="navigateWithFilter('진행중')"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${inProgressCount}</div></div>
+      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--green)" onclick="navigateWithFilter('완료')"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${completed}</div></div>
     </div>
 
     <div class="chart-grid">
