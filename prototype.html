@@ -2607,11 +2607,11 @@ function renderDashboard(el) {
         ${showAlerts.map(r => {
           const days = Math.floor(getDaysSince(r.createdAt));
           const pc = PRIORITY_COLORS[r.priority] || {};
-          const urgency = days >= 5 ? '#666' : days >= 3 ? '#999' : '#bbb';
-          return `<div style="border:1.5px solid ${urgency};border-radius:10px;padding:14px;cursor:pointer;background:var(--surface);transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'" onclick="openAssignModal('${r.id}')">
+          const urgencyColor = days >= 5 ? 'var(--red)' : days >= 3 ? '#999' : 'var(--text-dim)';
+          return `<div style="border:1.5px solid #D5D5D5;border-radius:10px;padding:14px;cursor:pointer;background:var(--surface);transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'" onclick="openAssignModal('${r.id}')">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
               <span style="font-size:11px;color:var(--text-dim);font-family:monospace">${r.id}</span>
-              <span style="font-size:11px;font-weight:600;color:${urgency}">${days}일 경과</span>
+              <span style="font-size:11px;font-weight:600;color:${urgencyColor}">${days}일 경과</span>
             </div>
             <div style="font-size:13px;font-weight:600;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</div>
             <div style="display:flex;align-items:center;justify-content:space-between">
@@ -3362,7 +3362,7 @@ function renderFilterBar(role) {
 
   const mgrAssigneeStatuses = ['미배정', 'TO-DO'];
   const mgrProgressStatuses = ['진행중', '완료', '반려'];
-  const statusRow = `<div class="filter-bar">
+  const statusRow = `<div class="filter-bar" style="padding-left:16px">
     <button class="filter-btn ${currentFilter==='전체'?'active f-default':''}" onclick="filterStatus(this,'전체')">전체</button>
     <span class="filter-label">담당자</span>
     ${mgrAssigneeStatuses.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${statusLabel(s)}</button>`).join('')}
