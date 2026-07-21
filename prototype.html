@@ -110,14 +110,13 @@ body {
 /* Account Button */
 .account-wrap { position: relative; }
 .account-btn {
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text-dim); width: 36px; height: 36px;
+  border-radius: 6px; cursor: pointer; font-size: 16px;
   display: flex; align-items: center; justify-content: center;
-  background: none; border: 2px solid var(--text-mid);
-  border-radius: 50%; width: 34px; height: 34px;
-  cursor: pointer; transition: all 0.15s; padding: 0;
+  transition: all 0.15s; padding: 0;
 }
-.account-btn:hover { border-color: var(--accent); }
-.account-btn svg { width: 20px; height: 20px; fill: var(--text-mid); }
-.account-btn:hover svg { fill: var(--accent); }
+.account-btn:hover { border-color: var(--accent); color: var(--text); }
 .account-dropdown {
   display: none; position: absolute; top: calc(100% + 6px); right: 0;
   background: var(--surface); border: 1px solid var(--border);
@@ -2118,9 +2117,7 @@ body.light .scenario-target {
     </div>
   </div>
   <div class="account-wrap">
-    <button class="account-btn" onclick="toggleAccountMenu()" id="accountBtn" title="역할 전환">
-      <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
-    </button>
+    <button class="account-btn" onclick="toggleAccountMenu()" id="accountBtn" title="역할 전환">👤</button>
     <div class="account-dropdown" id="accountDropdown">
       <div class="account-dropdown-header">역할 전환</div>
       <button class="account-role-item requester" onclick="switchRole('requester');toggleAccountMenu()">
