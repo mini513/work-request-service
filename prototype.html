@@ -388,12 +388,15 @@ body {
   transition: all 0.15s;
 }
 .filter-btn:hover { border-color: var(--accent); color: var(--text); }
-.filter-btn.active {
-  background: var(--accent-bg);
-  border-color: var(--accent);
-  color: var(--accent);
-  font-weight: 600;
-}
+.filter-btn.active { font-weight: 600; }
+.filter-btn.active.f-default { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+.filter-btn.active.f-접수 { background: var(--yellow-bg); border-color: var(--yellow); color: var(--yellow); }
+.filter-btn.active.f-배정완료 { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+.filter-btn.active.f-진행중 { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+.filter-btn.active.f-완료 { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+.filter-btn.active.f-반려 { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+.filter-btn.active.f-미배정 { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+.filter-btn.active.f-대기중 { background: var(--yellow-bg); border-color: var(--yellow); color: var(--yellow); }
 .search-wrap {
   display: flex;
   align-items: center;
@@ -3092,8 +3095,8 @@ function renderFilterBar(role) {
   if (role === 'requester') {
     const reqStatuses = ['대기중', '진행중', '완료', '반려'];
     return `<div class="filter-bar">
-      <button class="filter-btn ${currentFilter==='전체'?'active':''}" onclick="filterStatus(this,'전체')">전체</button>
-      ${reqStatuses.map(s => `<button class="filter-btn ${currentFilter===s?'active':''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
+      <button class="filter-btn ${currentFilter==='전체'?'active f-default':''}" onclick="filterStatus(this,'전체')">전체</button>
+      ${reqStatuses.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
       <div class="search-wrap">
         <input class="search-input" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')execSearch(this.value)">
         <button class="search-btn" onclick="execSearch(this.previousElementSibling.value)" title="검색">🔍</button>
@@ -3102,8 +3105,8 @@ function renderFilterBar(role) {
   }
   if (role === 'worker') {
     return `<div class="filter-bar">
-      <button class="filter-btn ${currentFilter==='전체'?'active':''}" onclick="filterStatus(this,'전체')">전체</button>
-      ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active':''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
+      <button class="filter-btn ${currentFilter==='전체'?'active f-default':''}" onclick="filterStatus(this,'전체')">전체</button>
+      ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
       <div class="search-wrap">
         <input class="search-input" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')execSearch(this.value)">
         <button class="search-btn" onclick="execSearch(this.previousElementSibling.value)" title="검색">🔍</button>
@@ -3145,9 +3148,9 @@ function renderFilterBar(role) {
 
   const statusRow = `<div class="filter-bar">
     <label style="font-size:12px;color:var(--text-dim);white-space:nowrap">상태</label>
-    <button class="filter-btn ${currentFilter==='전체'?'active':''}" onclick="filterStatus(this,'전체')">전체</button>
-    ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active':''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
-    <button class="filter-btn ${currentFilter==='미배정'?'active':''}" onclick="filterStatus(this,'미배정')">미배정</button>
+    <button class="filter-btn ${currentFilter==='전체'?'active f-default':''}" onclick="filterStatus(this,'전체')">전체</button>
+    ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
+    <button class="filter-btn ${currentFilter==='미배정'?'active f-미배정':''}" onclick="filterStatus(this,'미배정')">미배정</button>
   </div>`;
 
   return conditionRow + statusRow;
