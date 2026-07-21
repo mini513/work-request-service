@@ -390,13 +390,11 @@ body {
 .filter-btn:hover { border-color: var(--accent); color: var(--text); }
 .filter-btn.active { font-weight: 600; }
 .filter-btn.active.f-default { background: var(--surface2); border-color: var(--text-mid); color: var(--text); }
-.filter-btn.active.f-접수 { background: var(--yellow-bg); border-color: var(--yellow); color: var(--yellow); }
-.filter-btn.active.f-배정완료 { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+.filter-btn.active.f-미배정 { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+.filter-btn.active.f-TO-DO { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
 .filter-btn.active.f-진행중 { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
 .filter-btn.active.f-완료 { background: var(--green-bg); border-color: var(--green); color: var(--green); }
 .filter-btn.active.f-반려 { background: var(--red-bg); border-color: var(--red); color: var(--red); }
-.filter-btn.active.f-미배정 { background: var(--red-bg); border-color: var(--red); color: var(--red); }
-.filter-btn.active.f-대기중 { background: var(--yellow-bg); border-color: var(--yellow); color: var(--yellow); }
 .search-wrap {
   display: flex;
   align-items: center;
@@ -2331,7 +2329,7 @@ function renderRequesterList(el) {
   const allMyReqs = REQUESTS.filter(r => r.requester.id === 'u1');
   const myReqs = applyFilters([...allMyReqs]);
 
-  const delayedReqs = allMyReqs.filter(r => r.status === '접수' && getDaysSince(r.createdAt) >= 2)
+  const delayedReqs = allMyReqs.filter(r => r.status === '미배정' && getDaysSince(r.createdAt) >= 2)
     .sort((a, b) => getDaysSince(b.createdAt) - getDaysSince(a.createdAt));
   let delayHtml = '';
   if (delayedReqs.length) {
@@ -2339,9 +2337,9 @@ function renderRequesterList(el) {
     const moreDelay = delayedReqs.length - showDelay.length;
     delayHtml = `<div style="margin-bottom:16px">
       <div style="display:flex;align-items:center;margin-bottom:12px">
-        <span style="font-size:15px;font-weight:700;color:var(--accent)">⏳ 접수 대기 중</span>
+        <span style="font-size:15px;font-weight:700;color:var(--accent)">⏳ 배정 대기 중</span>
         <span style="background:var(--accent);color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:8px">${delayedReqs.length}건</span>
-        ${moreDelay > 0 ? `<span style="margin-left:auto;font-size:12px;color:var(--text-dim);cursor:pointer;text-decoration:underline" onclick="currentFilter='접수';renderPage()">외 ${moreDelay}건 더보기 →</span>` : ''}
+        ${moreDelay > 0 ? `<span style="margin-left:auto;font-size:12px;color:var(--text-dim);cursor:pointer;text-decoration:underline" onclick="currentFilter='미배정';renderPage()">외 ${moreDelay}건 더보기 →</span>` : ''}
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
         ${showDelay.map(r => {
@@ -2403,7 +2401,7 @@ function renderWorkerDashboard(el) {
   const filterWorker = workers.find(w => w.id === workerDashFilter);
   const total = filtered.length;
   const byStatus = {};
-  ['배정완료','진행중','완료'].forEach(s => byStatus[s] = filtered.filter(r => r.status === s).length);
+  ['TO-DO','진행중','완료'].forEach(s => byStatus[s] = filtered.filter(r => r.status === s).length);
 
   const urgentReqs = filtered.filter(r => r.status !== '완료' && r.status !== '반려' && (r.priority === '긴급' || r.priority === '높음'))
     .sort((a, b) => (PRIORITY_ORDER[a.priority] || 9) - (PRIORITY_ORDER[b.priority] || 9));
@@ -2426,7 +2424,7 @@ function renderWorkerDashboard(el) {
             </div>
             <div style="font-size:13px;font-weight:600;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</div>
             <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-dim)">
-              <span>${r.status}</span>
+              <span>${statusLabel(r.status)}</span>
               <span>${r.assignee ? r.assignee.name : ''}</span>
             </div>
           </div>`;
@@ -2437,7 +2435,7 @@ function renderWorkerDashboard(el) {
 
   const workerSummaryHtml = workers.map(w => {
     const wReqs = allAssigned.filter(r => r.assignee.id === w.id);
-    const waiting = wReqs.filter(r => r.status === '배정완료').length;
+    const waiting = wReqs.filter(r => r.status === 'TO-DO').length;
     const prog = wReqs.filter(r => r.status === '진행중').length;
     const done = wReqs.filter(r => r.status === '완료').length;
     const isActive = workerDashFilter === w.id;
@@ -2445,7 +2443,7 @@ function renderWorkerDashboard(el) {
   }).join('');
 
   const kanbanCols = [
-    { status: '배정완료', label: '대기', color: 'var(--blue)', bg: 'var(--blue-bg)' },
+    { status: 'TO-DO', label: 'TO-DO', color: 'var(--blue)', bg: 'var(--blue-bg)' },
     { status: '진행중', label: '진행중', color: 'var(--accent)', bg: 'var(--accent-bg)' },
     { status: '완료', label: '완료', color: 'var(--green)', bg: 'var(--green-bg)' },
   ];
@@ -2512,10 +2510,10 @@ function renderWorkerList(el) {
   if (workerListViewMode === 'kanban') {
     const total = myReqsAll.length;
     const byStatus = {};
-    ['배정완료','진행중','완료'].forEach(s => byStatus[s] = myReqsAll.filter(r => r.status === s).length);
+    ['TO-DO','진행중','완료'].forEach(s => byStatus[s] = myReqsAll.filter(r => r.status === s).length);
 
     const kanbanCols = [
-      { status: '배정완료', label: '대기', color: 'var(--blue)', bg: 'var(--blue-bg)' },
+      { status: 'TO-DO', label: 'TO-DO', color: 'var(--blue)', bg: 'var(--blue-bg)' },
       { status: '진행중', label: '진행중', color: 'var(--accent)', bg: 'var(--accent-bg)' },
       { status: '완료', label: '완료', color: 'var(--green)', bg: 'var(--green-bg)' },
     ];
@@ -2553,7 +2551,7 @@ function renderWorkerList(el) {
       </div>
       <div class="stats-row">
         <div class="stat-card" style="border:1.5px solid var(--text-mid)"><div class="stat-label">전체</div><div class="stat-value">${total}</div></div>
-        <div class="stat-card" style="border:1.5px solid var(--blue)"><div class="stat-label" style="color:var(--blue)">대기</div><div class="stat-value" style="color:var(--blue)">${byStatus['배정완료'] || 0}</div></div>
+        <div class="stat-card" style="border:1.5px solid var(--blue)"><div class="stat-label" style="color:var(--blue)">TO-DO</div><div class="stat-value" style="color:var(--blue)">${byStatus['TO-DO'] || 0}</div></div>
         <div class="stat-card" style="border:1.5px solid var(--accent)"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${byStatus['진행중'] || 0}</div></div>
         <div class="stat-card" style="border:1.5px solid var(--green)"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${byStatus['완료'] || 0}</div></div>
       </div>
@@ -2612,8 +2610,8 @@ function renderDashboard(el) {
     </div>`;
   }
 
-  const recentReceived = all.filter(r => r.status === '접수' || (r.status === '배정완료' && !r.assignee)).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
-  const inProgressReqs = all.filter(r => r.status === '진행중' || r.status === '배정완료').sort((a, b) => {
+  const recentReceived = all.filter(r => r.status === '미배정').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+  const inProgressReqs = all.filter(r => r.status === '진행중' || r.status === 'TO-DO').sort((a, b) => {
     const pa = { '긴급': 0, '높음': 1, '보통': 2, '낮음': 3 };
     return (pa[a.priority] ?? 9) - (pa[b.priority] ?? 9);
   }).slice(0, 5);
@@ -2634,8 +2632,8 @@ function renderDashboard(el) {
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-title" style="display:flex;justify-content:space-between;align-items:center">
-          <span>📥 최근 접수된 요청</span>
-          <span style="font-size:11px;color:var(--text-dim);font-weight:400;cursor:pointer" onclick="navigateWithFilter('접수')">전체 보기 →</span>
+          <span>📥 최근 미배정 요청</span>
+          <span style="font-size:11px;color:var(--text-dim);font-weight:400;cursor:pointer" onclick="navigateWithFilter('미배정')">전체 보기 →</span>
         </div>
         ${recentReceived.length ? `<div style="display:flex;flex-direction:column;gap:6px">
           ${recentReceived.map(r => {
@@ -2649,7 +2647,7 @@ function renderDashboard(el) {
               ${!r.assignee ? `<button class="btn btn-sm btn-primary" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();openAssignModal('${r.id}')">배정</button>` : ''}
             </div>`;
           }).join('')}
-        </div>` : `<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:13px">접수 대기 중인 요청이 없습니다</div>`}
+        </div>` : `<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:13px">미배정 요청이 없습니다</div>`}
       </div>
       <div class="chart-card">
         <div class="chart-card-title" style="display:flex;justify-content:space-between;align-items:center">
@@ -2662,7 +2660,7 @@ function renderDashboard(el) {
             const sc = STATUS_COLORS[r.status] || {};
             return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface1);border-radius:6px;cursor:pointer;font-size:13px" onclick="openDetail('${r.id}')">
               <span style="font-family:monospace;color:var(--text-dim);font-size:11px;min-width:56px">${r.id}</span>
-              <span class="badge" style="background:${sc.bg};color:${sc.text};font-size:10px;padding:1px 6px">${r.status}</span>
+              <span class="badge" style="background:${sc.bg};color:${sc.text};font-size:10px;padding:1px 6px">${statusLabel(r.status)}</span>
               <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</span>
               <span style="font-size:11px;color:var(--text-dim);white-space:nowrap">${r.assignee ? r.assignee.name : '미배정'}</span>
             </div>`;
@@ -2829,8 +2827,8 @@ function renderLog(el) {
   const byStatus = {};
   STATUSES.forEach(s => byStatus[s] = all.filter(r => r.status === s).length);
   const statusData = [
-    { name: '접수', count: byStatus['접수'] || 0, color: '#ff8c00' },
-    { name: '배정완료', count: byStatus['배정완료'] || 0, color: '#5b8def' },
+    { name: '미배정', count: byStatus['미배정'] || 0, color: '#e53935' },
+    { name: 'TO-DO', count: byStatus['TO-DO'] || 0, color: '#5b8def' },
     { name: '진행중', count: byStatus['진행중'] || 0, color: '#a78bfa' },
     { name: '완료', count: completed.length, color: '#22c55e' },
     { name: '반려', count: byStatus['반려'] || 0, color: '#f55' },
@@ -3053,7 +3051,7 @@ function renderDetail(el) {
 
   let actionButtons = '';
   if (isWorker && req.status !== '반려') {
-    if (req.status === '배정완료') {
+    if (req.status === 'TO-DO') {
       actionButtons = `<div class="mt-16">
         <div class="form-group"><label class="form-label">작업 가능일</label><input type="date" class="form-input" id="estDate"></div>
         <button class="btn btn-primary" onclick="startWork('${req.id}')">작업 시작 + 예정일 알림</button>
@@ -3063,7 +3061,7 @@ function renderDetail(el) {
         <div class="form-group"><label class="form-label">처리 내용</label><textarea class="form-textarea" id="completeNote" placeholder="처리 결과를 입력하세요"></textarea></div>
         <div style="display:flex;gap:8px">
           <button class="btn btn-primary" onclick="completeWork('${req.id}')">처리 완료</button>
-          <button class="btn btn-secondary" onclick="quickChangeStatus('${req.id}','배정완료')">← 배정완료로 되돌리기</button>
+          <button class="btn btn-secondary" onclick="quickChangeStatus('${req.id}','TO-DO')">← TO-DO로 되돌리기</button>
         </div>
       </div>`;
     } else if (req.status === '완료') {
@@ -3085,7 +3083,7 @@ function renderDetail(el) {
         </div>
         <div class="page-subtitle">${req.id} · ${req.category} · ${req.requester.name} (${req.requester.dept})</div>
       </div>
-      <span class="badge" style="background:${STATUS_COLORS[req.status].bg};color:${STATUS_COLORS[req.status].text};font-size:13px;padding:4px 12px">${req.status}</span>
+      <span class="badge" style="background:${STATUS_COLORS[req.status].bg};color:${STATUS_COLORS[req.status].text};font-size:13px;padding:4px 12px">${statusLabel(req.status)}</span>
     </div>
 
     <div class="status-stepper">
@@ -3094,7 +3092,7 @@ function renderDetail(el) {
         if (req.status === '반려') cls = i === 0 ? 'done' : '';
         else if (i < statusIdx) cls = 'done';
         else if (i === statusIdx) cls = 'current';
-        return `<div class="step ${cls}"><div class="step-dot"></div><div class="step-label">${s}</div></div>`;
+        return `<div class="step ${cls}"><div class="step-dot"></div><div class="step-label">${statusLabel(s)}</div></div>`;
       }).join('')}
     </div>
 
@@ -3160,22 +3158,23 @@ function renderEmptyState(message, desc) {
 
 function getAvailableStatuses(status) {
   const transitions = {
-    '배정완료': ['진행중'],
-    '진행중': ['완료', '배정완료'],
+    'TO-DO': ['진행중'],
+    '진행중': ['완료', 'TO-DO'],
     '완료': ['진행중'],
   };
   return transitions[status] || [];
 }
 
 function renderStatusBadge(r) {
+  const label = statusLabel(r.status);
   if (currentRole !== 'worker') {
-    return `<span class="badge" style="background:${STATUS_COLORS[r.status].bg};color:${STATUS_COLORS[r.status].text}">${r.status}</span>`;
+    return `<span class="badge" style="background:${STATUS_COLORS[r.status].bg};color:${STATUS_COLORS[r.status].text}">${label}</span>`;
   }
   const nextStatuses = getAvailableStatuses(r.status);
   if (nextStatuses.length === 0) {
-    return `<span class="badge" style="background:${STATUS_COLORS[r.status].bg};color:${STATUS_COLORS[r.status].text}">${r.status}</span>`;
+    return `<span class="badge" style="background:${STATUS_COLORS[r.status].bg};color:${STATUS_COLORS[r.status].text}">${label}</span>`;
   }
-  return `<span class="status-badge-btn badge" style="background:${STATUS_COLORS[r.status].bg};color:${STATUS_COLORS[r.status].text}" onclick="event.stopPropagation();toggleStatusDropdown(event,'${r.id}')">${r.status} <span class="arrow">▼</span></span>`;
+  return `<span class="status-badge-btn badge" style="background:${STATUS_COLORS[r.status].bg};color:${STATUS_COLORS[r.status].text}" onclick="event.stopPropagation();toggleStatusDropdown(event,'${r.id}')">${label} <span class="arrow">▼</span></span>`;
 }
 
 function toggleStatusDropdown(e, reqId) {
@@ -3186,13 +3185,13 @@ function toggleStatusDropdown(e, reqId) {
 
   const rect = e.currentTarget.getBoundingClientRect();
   const dd = document.getElementById('statusDropdown');
-  const actionLabel = { '배정완료': '← 배정완료로 되돌리기', '진행중': '→ 작업 시작', '완료': '→ 처리 완료' };
+  const actionLabel = { 'TO-DO': '← TO-DO로 되돌리기', '진행중': '→ 작업 시작', '완료': '→ 처리 완료' };
   const fromComplete = req.status === '완료';
   if (fromComplete) actionLabel['진행중'] = '← 진행중으로 되돌리기';
   dd.innerHTML = `<div class="status-dropdown-item current" style="pointer-events:none">
-    <span class="dot" style="background:${STATUS_COLORS[req.status].text}"></span>현재: ${req.status}
+    <span class="dot" style="background:${STATUS_COLORS[req.status].text}"></span>현재: ${statusLabel(req.status)}
   </div>` + next.map(s => `<div class="status-dropdown-item" onclick="quickChangeStatus('${reqId}','${s}')">
-    <span class="dot" style="background:${STATUS_COLORS[s].text}"></span>${actionLabel[s] || s}
+    <span class="dot" style="background:${STATUS_COLORS[s].text}"></span>${actionLabel[s] || statusLabel(s)}
   </div>`).join('');
   dd.style.top = (rect.bottom + 4) + 'px';
   dd.style.left = rect.left + 'px';
@@ -3215,7 +3214,7 @@ function quickChangeStatus(id, newStatus) {
   const timelineActions = {
     '진행중': { action: '진행중', detail: oldStatus === '완료' ? '완료 → 진행중으로 상태 변경' : '작업 시작' },
     '완료': { action: '완료', detail: '처리 완료' },
-    '배정완료': { action: '상태 변경', detail: '진행중 → 배정완료로 상태 변경' },
+    'TO-DO': { action: '상태 변경', detail: '진행중 → TO-DO로 상태 변경' },
   };
   const ta = timelineActions[newStatus];
   if (ta) req.timeline.push({ date: now, action: ta.action, by: USERS.worker1.name, detail: ta.detail });
@@ -3259,7 +3258,7 @@ const COL_DEFS = {
     </span>`;
   }},
   statusAction: { width: '110px', render: r => {
-    const nextMap = { '배정완료': '진행중', '진행중': '완료' };
+    const nextMap = { 'TO-DO': '진행중', '진행중': '완료' };
     const next = nextMap[r.status];
     if (!next) return `<span class="req-status">${renderStatusBadge(r)}</span>`;
     return `<span class="req-status" onclick="event.stopPropagation()">
@@ -3288,10 +3287,9 @@ function getAssigneeList() {
 
 function renderFilterBar(role) {
   if (role === 'requester') {
-    const reqStatuses = ['대기중', '진행중', '완료', '반려'];
     return `<div class="filter-bar">
       <button class="filter-btn ${currentFilter==='전체'?'active f-default':''}" onclick="filterStatus(this,'전체')">전체</button>
-      ${reqStatuses.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
+      ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${statusLabel(s)}</button>`).join('')}
       <div class="search-wrap">
         <input class="search-input" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')execSearch(this.value)">
         <button class="search-btn" onclick="execSearch(this.previousElementSibling.value)" title="검색">🔍</button>
@@ -3301,7 +3299,7 @@ function renderFilterBar(role) {
   if (role === 'worker') {
     return `<div class="filter-bar">
       <button class="filter-btn ${currentFilter==='전체'?'active f-default':''}" onclick="filterStatus(this,'전체')">전체</button>
-      ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
+      ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${statusLabel(s)}</button>`).join('')}
       <div class="search-wrap">
         <input class="search-input" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')execSearch(this.value)">
         <button class="search-btn" onclick="execSearch(this.previousElementSibling.value)" title="검색">🔍</button>
@@ -3340,8 +3338,7 @@ function renderFilterBar(role) {
   const statusRow = `<div class="filter-bar">
     <label style="font-size:12px;color:var(--text-dim);white-space:nowrap">상태</label>
     <button class="filter-btn ${currentFilter==='전체'?'active f-default':''}" onclick="filterStatus(this,'전체')">전체</button>
-    ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
-    <button class="filter-btn ${currentFilter==='미배정'?'active f-미배정':''}" onclick="filterStatus(this,'미배정')">미배정</button>
+    ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${statusLabel(s)}</button>`).join('')}
     <div class="search-wrap" style="margin-left:auto">
       <input class="search-input" id="searchInput" placeholder="제목 · ID · 담당자 검색" value="${currentSearch}" onkeydown="if(event.key==='Enter')applyManagerFilter()" style="min-width:180px">
       <button class="search-btn" onclick="applyManagerFilter()" title="검색">🔍</button>
@@ -3390,11 +3387,7 @@ function resetAdvFilters() {
 
 function applyFilters(reqs) {
   let filtered = reqs;
-  if (currentFilter === '미배정') {
-    filtered = filtered.filter(r => !r.assignee);
-  } else if (currentFilter === '대기중') {
-    filtered = filtered.filter(r => r.status === '접수' || r.status === '배정완료');
-  } else if (currentFilter !== '전체') {
+  if (currentFilter !== '전체') {
     filtered = filtered.filter(r => r.status === currentFilter);
   }
   if (currentRole === 'manager') {
@@ -3498,10 +3491,10 @@ function submitRequest() {
   const nowStr = now.toISOString().slice(0, 16).replace('T', ' ');
   REQUESTS.push({
     id, category: cat, title, content,
-    requester: USERS.requester, priority, status: '접수',
+    requester: USERS.requester, priority, status: '미배정',
     createdAt: nowStr, desiredDate: desiredDate || null,
     assignee: null, reporter: null, estimatedDate: null,
-    timeline: [{ date: nowStr, action: '요청 등록', by: USERS.requester.name, detail: title + ' 접수' }],
+    timeline: [{ date: nowStr, action: '요청 등록', by: USERS.requester.name, detail: title + ' 등록' }],
     comments: [],
   });
   NOTIFICATIONS.manager.unshift({ id: 'n' + Date.now(), reqId: id, message: `[신규] ${title}`, time: nowStr, read: false });
@@ -3555,7 +3548,7 @@ function quickAssign(reqId, workerId) {
   const worker = Object.values(USERS).find(u => u.id === workerId);
   if (!req || !worker) return;
   req.assignee = worker;
-  req.status = '배정완료';
+  req.status = 'TO-DO';
   const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
   req.timeline.push({ date: now, action: '담당자 배정', by: USERS.manager.name, detail: `실무자: ${worker.name} (빠른 배정)` });
   NOTIFICATIONS.worker.unshift({ id: 'n' + Date.now(), reqId: req.id, message: `[배정] ${req.title}`, time: now, read: false });
@@ -3584,7 +3577,7 @@ function confirmAssign() {
   const reporter = reporterId ? Object.values(USERS).find(u => u.id === reporterId) : null;
   req.assignee = worker;
   req.reporter = reporter;
-  req.status = '배정완료';
+  req.status = 'TO-DO';
   const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
   req.timeline.push({ date: now, action: '담당자 배정', by: USERS.manager.name, detail: `실무자: ${worker.name}${reporter ? ' / 보고자: ' + reporter.name : ''}` });
   NOTIFICATIONS.requester.unshift({ id: 'n' + Date.now(), reqId: req.id, message: `담당자가 배정되었습니다 (${worker.name})`, time: now, read: false });
@@ -3695,7 +3688,7 @@ function handleNotiClick(notiId, reqId, isRemindPrompt) {
 }
 
 function generateRemindNotifications() {
-  const myReqs = REQUESTS.filter(r => r.requester.id === 'u1' && !r.assignee && r.status === '접수');
+  const myReqs = REQUESTS.filter(r => r.requester.id === 'u1' && r.status === '미배정');
   myReqs.forEach(r => {
     const days = Math.floor(getDaysSince(r.createdAt));
     if (days >= 2) {
@@ -3904,7 +3897,7 @@ const SCENARIOS = [
   { role: 'requester', group: '긴급 요청 등록', page: 'list', detail: null, target: '#newReqModal .btn-primary', action: 'keepModal',
     text: '<strong>등록 ⑦</strong> 모든 항목을 확인한 후 "요청 등록" 버튼을 클릭합니다.' },
   { role: 'requester', group: '긴급 요청 등록', page: 'list', detail: null, target: '.req-item',
-    text: '<strong>등록 ⑧</strong> 등록 완료! 내 요청 목록에 새 건이 추가되었습니다. 관리자에게 접수 알림이 전송됩니다.' },
+    text: '<strong>등록 ⑧</strong> 등록 완료! 내 요청 목록에 새 건이 추가되었습니다. 관리자에게 신규 요청 알림이 전송됩니다.' },
 
   // ═══════════════════════════════════════════════════════════════
   // 요청자 S2: 배정 알림 확인 + 긴급 소통
@@ -3917,7 +3910,7 @@ const SCENARIOS = [
   { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: null, target: '.noti-item', action: 'openNoti',
     text: '<strong>소통 ②</strong> "담당자가 배정되었습니다" 알림을 클릭하여 해당 요청 상세로 이동합니다.' },
   { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.status-stepper',
-    text: '<strong>소통 ③</strong> 상태 스테퍼에서 "배정완료" 단계를 확인합니다. 담당자가 지정되었네요!' },
+    text: '<strong>소통 ③</strong> 상태 스테퍼에서 "TO-DO" 단계를 확인합니다. 담당자가 지정되었네요!' },
   { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.detail-info-value',
     text: '<strong>소통 ④</strong> 배정된 담당자(이준호)와 보고자(한동훈 파트장) 정보를 확인합니다.' },
   { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.comment-item',
@@ -3937,25 +3930,25 @@ const SCENARIOS = [
   { role: 'requester', group: '처리 완료 확인', page: 'list', detail: 'REQ-004', target: '.status-stepper',
     text: '<strong>확인 ③</strong> 상태 스테퍼에서 "완료" 단계를 확인합니다. 처리가 완료되었네요!' },
   { role: 'requester', group: '처리 완료 확인', page: 'list', detail: 'REQ-004', target: '.timeline-item', targetLabel: false,
-    text: '<strong>확인 ④</strong> 타임라인에서 전체 처리 이력(접수→배정→진행→완료)을 확인합니다.' },
+    text: '<strong>확인 ④</strong> 타임라인에서 전체 처리 이력(미배정→TO-DO→진행중→완료)을 확인합니다.' },
   { role: 'requester', group: '처리 완료 확인', page: 'list', detail: 'REQ-004', target: '.comment-input',
     text: '<strong>확인 ⑤</strong> 댓글로 감사 인사나 추가 피드백을 남깁니다.' },
 
   // ═══════════════════════════════════════════════════════════════
-  // 관리자 S1: 신규 요청 접수 + 담당자 배정
+  // 관리자 S1: 신규 요청 확인 + 담당자 배정
   // Story: "요청 모니터링에서 미배정 경고를 발견! 빠르게 담당자를 배정하자"
   // 서비스 사이클: ① 요청자 등록 → ② 관리자 배정 → 실무자 시작 → ...
   // ═══════════════════════════════════════════════════════════════
-  { role: 'manager', group: '신규 요청 접수 + 배정', page: 'dashboard', detail: null, target: '#kpiUnassigned',
-    text: '<strong>접수 ①</strong> 요청 모니터링에서 현황을 파악합니다. 미배정 건수가 눈에 띕니다.' },
-  { role: 'manager', group: '신규 요청 접수 + 배정', page: 'dashboard', detail: null, target: '.kpi-alert',
-    text: '<strong>접수 ②</strong> ⚠️ KPI 경고를 확인합니다. 2일 이상 미배정된 요청이 있습니다!' },
-  { role: 'manager', group: '신규 요청 접수 + 배정', page: 'list', detail: null, target: '.req-item', beforeAction: () => { currentFilter = '미배정'; renderPage(); },
-    text: '<strong>접수 ③</strong> 요청 목록에서 "미배정" 필터를 선택하고, 배정할 요청을 클릭합니다.' },
-  { role: 'manager', group: '신규 요청 접수 + 배정', page: 'list', detail: 'REQ-003', target: '.btn-primary',
-    text: '<strong>접수 ④</strong> 요청 내용을 확인한 후 "담당자 배정" 버튼을 클릭합니다.' },
-  { role: 'manager', group: '신규 요청 접수 + 배정', page: 'list', detail: 'REQ-003', target: '#assignModal .btn-primary', action: 'openAssign',
-    text: '<strong>접수 ⑤</strong> 적합한 실무 담당자와 보고자를 선택한 후 "배정 확인" 버튼을 클릭합니다.' },
+  { role: 'manager', group: '신규 요청 확인 + 배정', page: 'dashboard', detail: null, target: '#kpiUnassigned',
+    text: '<strong>확인 ①</strong> 요청 모니터링에서 현황을 파악합니다. 미배정 건수가 눈에 띕니다.' },
+  { role: 'manager', group: '신규 요청 확인 + 배정', page: 'dashboard', detail: null, target: '.kpi-alert',
+    text: '<strong>확인 ②</strong> ⚠️ KPI 경고를 확인합니다. 2일 이상 미배정된 요청이 있습니다!' },
+  { role: 'manager', group: '신규 요청 확인 + 배정', page: 'list', detail: null, target: '.req-item', beforeAction: () => { currentFilter = '미배정'; renderPage(); },
+    text: '<strong>확인 ③</strong> 요청 목록에서 "미배정" 필터를 선택하고, 배정할 요청을 클릭합니다.' },
+  { role: 'manager', group: '신규 요청 확인 + 배정', page: 'list', detail: 'REQ-003', target: '.btn-primary',
+    text: '<strong>확인 ④</strong> 요청 내용을 확인한 후 "담당자 배정" 버튼을 클릭합니다.' },
+  { role: 'manager', group: '신규 요청 확인 + 배정', page: 'list', detail: 'REQ-003', target: '#assignModal .btn-primary', action: 'openAssign',
+    text: '<strong>확인 ⑤</strong> 적합한 실무 담당자와 보고자를 선택한 후 "배정 확인" 버튼을 클릭합니다.' },
 
   // ═══════════════════════════════════════════════════════════════
   // 관리자 S2: 부적합 요청 반려
@@ -4094,7 +4087,7 @@ let filteredScenarios = [];
 function openBlueprintMap() {
   const phases = [
     { name: '요청 등록', actor: '요청자' },
-    { name: '요청 접수', actor: '관리자' },
+    { name: '요청 확인', actor: '관리자' },
     { name: '담당자 배정', actor: '관리자' },
     { name: '작업 수행', actor: '실무자' },
     { name: '처리 완료', actor: '실무자' },
@@ -4109,10 +4102,10 @@ function openBlueprintMap() {
       ['새 요청 등록 모달\n입력 폼 표시', '요청 상세 화면\n상태 스테퍼 표시', '담당자 배정 모달\n실무자 선택 드롭다운\n보고자 지정', '요청 상세 화면\n댓글 입력·목록\n작업 예정일 표시', '처리 완료 버튼\n처리 내용 입력 폼\n댓글 입력', '요청 상세 화면\n타임라인 표시\n댓글 입력'],
     ]},
     { key: 'back', label: '백스테이지\n(시스템)', class: 'back', rows: [
-      ['요청 데이터 저장\n요청 ID 자동 생성\n상태: 접수', '관리자 알림 생성\n모니터링 카운트 갱신', '상태 → 배정완료\n실무자 연결\n보고자 연결', '댓글 데이터 저장\n실무자 알림 생성\n상태 → 진행중\n예정일 저장', '상태 → 완료\n처리 내용 저장\n완료일 기록', '타임라인 최종 갱신\n댓글 데이터 저장'],
+      ['요청 데이터 저장\n요청 ID 자동 생성\n상태: 미배정', '관리자 알림 생성\n모니터링 카운트 갱신', '상태 → TO-DO\n실무자 연결\n보고자 연결', '댓글 데이터 저장\n실무자 알림 생성\n상태 → 진행중\n예정일 저장', '상태 → 완료\n처리 내용 저장\n완료일 기록', '타임라인 최종 갱신\n댓글 데이터 저장'],
     ]},
     { key: 'support', label: '지원 프로세스', class: 'support', rows: [
-      ['—', '관리자에게 알림 발송\n(신규 요청 접수)', '실무자에게 알림 발송\n(업무 배정 알림)\n보고자에게 알림 발송', '실무자에게 댓글 알림\n(요청자 긴급 소통)\n관리자에게 상태 변경 알림', '요청자에게 알림 발송\n(처리 완료 알림)\n관리자에게 알림 발송', '—'],
+      ['—', '관리자에게 알림 발송\n(신규 요청 알림)', '실무자에게 알림 발송\n(업무 배정 알림)\n보고자에게 알림 발송', '실무자에게 댓글 알림\n(요청자 긴급 소통)\n관리자에게 상태 변경 알림', '요청자에게 알림 발송\n(처리 완료 알림)\n관리자에게 알림 발송', '—'],
     ]},
   ];
 
@@ -4169,7 +4162,7 @@ function openBlueprintMap() {
 function openStakeholderMap() {
   const flows = [
     { from: '요청자', to: '관리자', label: '요청 등록', detail: '업무 요청서를 작성하여 관리자에게 제출', fromColor: 'var(--blue)', toColor: 'var(--yellow)' },
-    { from: '관리자', to: '요청자', label: '접수 · 반려 알림', detail: '요청 검토 결과를 요청자에게 알림 전송', fromColor: 'var(--yellow)', toColor: 'var(--blue)' },
+    { from: '관리자', to: '요청자', label: '배정 · 반려 알림', detail: '요청 검토 결과를 요청자에게 알림 전송', fromColor: 'var(--yellow)', toColor: 'var(--blue)' },
     { from: '관리자', to: '실무자', label: '담당자 배정', detail: '적합한 실무자를 선택하여 업무 배정', fromColor: 'var(--yellow)', toColor: 'var(--green)' },
     { from: '실무자', to: '관리자', label: '상태 변경 보고', detail: '작업 시작 · 완료 등 진행 상태를 관리자에게 보고', fromColor: 'var(--green)', toColor: 'var(--yellow)' },
     { from: '실무자', to: '요청자', label: '처리 완료 알림', detail: '요청 처리 완료 시 요청자에게 결과 통보', fromColor: 'var(--green)', toColor: 'var(--blue)' },
@@ -4232,9 +4225,9 @@ function openStakeholderMap() {
         <line x1="250" y1="175" x2="400" y2="175" stroke="var(--blue)" stroke-width="2" marker-end="url(#ah-blue)" opacity="0.7"/>
         <text x="325" y="167" text-anchor="middle" font-size="10" fill="var(--blue)" font-weight="600">요청 등록</text>
 
-        <!-- 관리자 → 요청자: 접수/반려 -->
+        <!-- 관리자 → 요청자: 배정/반려 -->
         <line x1="400" y1="195" x2="250" y2="195" stroke="var(--yellow)" stroke-width="2" marker-end="url(#ah-yellow)" opacity="0.7"/>
-        <text x="325" y="210" text-anchor="middle" font-size="10" fill="var(--yellow)" font-weight="600">접수·반려</text>
+        <text x="325" y="210" text-anchor="middle" font-size="10" fill="var(--yellow)" font-weight="600">배정·반려</text>
 
         <!-- 관리자 → 실무자: 배정 -->
         <line x1="420" y1="210" x2="260" y2="400" stroke="var(--yellow)" stroke-width="2" marker-end="url(#ah-yellow)" opacity="0.7"/>
@@ -4281,7 +4274,7 @@ function openIAMap() {
       label: '👤 요청자',
       pages: [
         { name: '내 요청 목록', features: ['상태 필터 (전체/대기중/진행중/완료/반려)', '검색', '정렬 (ID/카테고리/제목/긴급도/상태/등록일/담당자)', '새 요청 등록 버튼'] },
-        { name: '요청 상세', features: ['요청 내용 · 긴급도 · 희망완료일', '상태 스테퍼 (접수→배정완료→진행중→완료)', '담당자 · 보고자 · 작업 예정일', '처리 타임라인', '댓글'] },
+        { name: '요청 상세', features: ['요청 내용 · 긴급도 · 희망완료일', '상태 스테퍼 (미배정→TO-DO→진행중→완료)', '담당자 · 보고자 · 작업 예정일', '처리 타임라인', '댓글'] },
         { name: '새 요청 등록 (모달)', features: ['카테고리 · 제목 · 상세 내용', '긴급도 · 희망 완료일'] },
       ]
     },
@@ -4297,8 +4290,8 @@ function openIAMap() {
     worker: {
       label: '🔧 실무자',
       pages: [
-        { name: '대시보드', features: ['담당 건수 카드 (배정완료/진행중/완료)', '긴급 일감 하이라이트', '칸반 보드 (대기/진행중/완료)'] },
-        { name: '내 담당 목록', features: ['상태 필터', '검색 · 정렬', '상태 전환 드롭다운 (배정완료↔진행중↔완료)'] },
+        { name: '대시보드', features: ['담당 건수 카드 (TO-DO/진행중/완료)', '긴급 일감 하이라이트', '칸반 보드 (TO-DO/진행중/완료)'] },
+        { name: '내 담당 목록', features: ['상태 필터', '검색 · 정렬', '상태 전환 드롭다운 (TO-DO↔진행중↔완료)'] },
         { name: '요청 상세', features: ['작업 시작 + 예정일 알림', '처리 완료 + 처리 내용 기록', '상태 되돌리기', '댓글'] },
       ]
     }
@@ -4485,6 +4478,11 @@ function applyScenarioStep() {
 }
 
 // ── Helpers ──
+function statusLabel(status) {
+  if (status === 'TO-DO' && currentRole === 'requester') return '배정 완료';
+  return status;
+}
+
 function getDaysSince(dateStr) {
   return (new Date() - new Date(dateStr)) / (1000 * 60 * 60 * 24);
 }
