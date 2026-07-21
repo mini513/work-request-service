@@ -1835,11 +1835,14 @@ body.light .scenario-target {
 .test-accounts { display: flex; gap: 8px; }
 .test-account {
   flex: 1; padding: 10px 8px; background: var(--bg);
-  border: 1px solid var(--border); border-radius: 8px;
+  border: 2px solid var(--border); border-radius: 8px;
   cursor: pointer; transition: all 0.2s; text-align: center;
 }
-.test-account:hover { border-color: var(--accent); background: var(--accent-bg); }
-.test-account-icon { font-size: 20px; margin-bottom: 4px; }
+.test-account:hover { border-color: var(--accent); background: var(--accent-bg); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(91,141,239,0.15); }
+.test-account:active { transform: translateY(0) scale(0.97); }
+.test-account.selected { border-color: var(--accent); background: var(--accent-bg); box-shadow: 0 0 0 3px rgba(91,141,239,0.2); }
+.test-account-icon { font-size: 20px; margin-bottom: 4px; transition: transform 0.2s; }
+.test-account:hover .test-account-icon { transform: scale(1.15); }
 .test-account-role { font-size: 11px; font-weight: 600; color: var(--text); }
 .test-account-id { font-size: 10px; color: var(--text-dim); font-family: monospace; }
 </style>
@@ -1868,17 +1871,17 @@ body.light .scenario-target {
         * 원하는 역할을 선택하시면<br>아이디 / 비밀번호가 자동으로 입력됩니다.
       </div>
       <div class="test-accounts">
-        <div class="test-account" onclick="fillTestAccount('kimms','1234')">
+        <div class="test-account" onclick="fillTestAccount('kimms','1234',this)">
           <div class="test-account-icon">👤</div>
           <div class="test-account-role">요청자</div>
           <div class="test-account-id">kimms</div>
         </div>
-        <div class="test-account" onclick="fillTestAccount('parkjy','1234')">
+        <div class="test-account" onclick="fillTestAccount('parkjy','1234',this)">
           <div class="test-account-icon">👔</div>
           <div class="test-account-role">관리자</div>
           <div class="test-account-id">parkjy</div>
         </div>
-        <div class="test-account" onclick="fillTestAccount('leejh','1234')">
+        <div class="test-account" onclick="fillTestAccount('leejh','1234',this)">
           <div class="test-account-icon">🔧</div>
           <div class="test-account-role">실무자</div>
           <div class="test-account-id">leejh</div>
@@ -4015,10 +4018,12 @@ const LOGIN_ACCOUNTS = {
   leejh:  { role: 'worker',    name: '이준호', dept: 'IT지원팀' },
 };
 
-function fillTestAccount(id, pw) {
+function fillTestAccount(id, pw, el) {
   document.getElementById('loginId').value = id;
   document.getElementById('loginPw').value = pw;
   document.getElementById('loginError').style.display = 'none';
+  document.querySelectorAll('.test-account').forEach(a => a.classList.remove('selected'));
+  if (el) el.classList.add('selected');
   const btn = document.getElementById('loginBtn');
   btn.classList.remove('pulse');
   void btn.offsetWidth;
