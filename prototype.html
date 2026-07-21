@@ -2550,10 +2550,10 @@ function renderWorkerList(el) {
         ${viewToggle}
       </div>
       <div class="stats-row">
-        <div class="stat-card" style="border:1.5px solid var(--text-mid)"><div class="stat-label">전체</div><div class="stat-value">${total}</div></div>
-        <div class="stat-card" style="border:1.5px solid var(--blue)"><div class="stat-label" style="color:var(--blue)">TO-DO</div><div class="stat-value" style="color:var(--blue)">${byStatus['TO-DO'] || 0}</div></div>
-        <div class="stat-card" style="border:1.5px solid var(--accent)"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${byStatus['진행중'] || 0}</div></div>
-        <div class="stat-card" style="border:1.5px solid var(--green)"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${byStatus['완료'] || 0}</div></div>
+        <div class="stat-card" style="border:1.5px solid #D5D5D5"><div class="stat-label">전체</div><div class="stat-value">${total}</div></div>
+        <div class="stat-card" style="border:1.5px solid #D5D5D5"><div class="stat-label" style="color:var(--blue)">TO-DO</div><div class="stat-value" style="color:var(--blue)">${byStatus['TO-DO'] || 0}</div></div>
+        <div class="stat-card" style="border:1.5px solid #D5D5D5"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${byStatus['진행중'] || 0}</div></div>
+        <div class="stat-card" style="border:1.5px solid #D5D5D5"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${byStatus['완료'] || 0}</div></div>
       </div>
       <div class="kanban-board">${kanbanHtml}</div>
     `;
