@@ -1838,13 +1838,27 @@ body.light .scenario-target {
   border: 2px solid var(--border); border-radius: 8px;
   cursor: pointer; transition: all 0.2s; text-align: center;
 }
-.test-account:hover { border-color: var(--accent); background: var(--accent-bg); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(91,141,239,0.15); }
-.test-account:active { transform: translateY(0) scale(0.97); }
+.test-account:hover { border-color: var(--accent); background: var(--accent-bg); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(91,141,239,0.15); animation: none !important; }
+.test-account:active { transform: translateY(0) scale(0.97); animation: none !important; }
 .test-account.selected { border-color: var(--accent); background: var(--accent-bg); box-shadow: 0 0 0 3px rgba(91,141,239,0.2); }
 .test-account-icon { font-size: 20px; margin-bottom: 4px; transition: transform 0.2s; }
 .test-account:hover .test-account-icon { transform: scale(1.15); }
 .test-account-role { font-size: 11px; font-weight: 600; color: var(--text); }
 .test-account-id { font-size: 10px; color: var(--text-dim); font-family: monospace; }
+
+@keyframes arrowBlink {
+  0%, 100% { opacity: 1; transform: translateY(0); }
+  50% { opacity: 0.4; transform: translateY(3px); }
+}
+.test-account:nth-child(1) { animation: cardBounce 2s ease-in-out 0.5s infinite; }
+.test-account:nth-child(2) { animation: cardBounce 2s ease-in-out 0.65s infinite; }
+.test-account:nth-child(3) { animation: cardBounce 2s ease-in-out 0.8s infinite; }
+@keyframes cardBounce {
+  0%, 100% { transform: translateY(0); box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-color: var(--border); }
+  15% { transform: translateY(-6px); box-shadow: 0 8px 20px rgba(91,141,239,0.25); border-color: var(--accent); }
+  30% { transform: translateY(0); box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-color: var(--border); }
+}
+.test-account.selected { animation: none; }
 </style>
 </head>
 <body class="light">
@@ -1867,8 +1881,10 @@ body.light .scenario-target {
       <button class="login-btn" id="loginBtn" onclick="handleLogin()">로그인</button>
       <div class="login-error" id="loginError">등록되지 않은 계정입니다.</div>
       <div class="login-divider">테스트 계정</div>
-      <div style="text-align:center;font-size:12px;color:var(--red);font-weight:600;margin-bottom:12px;line-height:1.6">
-        * 원하는 역할을 선택하시면<br>아이디 / 비밀번호가 자동으로 입력됩니다.
+      <div style="text-align:center;font-size:12px;color:var(--accent);font-weight:600;margin-bottom:12px;line-height:1.6">
+        <span style="animation:arrowBlink 1.2s ease-in-out infinite;display:inline-block">👇</span>
+        역할을 선택해 주세요!
+        <span style="animation:arrowBlink 1.2s ease-in-out infinite;display:inline-block">👇</span>
       </div>
       <div class="test-accounts">
         <div class="test-account" onclick="fillTestAccount('kimms','1234',this)">
