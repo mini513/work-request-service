@@ -2324,17 +2324,36 @@ function renderRequesterList(el) {
   const allMyReqs = REQUESTS.filter(r => r.requester.id === 'u1');
   const myReqs = applyFilters([...allMyReqs]);
 
-  const delayedReqs = allMyReqs.filter(r => r.status === '접수' && getDaysSince(r.createdAt) >= 2);
+  const delayedReqs = allMyReqs.filter(r => r.status === '접수' && getDaysSince(r.createdAt) >= 2)
+    .sort((a, b) => getDaysSince(b.createdAt) - getDaysSince(a.createdAt));
   let delayHtml = '';
   if (delayedReqs.length) {
-    delayHtml = `<div class="kpi-alert-wrap" style="background:var(--accent-bg);border-color:var(--accent)">
-      <div class="kpi-alert-title" style="color:var(--accent)">⏳ 접수 대기 중 (${delayedReqs.length}건)</div>`;
-    delayedReqs.forEach(r => {
-      delayHtml += `<div class="kpi-alert" style="color:var(--text);cursor:pointer" onclick="openDetail('${r.id}')">
-        <span>• <strong>${r.id}</strong> ${r.title} — ${getDaysSince(r.createdAt).toFixed(0)}일째 대기 중</span>
-      </div>`;
-    });
-    delayHtml += '</div>';
+    const showDelay = delayedReqs.slice(0, 4);
+    const moreDelay = delayedReqs.length - showDelay.length;
+    delayHtml = `<div style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:15px;font-weight:700;color:var(--accent)">⏳ 접수 대기 중</span>
+        <span style="background:var(--accent);color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px">${delayedReqs.length}건</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
+        ${showDelay.map(r => {
+          const days = Math.floor(getDaysSince(r.createdAt));
+          const pc = PRIORITY_COLORS[r.priority] || {};
+          const urgency = days >= 5 ? 'var(--red)' : days >= 3 ? 'var(--yellow)' : 'var(--accent)';
+          return `<div style="border:1.5px solid ${urgency};border-radius:10px;padding:14px;cursor:pointer;background:var(--surface);transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'" onclick="openDetail('${r.id}')">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span style="font-size:11px;color:var(--text-dim);font-family:monospace">${r.id}</span>
+              <span style="font-size:11px;font-weight:600;color:${urgency}">${days}일째 대기</span>
+            </div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</div>
+            <div style="display:flex;align-items:center">
+              <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:10px;padding:2px 6px">${r.priority}</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      ${moreDelay > 0 ? `<div style="text-align:center;margin-top:10px"><span style="font-size:12px;color:var(--text-dim);cursor:pointer;text-decoration:underline" onclick="currentFilter='접수';renderPage()">외 ${moreDelay}건 더보기 →</span></div>` : ''}
+    </div>`;
   }
 
   el.innerHTML = `
@@ -2379,18 +2398,36 @@ function renderWorkerDashboard(el) {
   const byStatus = {};
   ['배정완료','진행중','완료'].forEach(s => byStatus[s] = filtered.filter(r => r.status === s).length);
 
-  const urgentReqs = filtered.filter(r => r.status !== '완료' && r.status !== '반려' && (r.priority === '긴급' || r.priority === '높음'));
+  const urgentReqs = filtered.filter(r => r.status !== '완료' && r.status !== '반려' && (r.priority === '긴급' || r.priority === '높음'))
+    .sort((a, b) => (PRIORITY_ORDER[a.priority] || 9) - (PRIORITY_ORDER[b.priority] || 9));
   let urgentHtml = '';
   if (urgentReqs.length > 0) {
-    urgentHtml = `<div class="kpi-alert-wrap" style="background:var(--yellow-bg,#fff8e1);border-color:var(--yellow,#ff8c00)">
-      <div class="kpi-alert-title" style="color:var(--yellow,#ff8c00)">🔥 긴급/높음 우선 처리 (${urgentReqs.length}건)</div>`;
-    urgentReqs.forEach(r => {
-      const pc = PRIORITY_COLORS[r.priority] || {};
-      urgentHtml += `<div class="kpi-alert" style="color:var(--text);cursor:pointer" onclick="currentDetailId='${r.id}';renderPage()">
-        <span>• <strong>${r.id}</strong> ${r.title} — <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:11px;padding:2px 6px">${r.priority}</span> · ${r.status}${workerDashFilter === 'all' ? ' · ' + r.assignee.name : ''}</span>
-      </div>`;
-    });
-    urgentHtml += '</div>';
+    const showUrgent = urgentReqs.slice(0, 4);
+    const moreUrgent = urgentReqs.length - showUrgent.length;
+    urgentHtml = `<div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:15px;font-weight:700;color:var(--yellow,#ff8c00)">🔥 긴급/높음 우선 처리</span>
+        <span style="background:var(--yellow,#ff8c00);color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px">${urgentReqs.length}건</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
+        ${showUrgent.map(r => {
+          const pc = PRIORITY_COLORS[r.priority] || {};
+          const borderColor = r.priority === '긴급' ? 'var(--red)' : 'var(--yellow,#ff8c00)';
+          return `<div style="border:1.5px solid ${borderColor};border-radius:10px;padding:14px;cursor:pointer;background:var(--surface);transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'" onclick="currentDetailId='${r.id}';renderPage()">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span style="font-size:11px;color:var(--text-dim);font-family:monospace">${r.id}</span>
+              <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:10px;padding:2px 6px">${r.priority}</span>
+            </div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-dim)">
+              <span>${r.status}</span>
+              <span>${r.assignee ? r.assignee.name : ''}</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      ${moreUrgent > 0 ? `<div style="text-align:center;margin-top:10px"><span style="font-size:12px;color:var(--text-dim);cursor:pointer;text-decoration:underline">외 ${moreUrgent}건 더보기 →</span></div>` : ''}
+    </div>`;
   }
 
   const workerSummaryHtml = workers.map(w => {
