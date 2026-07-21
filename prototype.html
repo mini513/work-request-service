@@ -110,19 +110,19 @@ body {
 /* Account Button */
 .account-wrap { position: relative; }
 .account-btn {
-  display: flex; align-items: center; gap: 6px;
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 6px; padding: 4px 10px 4px 6px;
-  cursor: pointer; height: 36px; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: 2px solid var(--text-mid);
+  border-radius: 50%; width: 34px; height: 34px;
+  cursor: pointer; transition: all 0.15s; padding: 0;
 }
 .account-btn:hover { border-color: var(--accent); }
-.account-avatar { font-size: 18px; }
-.account-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.account-btn svg { width: 20px; height: 20px; fill: var(--text-mid); }
+.account-btn:hover svg { fill: var(--accent); }
 .account-dropdown {
   display: none; position: absolute; top: calc(100% + 6px); right: 0;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
-  min-width: 220px; z-index: 10001; overflow: hidden;
+  min-width: 140px; z-index: 10001; overflow: hidden;
 }
 .account-dropdown.show { display: block; }
 .account-dropdown-header {
@@ -136,10 +136,8 @@ body {
 }
 .account-role-item:hover { background: var(--surface2); }
 .account-role-item.active { background: var(--accent-bg); }
-.account-role-icon { font-size: 20px; }
-.account-role-info { display: flex; flex-direction: column; gap: 1px; }
+.account-role-icon { font-size: 10px; flex-shrink: 0; }
 .account-role-name { font-size: 13px; font-weight: 600; color: var(--text); }
-.account-role-label { font-size: 10px; color: var(--text-dim); }
 
 /* Notification Bell */
 .noti-wrap { position: relative; }
@@ -2120,33 +2118,22 @@ body.light .scenario-target {
     </div>
   </div>
   <div class="account-wrap">
-    <button class="account-btn" onclick="toggleAccountMenu()" id="accountBtn" title="계정">
-      <span class="account-avatar" id="accountAvatar">👤</span>
-      <span class="account-name" id="accountName">김민수</span>
-      <span style="font-size:10px;color:var(--text-dim)">▼</span>
+    <button class="account-btn" onclick="toggleAccountMenu()" id="accountBtn" title="역할 전환">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
     </button>
     <div class="account-dropdown" id="accountDropdown">
-      <div class="account-dropdown-header">계정 전환</div>
+      <div class="account-dropdown-header">역할 전환</div>
       <button class="account-role-item requester" onclick="switchRole('requester');toggleAccountMenu()">
-        <span class="account-role-icon">👤</span>
-        <div class="account-role-info">
-          <span class="account-role-name">김민수</span>
-          <span class="account-role-label">요청자 · 영업팀</span>
-        </div>
+        <span class="account-role-icon" style="color:var(--blue)">●</span>
+        <span class="account-role-name">요청자</span>
       </button>
       <button class="account-role-item manager" onclick="switchRole('manager');toggleAccountMenu()">
-        <span class="account-role-icon">👔</span>
-        <div class="account-role-info">
-          <span class="account-role-name">박지영</span>
-          <span class="account-role-label">관리자 · 경영지원팀</span>
-        </div>
+        <span class="account-role-icon" style="color:var(--yellow)">●</span>
+        <span class="account-role-name">관리자</span>
       </button>
       <button class="account-role-item worker" onclick="switchRole('worker');toggleAccountMenu()">
-        <span class="account-role-icon">🔧</span>
-        <div class="account-role-info">
-          <span class="account-role-name">이준호</span>
-          <span class="account-role-label">실무자 · IT지원팀</span>
-        </div>
+        <span class="account-role-icon" style="color:var(--green)">●</span>
+        <span class="account-role-name">실무자</span>
       </button>
     </div>
   </div>
@@ -2390,10 +2377,6 @@ function switchRole(role) {
   sortDir = 'asc';
   document.querySelectorAll('.ham-role-btn').forEach(b => b.classList.toggle('active', b.dataset.role === role));
   document.getElementById('currentRoleBadge').textContent = ROLE_LABELS[role];
-  const acctInfo = { requester: { avatar: '👤', name: '김민수' }, manager: { avatar: '👔', name: '박지영' }, worker: { avatar: '🔧', name: '이준호' } };
-  const ai = acctInfo[role] || acctInfo.requester;
-  document.getElementById('accountAvatar').textContent = ai.avatar;
-  document.getElementById('accountName').textContent = ai.name;
   document.querySelectorAll('.account-role-item').forEach(el => el.classList.remove('active'));
   const activeItem = document.querySelector(`.account-role-item.${role}`);
   if (activeItem) activeItem.classList.add('active');
