@@ -2459,7 +2459,7 @@ function renderRequesterList(el) {
     .sort((a, b) => getDaysSince(b.createdAt) - getDaysSince(a.createdAt));
   let delayHtml = '';
   if (delayedReqs.length) {
-    const showDelay = delayedReqs.slice(0, 4);
+    const showDelay = delayedReqs.slice(0, 5);
     const moreDelay = delayedReqs.length - showDelay.length;
     delayHtml = `<div style="margin-bottom:16px;background:var(--surface);border:1px solid #e0e0e0;border-radius:12px;padding:18px 20px">
       <div style="display:flex;align-items:center;margin-bottom:12px">
@@ -2533,7 +2533,7 @@ function renderWorkerDashboard(el) {
     .sort((a, b) => (PRIORITY_ORDER[a.priority] || 9) - (PRIORITY_ORDER[b.priority] || 9));
   let urgentHtml = '';
   if (urgentReqs.length > 0) {
-    const showUrgent = urgentReqs.slice(0, 4);
+    const showUrgent = urgentReqs.slice(0, 5);
     const moreUrgent = urgentReqs.length - showUrgent.length;
     urgentHtml = `<div style="margin-bottom:20px">
       <div style="display:flex;align-items:center;margin-bottom:12px">
