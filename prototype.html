@@ -4164,6 +4164,34 @@ function getScenarioGroups(steps) {
 
 let filteredScenarios = [];
 
+function sbChar(x, y, scale, expr, hair) {
+  const s = scale || 1, hc = hair || '#4a3728';
+  const eyes = { normal: `<circle cx="${x-4*s}" cy="${y-2*s}" r="${2*s}" fill="#333"/><circle cx="${x+4*s}" cy="${y-2*s}" r="${2*s}" fill="#333"/>`,
+    happy: `<path d="M${x-6*s},${y-2*s} q${2*s},-${3*s} ${4*s},0" stroke="#333" stroke-width="${1.5*s}" fill="none"/><path d="M${x+2*s},${y-2*s} q${2*s},-${3*s} ${4*s},0" stroke="#333" stroke-width="${1.5*s}" fill="none"/>`,
+    sad: `<circle cx="${x-4*s}" cy="${y-1*s}" r="${2*s}" fill="#333"/><circle cx="${x+4*s}" cy="${y-1*s}" r="${2*s}" fill="#333"/>`,
+    surprised: `<circle cx="${x-4*s}" cy="${y-2*s}" r="${2.5*s}" fill="#333"/><circle cx="${x+4*s}" cy="${y-2*s}" r="${2.5*s}" fill="#333"/>` };
+  const mouths = { normal: `<path d="M${x-3*s},${y+4*s} q${3*s},${3*s} ${6*s},0" stroke="#333" stroke-width="${1.2*s}" fill="none"/>`,
+    happy: `<path d="M${x-4*s},${y+3*s} q${4*s},${5*s} ${8*s},0" stroke="#333" stroke-width="${1.2*s}" fill="none"/>`,
+    sad: `<path d="M${x-3*s},${y+6*s} q${3*s},-${3*s} ${6*s},0" stroke="#333" stroke-width="${1.2*s}" fill="none"/>`,
+    surprised: `<ellipse cx="${x}" cy="${y+5*s}" rx="${2.5*s}" ry="${3*s}" fill="#333"/>` };
+  return `<circle cx="${x}" cy="${y}" r="${14*s}" fill="#ffe0c2"/>
+    <ellipse cx="${x}" cy="${y-12*s}" rx="${15*s}" ry="${8*s}" fill="${hc}"/>
+    <path d="M${x-14*s},${y-4*s} q0,-${14*s} ${14*s},-${14*s}" stroke="none" fill="${hc}"/>
+    <path d="M${x+14*s},${y-4*s} q0,-${14*s} -${14*s},-${14*s}" stroke="none" fill="${hc}"/>
+    ${eyes[expr] || eyes.normal}${mouths[expr] || mouths.normal}
+    <rect x="${x-10*s}" y="${y+14*s}" width="${20*s}" height="${22*s}" rx="${4*s}" fill="#6b8cff"/>`;
+}
+
+function sbSpeech(x, y, w, text, tail) {
+  const td = tail || 'bottom';
+  const tailPath = td === 'left' ? `<polygon points="${x},${y+8} ${x-10},${y+20} ${x+8},${y+14}" fill="#fff"/>` :
+    td === 'right' ? `<polygon points="${x+w},${y+8} ${x+w+10},${y+20} ${x+w-8},${y+14}" fill="#fff"/>` :
+    `<polygon points="${x+w/2-5},${y+22} ${x+w/2+5},${y+22} ${x+w/2},${y+32}" fill="#fff"/>`;
+  return `<rect x="${x}" y="${y}" width="${w}" height="24" rx="8" fill="#fff"/>
+    ${tailPath}
+    <text x="${x+w/2}" y="${y+16}" text-anchor="middle" font-size="9" fill="#333" font-weight="500">${text}</text>`;
+}
+
 function openStoryboard() {
   const scenarios = [
     {
@@ -4171,34 +4199,64 @@ function openStoryboard() {
       title: '"PC가 또 멈췄어... 긴급 요청 넣어야지!"',
       panels: [
         {
-          scene: `<div class="sb-emoji-main">😫💻</div>
-            <div class="sb-emoji-row">💥🔵💀</div>
-            <div class="sb-bubble">블루스크린이 또...!</div>`,
-          desc: '어김없이 찾아온 PC 블루스크린. 하루 3번째 반복이다. 더 이상 참을 수 없어 긴급 요청을 넣기로 한다.'
+          scene: `<svg viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg">
+            <rect x="60" y="55" width="50" height="35" rx="3" fill="#4466aa"/>
+            <rect x="65" y="60" width="40" height="22" rx="1" fill="#3355cc"/>
+            <text x="85" y="74" text-anchor="middle" font-size="7" fill="#fff" font-weight="700">BLUE SCREEN</text>
+            <rect x="75" y="90" width="20" height="4" rx="1" fill="#556"/>
+            <rect x="80" y="94" width="10" height="8" rx="1" fill="#556"/>
+            ${sbChar(35, 80, 0.8, 'sad', '#4a3728')}
+            <text x="32" y="48" font-size="16" text-anchor="middle">😱</text>
+            ${sbSpeech(55, 15, 90, '또 블루스크린이야...!', 'left')}
+            <text x="120" y="65" font-size="14">💥</text>
+            <text x="95" y="55" font-size="10">⚡</text>
+          </svg>`,
+          desc: '어김없이 찾아온 PC 블루스크린. 하루 3번째다. 더 이상 참을 수 없다!'
         },
         {
-          scene: `<div class="sb-emoji-main">📝</div>
-            <div class="sb-ui-mock">
-              <span>IT 장애</span>
-              <span class="sb-ui-badge" style="background:rgba(255,99,99,.4);color:#fcc">긴급</span>
-            </div>
-            <div class="sb-ui-mock">
-              <span style="flex:1">PC 블루스크린 반복 발생</span>
-            </div>
-            <div class="sb-ui-btn">요청 등록</div>`,
-          desc: '새 요청을 등록한다. 카테고리는 IT 장애, 긴급도는 "긴급". 증상과 위치를 구체적으로 작성하고 제출!'
+          scene: `<svg viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg">
+            ${sbChar(40, 75, 0.7, 'normal', '#4a3728')}
+            <rect x="80" y="30" width="100" height="110" rx="8" fill="#fff" stroke="#ddd" stroke-width="1"/>
+            <rect x="88" y="40" width="84" height="14" rx="3" fill="#f0f0f0"/>
+            <text x="95" y="50" font-size="7" fill="#666">IT 장애</text>
+            <rect x="145" y="42" width="22" height="8" rx="2" fill="#fee2e2"/>
+            <text x="156" y="49" text-anchor="middle" font-size="6" fill="#e55" font-weight="600">긴급</text>
+            <rect x="88" y="60" width="84" height="14" rx="3" fill="#f0f0f0"/>
+            <text x="95" y="70" font-size="6.5" fill="#666">PC 블루스크린 반복 발생</text>
+            <rect x="88" y="80" width="84" height="24" rx="3" fill="#f8f8f8" stroke="#eee"/>
+            <text x="95" y="92" font-size="5.5" fill="#999">증상을 구체적으로...</text>
+            <rect x="110" y="112" width="48" height="16" rx="6" fill="#6b8cff"/>
+            <text x="134" y="123" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="600">요청 등록</text>
+            <text x="60" y="55" font-size="8" fill="#6b8cff">✍️</text>
+          </svg>`,
+          desc: '새 요청 등록! 카테고리, 제목, 긴급도를 입력하고 제출한다.'
         },
         {
-          scene: `<div class="sb-emoji-main">🔔</div>
-            <div class="sb-bubble">담당자가 배정되었습니다<br>(이준호, IT지원팀)</div>
-            <div class="sb-emoji-row">💬📱</div>`,
-          desc: '잠시 후 알림이 온다. 담당자가 배정됐다! 급한 사항을 댓글로 전달하고, 예정일도 확인한다.'
+          scene: `<svg viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg">
+            ${sbChar(100, 85, 0.8, 'surprised', '#4a3728')}
+            <circle cx="155" cy="35" r="18" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="155" y="40" text-anchor="middle" font-size="16">🔔</text>
+            <line x1="155" y1="20" x2="155" y2="14" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="145" y1="22" x2="141" y2="17" stroke="#f59e0b" stroke-width="1"/>
+            <line x1="165" y1="22" x2="169" y2="17" stroke="#f59e0b" stroke-width="1"/>
+            ${sbSpeech(30, 45, 120, '담당자가 배정되었습니다!')}
+            <rect x="55" y="120" width="90" height="20" rx="6" fill="rgba(255,255,255,.15)"/>
+            <text x="100" y="134" text-anchor="middle" font-size="7" fill="rgba(255,255,255,.7)">💬 급한 사항을 댓글로 전달</text>
+          </svg>`,
+          desc: '알림이 왔다! 담당자가 배정됐다. 급한 사항을 댓글로 전달한다.'
         },
         {
-          scene: `<div class="sb-emoji-main">😊✅</div>
-            <div class="sb-bubble">처리 완료! 메모리 교체했습니다</div>
-            <div class="sb-emoji-row">👍💬</div>`,
-          desc: '처리 완료 알림! 타임라인에서 전체 이력을 확인하고, 감사 댓글을 남긴다. 만족스러운 마무리.'
+          scene: `<svg viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg">
+            ${sbChar(100, 80, 0.9, 'happy', '#4a3728')}
+            <circle cx="100" cy="25" r="20" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+            <polyline points="90,25 97,33 112,18" stroke="#4ade80" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <text x="45" y="30" font-size="12">✨</text>
+            <text x="150" y="35" font-size="12">✨</text>
+            <text x="35" y="60" font-size="10">🎉</text>
+            <text x="160" y="55" font-size="10">🎉</text>
+            ${sbSpeech(35, 120, 130, '감사합니다! 정상 작동해요 👍')}
+          </svg>`,
+          desc: '처리 완료! 전체 이력을 확인하고 감사 댓글을 남긴다. 만족스러운 마무리.'
         }
       ]
     },
@@ -4207,36 +4265,87 @@ function openStoryboard() {
       title: '"미배정 경고가 떴다! 빠르게 배정하자"',
       panels: [
         {
-          scene: `<div class="sb-emoji-main">📊</div>
-            <div class="sb-ui-mock">
-              <span>미배정</span>
-              <span style="color:#f88;font-weight:700;font-size:16px;margin-left:auto">9</span>
-            </div>
-            <div class="sb-emoji-row">⚠️🔴⏰</div>`,
-          desc: '출근 후 대시보드를 확인한다. 미배정 9건! KPI 경고 카드에 2일 넘은 요청이 보인다.'
+          scene: `<svg viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg">
+            ${sbChar(35, 85, 0.7, 'surprised', '#2d1b0e')}
+            <rect x="75" y="25" width="110" height="80" rx="6" fill="#fff" stroke="#ddd"/>
+            <rect x="82" y="32" width="30" height="22" rx="3" fill="#f8f8f8" stroke="#eee"/>
+            <text x="97" y="42" text-anchor="middle" font-size="5.5" fill="#999">전체</text>
+            <text x="97" y="50" text-anchor="middle" font-size="9" fill="#333" font-weight="700">30</text>
+            <rect x="116" y="32" width="30" height="22" rx="3" fill="#fee2e2" stroke="#fca5a5"/>
+            <text x="131" y="42" text-anchor="middle" font-size="5.5" fill="#e55">미배정</text>
+            <text x="131" y="50" text-anchor="middle" font-size="9" fill="#e55" font-weight="700">9</text>
+            <rect x="150" y="32" width="30" height="22" rx="3" fill="#f8f8f8" stroke="#eee"/>
+            <text x="165" y="42" text-anchor="middle" font-size="5.5" fill="#999">진행중</text>
+            <text x="165" y="50" text-anchor="middle" font-size="9" fill="#333" font-weight="700">5</text>
+            <rect x="82" y="60" width="95" height="16" rx="3" fill="#fef2f2"/>
+            <text x="87" y="71" font-size="6.5" fill="#dc2626" font-weight="600">⚠ 담당자 미배정 2일 초과!</text>
+            <text x="82" y="95" font-size="7" fill="#999">REQ-003 수도꼭지 누수</text>
+            ${sbSpeech(25, 25, 45, '이런!', 'right')}
+          </svg>`,
+          desc: '대시보드 확인. 미배정 9건! 2일 넘은 경고가 눈에 띈다.'
         },
         {
-          scene: `<div class="sb-emoji-main">🔍📋</div>
-            <div class="sb-bubble">3층 화장실 수도꼭지 누수<br>높음 · 시설 보수</div>
-            <div class="sb-ui-mock"><span>오태준 · 개발팀</span></div>`,
-          desc: '경고 카드를 클릭해 요청 상세를 확인한다. 긴급도, 카테고리, 요청 내용을 꼼꼼히 검토.'
+          scene: `<svg viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg">
+            ${sbChar(155, 90, 0.7, 'normal', '#2d1b0e')}
+            <rect x="15" y="25" width="120" height="115" rx="8" fill="#fff" stroke="#ddd"/>
+            <text x="25" y="42" font-size="8" fill="#333" font-weight="700">REQ-003</text>
+            <rect x="70" y="34" width="28" height="10" rx="3" fill="#fef9c3"/>
+            <text x="84" y="42" text-anchor="middle" font-size="6" fill="#a16207" font-weight="600">높음</text>
+            <line x1="20" y1="50" x2="130" y2="50" stroke="#eee"/>
+            <text x="25" y="62" font-size="6.5" fill="#666">3층 남자 화장실</text>
+            <text x="25" y="72" font-size="7.5" fill="#333" font-weight="600">수도꼭지 누수</text>
+            <text x="25" y="84" font-size="6" fill="#999">세면대에서 물이 계속...</text>
+            <line x1="20" y1="92" x2="130" y2="92" stroke="#eee"/>
+            <text x="25" y="104" font-size="6" fill="#999">요청자</text>
+            <text x="25" y="114" font-size="7" fill="#333">오태준 · 개발팀</text>
+            <rect x="25" y="120" width="48" height="14" rx="5" fill="#6b8cff"/>
+            <text x="49" y="130" text-anchor="middle" font-size="6.5" fill="#fff" font-weight="600">담당자 배정</text>
+            <rect x="78" y="120" width="30" height="14" rx="5" fill="#fee2e2"/>
+            <text x="93" y="130" text-anchor="middle" font-size="6.5" fill="#e55" font-weight="600">반려</text>
+            <text x="155" y="65" font-size="7" fill="rgba(255,255,255,.5)">🔍</text>
+          </svg>`,
+          desc: '요청 상세를 확인한다. 긴급도, 내용, 요청자 정보를 꼼꼼히 검토.'
         },
         {
-          scene: `<div class="sb-emoji-main">👥</div>
-            <div class="sb-ui-mock" style="flex-direction:column;align-items:flex-start;gap:4px">
-              <span>담당자: 최서연</span>
-              <span>보고자: 윤미래 파트장</span>
-            </div>
-            <div class="sb-ui-btn">배정 확인</div>`,
-          desc: '적합한 실무자를 선택하고 보고자를 지정한다. 배정 확인을 누르면 담당자에게 알림이 간다.'
+          scene: `<svg viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg">
+            ${sbChar(40, 85, 0.7, 'normal', '#2d1b0e')}
+            <rect x="75" y="20" width="110" height="90" rx="8" fill="#fff" stroke="#ddd"/>
+            <text x="130" y="37" text-anchor="middle" font-size="7.5" fill="#333" font-weight="600">담당자 배정</text>
+            <line x1="80" y1="43" x2="180" y2="43" stroke="#eee"/>
+            <text x="85" y="56" font-size="6" fill="#999">실무 담당자</text>
+            <rect x="85" y="59" width="90" height="14" rx="3" fill="#f0fdf4" stroke="#86efac"/>
+            <text x="92" y="69" font-size="6.5" fill="#16a34a">🔧 최서연 · 시설관리팀</text>
+            <text x="85" y="84" font-size="6" fill="#999">보고자</text>
+            <rect x="85" y="87" width="90" height="14" rx="3" fill="#f8f8f8" stroke="#ddd"/>
+            <text x="92" y="97" font-size="6.5" fill="#666">윤미래 파트장</text>
+            <rect x="105" y="120" width="60" height="18" rx="6" fill="#6b8cff"/>
+            <text x="135" y="132" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="600">배정 확인</text>
+            ${sbSpeech(20, 40, 48, '이 사람!', 'right')}
+          </svg>`,
+          desc: '적합한 실무자와 보고자를 선택하고 배정한다. 담당자에게 알림이 전송!'
         },
         {
-          scene: `<div class="sb-emoji-main">📈</div>
-            <div class="sb-ui-mock" style="justify-content:space-around">
-              <span style="text-align:center">완료<br><span style="color:#6c8;font-size:14px;font-weight:700">85%</span></span>
-              <span style="text-align:center">평균<br><span style="font-size:14px;font-weight:700">2.3일</span></span>
-            </div>`,
-          desc: '처리 현황 페이지에서 팀 성과를 점검한다. 완료율과 평균 처리일을 확인하며 업무 부하를 관리.'
+          scene: `<svg viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg">
+            ${sbChar(160, 90, 0.7, 'happy', '#2d1b0e')}
+            <rect x="10" y="25" width="130" height="80" rx="6" fill="#fff" stroke="#ddd"/>
+            <text x="20" y="40" font-size="7" fill="#333" font-weight="600">📊 처리 현황</text>
+            <rect x="18" y="48" width="35" height="20" rx="3" fill="#f0fdf4"/>
+            <text x="35" y="57" text-anchor="middle" font-size="5" fill="#16a34a">완료율</text>
+            <text x="35" y="65" text-anchor="middle" font-size="9" fill="#16a34a" font-weight="700">85%</text>
+            <rect x="58" y="48" width="35" height="20" rx="3" fill="#eff6ff"/>
+            <text x="75" y="57" text-anchor="middle" font-size="5" fill="#3b82f6">평균</text>
+            <text x="75" y="65" text-anchor="middle" font-size="9" fill="#3b82f6" font-weight="700">2.3일</text>
+            <rect x="98" y="48" width="35" height="20" rx="3" fill="#fefce8"/>
+            <text x="115" y="57" text-anchor="middle" font-size="5" fill="#a16207">잔여</text>
+            <text x="115" y="65" text-anchor="middle" font-size="9" fill="#a16207" font-weight="700">4건</text>
+            <rect x="18" y="74" width="15" height="20" rx="1" fill="#86efac"/>
+            <rect x="38" y="80" width="15" height="14" rx="1" fill="#93c5fd"/>
+            <rect x="58" y="76" width="15" height="18" rx="1" fill="#86efac"/>
+            <rect x="78" y="84" width="15" height="10" rx="1" fill="#fde68a"/>
+            <rect x="98" y="72" width="15" height="22" rx="1" fill="#86efac"/>
+            <text x="55" y="100" text-anchor="middle" font-size="5" fill="#999">담당자별 완료 현황</text>
+          </svg>`,
+          desc: '처리 현황을 점검한다. 완료율과 평균 처리일로 팀 성과를 파악.'
         }
       ]
     },
@@ -4245,39 +4354,72 @@ function openStoryboard() {
       title: '"새 업무가 왔다! 확인하고 바로 시작하자"',
       panels: [
         {
-          scene: `<div class="sb-emoji-main">🔔📱</div>
-            <div class="sb-bubble">[배정] 노트북 충전기 고장</div>
-            <div class="sb-emoji-row">👀</div>`,
-          desc: '알림 벨이 울린다. 새로운 업무가 배정됐다! 알림을 클릭해 요청 상세로 이동한다.'
+          scene: `<svg viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg">
+            ${sbChar(100, 90, 0.9, 'surprised', '#1a1a2e')}
+            <rect x="50" y="15" width="100" height="30" rx="8" fill="#fff" stroke="#ddd"/>
+            <text x="60" y="30" font-size="6" fill="#e55" font-weight="600">NEW</text>
+            <text x="78" y="35" font-size="7" fill="#333">[배정] 노트북 충전기 고장</text>
+            <polygon points="100,45 95,50 105,50" fill="#fff"/>
+            <circle cx="155" cy="30" r="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/>
+            <text x="155" y="35" text-anchor="middle" font-size="12">🔔</text>
+            <text x="163" y="22" font-size="7" fill="#e55" font-weight="700">1</text>
+            <text x="50" y="140" font-size="10">✨</text>
+            <text x="145" y="135" font-size="10">✨</text>
+          </svg>`,
+          desc: '알림이 울린다! 새 업무가 배정됐다. 알림을 눌러 요청 상세로 이동.'
         },
         {
-          scene: `<div class="sb-emoji-main">📋</div>
-            <div class="sb-ui-mock" style="flex-direction:column;align-items:flex-start;gap:3px">
-              <span>노트북 충전기 고장</span>
-              <span style="font-size:9px">보통 · IT 장애</span>
-            </div>
-            <div class="sb-ui-mock">
-              <span>📅 작업 예정일</span>
-              <span class="sb-ui-btn">07-21</span>
-            </div>`,
-          desc: '요청 내용을 파악하고 작업 예정일을 입력한다. "작업 시작" 버튼을 눌러 상태를 진행중으로 변경.'
+          scene: `<svg viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg">
+            ${sbChar(35, 90, 0.7, 'normal', '#1a1a2e')}
+            <rect x="70" y="20" width="118" height="120" rx="8" fill="#fff" stroke="#ddd"/>
+            <text x="80" y="38" font-size="7.5" fill="#333" font-weight="700">노트북 충전기 고장</text>
+            <rect x="80" y="43" width="22" height="9" rx="2" fill="#dbeafe"/>
+            <text x="91" y="50" text-anchor="middle" font-size="5.5" fill="#3b82f6" font-weight="600">보통</text>
+            <rect x="106" y="43" width="28" height="9" rx="2" fill="#f0f0f0"/>
+            <text x="120" y="50" text-anchor="middle" font-size="5.5" fill="#666">IT 장애</text>
+            <line x1="75" y1="58" x2="183" y2="58" stroke="#eee"/>
+            <text x="80" y="70" font-size="6" fill="#999">서지훈 · 기획팀</text>
+            <text x="80" y="82" font-size="5.5" fill="#999">접촉 불량으로 충전이...</text>
+            <line x1="75" y1="90" x2="183" y2="90" stroke="#eee"/>
+            <text x="80" y="103" font-size="6" fill="#999">📅 작업 예정일</text>
+            <rect x="130" y="95" width="45" height="14" rx="3" fill="#f0f0f0"/>
+            <text x="152" y="105" text-anchor="middle" font-size="6.5" fill="#333">2026-07-21</text>
+            <rect x="95" y="118" width="72" height="16" rx="6" fill="#6b8cff"/>
+            <text x="131" y="129" text-anchor="middle" font-size="7" fill="#fff" font-weight="600">작업 시작</text>
+          </svg>`,
+          desc: '요청 내용을 파악하고 예정일을 입력. "작업 시작"을 눌러 진행중으로 변경.'
         },
         {
-          scene: `<div class="sb-emoji-main">🔧</div>
-            <div class="sb-bubble">부품 수배 중입니다.<br>내일 오전 방문 예정이에요.</div>
-            <div class="sb-emoji-row">💬👤</div>`,
-          desc: '작업 중 요청자의 긴급 댓글을 확인한다. 진행 상황을 댓글로 공유하며 소통.'
+          scene: `<svg viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg">
+            ${sbChar(160, 55, 0.55, 'normal', '#1a1a2e')}
+            ${sbChar(40, 55, 0.55, 'normal', '#4a3728')}
+            <rect x="65" y="15" width="85" height="22" rx="6" fill="#e0e7ff"/>
+            <text x="107" y="29" text-anchor="middle" font-size="6.5" fill="#4338ca">일정이 급해졌어요! 🙏</text>
+            <polygon points="65,30 55,37 70,35" fill="#e0e7ff"/>
+            <rect x="55" y="90" width="100" height="22" rx="6" fill="#dcfce7"/>
+            <text x="105" y="104" text-anchor="middle" font-size="6.5" fill="#16a34a">부품 수배 중, 내일 방문 예정!</text>
+            <polygon points="145,105 158,112 140,110" fill="#dcfce7"/>
+            <text x="30" y="30" font-size="7" fill="rgba(255,255,255,.4)">요청자</text>
+            <text x="148" y="30" font-size="7" fill="rgba(255,255,255,.4)">실무자</text>
+            <text x="80" y="75" font-size="8" fill="rgba(255,255,255,.3)">💬 댓글 소통</text>
+            <text x="90" y="135" font-size="7" fill="rgba(255,255,255,.2)">🔧 작업 진행 중...</text>
+          </svg>`,
+          desc: '요청자의 긴급 댓글을 확인하고 진행 상황을 공유하며 소통한다.'
         },
         {
-          scene: `<div class="sb-emoji-main">✅🎉</div>
-            <div class="sb-ui-mock">
-              <span>처리 내용</span>
-            </div>
-            <div class="sb-ui-mock">
-              <span style="font-size:9px">충전기 교체 완료. 정상 충전 확인.</span>
-            </div>
-            <div class="sb-ui-btn">처리 완료</div>`,
-          desc: '작업이 끝났다! 처리 내용을 기록하고 완료 버튼을 누른다. 요청자와 보고자에게 완료 알림이 전송.'
+          scene: `<svg viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg">
+            ${sbChar(100, 80, 0.9, 'happy', '#1a1a2e')}
+            <circle cx="100" cy="22" r="18" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+            <polyline points="91,22 97,29 111,15" stroke="#4ade80" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <text x="40" y="25" font-size="11">🎉</text>
+            <text x="153" y="22" font-size="11">🎉</text>
+            <text x="60" y="52" font-size="8">✨</text>
+            <text x="135" y="48" font-size="8">✨</text>
+            <rect x="40" y="125" width="120" height="22" rx="6" fill="rgba(255,255,255,.12)"/>
+            <text x="100" y="139" text-anchor="middle" font-size="7" fill="rgba(255,255,255,.7)">충전기 교체 완료. 정상 충전 확인!</text>
+            <text x="100" y="160" text-anchor="middle" font-size="6.5" fill="rgba(255,255,255,.4)">→ 요청자 · 보고자에게 완료 알림</text>
+          </svg>`,
+          desc: '작업 끝! 처리 내용을 기록하고 완료. 요청자와 보고자에게 알림이 간다.'
         }
       ]
     }
