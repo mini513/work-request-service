@@ -511,6 +511,7 @@ const NOTIFICATIONS = {
     { id: 'n2', reqId: 'REQ-001', message: '작업 예정일이 확정되었습니다 (07/16)', time: '2026-07-14 15:30', read: true },
     { id: 'n3', reqId: 'REQ-001', message: '이준호님이 댓글을 남겼습니다', time: '2026-07-15 10:15', read: false },
     { id: 'n4', reqId: 'REQ-004', message: '요청이 처리 완료되었습니다', time: '2026-07-10 16:00', read: true },
+    { id: 'n30', reqId: 'REQ-030', message: '📋 "사내 앱 알림 미수신" 요청이 2일째 미배정입니다. 리마인드 하시겠습니까?', time: '2026-07-21 09:00', read: false, remindPrompt: true },
   ],
   manager: [
     { id: 'n5', reqId: 'REQ-003', message: '[신규] 3층 화장실 수도꼭지 누수', time: '2026-07-16 08:45', read: false },

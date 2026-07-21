@@ -2257,6 +2257,7 @@ function switchRole(role) {
   sortDir = 'asc';
   document.querySelectorAll('.ham-role-btn').forEach(b => b.classList.toggle('active', b.dataset.role === role));
   document.getElementById('currentRoleBadge').textContent = ROLE_LABELS[role];
+  if (role === 'requester') generateRemindNotifications();
   renderSidebar();
   renderPage();
   renderNotiBadge();
@@ -3117,8 +3118,7 @@ function renderDetail(el) {
           <div class="detail-info-row"><div class="detail-info-label">긴급도</div><div class="detail-info-value"><span class="badge" style="background:${PRIORITY_COLORS[req.priority].bg};color:${PRIORITY_COLORS[req.priority].text}">${req.priority}</span></div></div>
           <div class="detail-info-row"><div class="detail-info-label">희망 완료일</div><div class="detail-info-value">${req.desiredDate || '-'}</div></div>
           <div class="detail-info-row"><div class="detail-info-label">담당자</div><div class="detail-info-value">${req.assignee ? req.assignee.name + ' (' + req.assignee.dept + ')' : (() => {
-            const days = getDaysSince(req.createdAt);
-            const showRemind = currentRole === 'requester' && days >= 1;
+            const showRemind = currentRole === 'requester' && req.remindEnabled;
             return '<span style="color:var(--yellow)">⏳ 배정 대기</span>' + (showRemind ? ` <button class="btn btn-sm" style="margin-left:8px;padding:2px 10px;font-size:11px;border:1px solid var(--yellow);color:var(--yellow);border-radius:6px;cursor:pointer" onclick="event.stopPropagation();sendRemind('${req.id}')">🔔 리마인드</button>` : '');
           })()}</div></div>
           <div class="detail-info-row"><div class="detail-info-label">보고자</div><div class="detail-info-value">${req.reporter ? req.reporter.name + ' (' + (req.reporter.title || req.reporter.dept) + ')' : '-'}</div></div>
@@ -3690,10 +3690,40 @@ function renderNotiList() {
   const notis = NOTIFICATIONS[currentRole] || [];
   document.getElementById('notiList').innerHTML = notis.length === 0
     ? '<div style="padding:20px;text-align:center;color:var(--text-dim);font-size:13px">알림이 없습니다</div>'
-    : notis.map(n => `<div class="noti-item ${n.read ? '' : 'unread'} ${n.urgent ? 'urgent' : ''}" onclick="openDetail('${n.reqId}');toggleNoti();if(scenarioMode)nextScenarioStep()">
+    : notis.map(n => `<div class="noti-item ${n.read ? '' : 'unread'} ${n.urgent ? 'urgent' : ''}" onclick="handleNotiClick('${n.id}','${n.reqId}',${!!n.remindPrompt})">
         <div class="noti-dot"></div>
         <div><div class="noti-msg">${n.message}</div><div class="noti-time">${n.time}</div></div>
       </div>`).join('');
+}
+
+function handleNotiClick(notiId, reqId, isRemindPrompt) {
+  if (isRemindPrompt) {
+    const req = REQUESTS.find(r => r.id === reqId);
+    if (req) req.remindEnabled = true;
+  }
+  openDetail(reqId);
+  toggleNoti();
+  if (scenarioMode) nextScenarioStep();
+}
+
+function generateRemindNotifications() {
+  const myReqs = REQUESTS.filter(r => r.requester.id === 'u1' && !r.assignee && r.status === '접수');
+  myReqs.forEach(r => {
+    const days = Math.floor(getDaysSince(r.createdAt));
+    if (days >= 2) {
+      const exists = NOTIFICATIONS.requester.some(n => n.reqId === r.id && n.remindPrompt);
+      if (!exists) {
+        NOTIFICATIONS.requester.unshift({
+          id: 'nr' + Date.now() + r.id,
+          reqId: r.id,
+          message: `📋 "${r.title}" 요청이 ${days}일째 미배정입니다. 리마인드 하시겠습니까?`,
+          time: new Date().toISOString().slice(0, 16).replace('T', ' '),
+          read: false,
+          remindPrompt: true,
+        });
+      }
+    }
+  });
 }
 
 function renderNotiBadge() {
@@ -4526,6 +4556,7 @@ document.getElementById('loginId').addEventListener('keydown', e => {
 });
 
 // ── Init ──
+generateRemindNotifications();
 renderSidebar();
 renderPage();
 renderNotiBadge();
