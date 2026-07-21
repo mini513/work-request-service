@@ -2533,14 +2533,37 @@ function renderDashboard(el) {
   const completed = all.filter(r => r.status === '완료').length;
   const inProgressCount = all.filter(r => r.status === '진행중').length;
 
-  const kpiAlerts = all.filter(r => !r.assignee && getDaysSince(r.createdAt) >= 1.5);
+  const kpiAlerts = all.filter(r => !r.assignee && getDaysSince(r.createdAt) >= 1.5)
+    .sort((a, b) => getDaysSince(b.createdAt) - getDaysSince(a.createdAt));
   let alertHtml = '';
   if (kpiAlerts.length) {
-    alertHtml = `<div class="kpi-alert-wrap"><div class="kpi-alert-title">⚠️ 미배정 경고 (${kpiAlerts.length}건)</div>`;
-    kpiAlerts.forEach(r => {
-      alertHtml += `<div class="kpi-alert" onclick="openAssignModal('${r.id}')"><span>• <strong>${r.id}</strong> ${r.title} — ${getDaysSince(r.createdAt).toFixed(0)}일 경과</span></div>`;
-    });
-    alertHtml += '</div>';
+    const showAlerts = kpiAlerts.slice(0, 4);
+    const moreCount = kpiAlerts.length - showAlerts.length;
+    alertHtml = `<div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:15px;font-weight:700;color:var(--red)">⚠ 담당자 미배정</span>
+        <span style="background:var(--red);color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px">${kpiAlerts.length}건</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
+        ${showAlerts.map(r => {
+          const days = Math.floor(getDaysSince(r.createdAt));
+          const pc = PRIORITY_COLORS[r.priority] || {};
+          const urgency = days >= 5 ? 'var(--red)' : days >= 3 ? 'var(--yellow)' : 'var(--text-mid)';
+          return `<div style="border:1.5px solid ${urgency};border-radius:10px;padding:14px;cursor:pointer;background:var(--surface);transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'" onclick="openAssignModal('${r.id}')">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span style="font-size:11px;color:var(--text-dim);font-family:monospace">${r.id}</span>
+              <span style="font-size:11px;font-weight:600;color:${urgency}">${days}일 경과</span>
+            </div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:10px;padding:2px 6px">${r.priority}</span>
+              <button class="btn btn-sm btn-primary" style="padding:3px 10px;font-size:11px;border-radius:6px" onclick="event.stopPropagation();openAssignModal('${r.id}')">배정하기</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      ${moreCount > 0 ? `<div style="text-align:center;margin-top:10px"><span style="font-size:12px;color:var(--text-dim);cursor:pointer;text-decoration:underline" onclick="navigateWithFilter('미배정')">외 ${moreCount}건 더보기 →</span></div>` : ''}
+    </div>`;
   }
 
   const recentReceived = all.filter(r => r.status === '접수' || (r.status === '배정완료' && !r.assignee)).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
