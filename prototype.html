@@ -2504,7 +2504,7 @@ function renderWorkerList(el) {
   const myReqsAll = REQUESTS.filter(r => r.assignee && r.assignee.id === 'u3');
   const myReqs = applyFilters([...myReqsAll]);
 
-  const viewToggle = `<div style="display:flex;gap:4px;border:1px solid var(--border);border-radius:6px;padding:2px;background:var(--surface2)">
+  const viewToggle = `<div style="display:flex;gap:4px;border-radius:6px;padding:2px;background:var(--surface2)">
     <button class="filter-btn ${workerListViewMode === 'list' ? 'active f-default' : ''}" style="padding:4px 12px;font-size:12px" onclick="toggleWorkerView('list')">📋 리스트</button>
     <button class="filter-btn ${workerListViewMode === 'kanban' ? 'active f-default' : ''}" style="padding:4px 12px;font-size:12px" onclick="toggleWorkerView('kanban')">📊 대시보드</button>
   </div>`;
@@ -2604,7 +2604,7 @@ function renderDashboard(el) {
             <div style="font-size:13px;font-weight:600;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</div>
             <div style="display:flex;align-items:center;justify-content:space-between">
               <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:10px;padding:2px 6px">${r.priority}</span>
-              <button class="btn btn-sm" style="padding:3px 10px;font-size:11px;border-radius:6px;border:1px solid var(--accent);color:var(--accent);background:#fff;transition:all .15s" onmouseover="this.style.background='var(--accent)';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='var(--accent)'" onclick="event.stopPropagation();openAssignModal('${r.id}')">배정하기</button>
+              <button class="btn btn-sm" style="padding:3px 10px;font-size:11px;border-radius:6px;border:1px solid #bbb;color:var(--text-mid);background:#fff;transition:all .15s" onmouseover="this.style.background='var(--surface2)';this.style.borderColor='#999'" onmouseout="this.style.background='#fff';this.style.borderColor='#bbb'" onclick="event.stopPropagation();openAssignModal('${r.id}')">배정하기</button>
             </div>
           </div>`;
         }).join('')}
