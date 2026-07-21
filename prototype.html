@@ -370,6 +370,20 @@ body {
 }
 
 /* ── Filter Bar ── */
+.filter-divider {
+  width: 1px;
+  height: 24px;
+  background: #D5D5D5;
+  margin: 0 4px;
+  align-self: center;
+}
+.filter-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  align-self: center;
+  font-weight: 500;
+}
 .filter-bar {
   display: flex;
   gap: 8px;
@@ -3287,9 +3301,15 @@ function getAssigneeList() {
 
 function renderFilterBar(role) {
   if (role === 'requester') {
+    const assigneeStatuses = ['미배정', 'TO-DO'];
+    const progressStatuses = ['진행중', '완료', '반려'];
     return `<div class="filter-bar">
       <button class="filter-btn ${currentFilter==='전체'?'active f-default':''}" onclick="filterStatus(this,'전체')">전체</button>
-      ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${statusLabel(s)}</button>`).join('')}
+      <span class="filter-label">담당자</span>
+      ${assigneeStatuses.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${statusLabel(s)}</button>`).join('')}
+      <div class="filter-divider"></div>
+      <span class="filter-label">상태</span>
+      ${progressStatuses.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${statusLabel(s)}</button>`).join('')}
       <div class="search-wrap">
         <input class="search-input" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')execSearch(this.value)">
         <button class="search-btn" onclick="execSearch(this.previousElementSibling.value)" title="검색">🔍</button>
@@ -3297,10 +3317,14 @@ function renderFilterBar(role) {
     </div>`;
   }
   if (role === 'worker') {
-    const workerStatuses = ['TO-DO', '진행중', '완료'];
     return `<div class="filter-bar">
       <button class="filter-btn ${currentFilter==='전체'?'active f-default':''}" onclick="filterStatus(this,'전체')">전체</button>
-      ${workerStatuses.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${statusLabel(s)}</button>`).join('')}
+      <span class="filter-label">담당자</span>
+      <button class="filter-btn ${currentFilter==='TO-DO'?'active f-TO-DO':''}" onclick="filterStatus(this,'TO-DO')">${statusLabel('TO-DO')}</button>
+      <div class="filter-divider"></div>
+      <span class="filter-label">상태</span>
+      <button class="filter-btn ${currentFilter==='진행중'?'active f-진행중':''}" onclick="filterStatus(this,'진행중')">진행중</button>
+      <button class="filter-btn ${currentFilter==='완료'?'active f-완료':''}" onclick="filterStatus(this,'완료')">완료</button>
       <div class="search-wrap">
         <input class="search-input" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')execSearch(this.value)">
         <button class="search-btn" onclick="execSearch(this.previousElementSibling.value)" title="검색">🔍</button>
@@ -3336,10 +3360,15 @@ function renderFilterBar(role) {
     ${hasAdvFilter ? '<button class="filter-reset-btn" onclick="resetAdvFilters()">초기화</button>' : ''}
   </div>`;
 
+  const mgrAssigneeStatuses = ['미배정', 'TO-DO'];
+  const mgrProgressStatuses = ['진행중', '완료', '반려'];
   const statusRow = `<div class="filter-bar">
-    <label style="font-size:12px;color:var(--text-dim);white-space:nowrap">상태</label>
     <button class="filter-btn ${currentFilter==='전체'?'active f-default':''}" onclick="filterStatus(this,'전체')">전체</button>
-    ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${statusLabel(s)}</button>`).join('')}
+    <span class="filter-label">담당자</span>
+    ${mgrAssigneeStatuses.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${statusLabel(s)}</button>`).join('')}
+    <div class="filter-divider"></div>
+    <span class="filter-label">상태</span>
+    ${mgrProgressStatuses.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${statusLabel(s)}</button>`).join('')}
     <div class="search-wrap" style="margin-left:auto">
       <input class="search-input" id="searchInput" placeholder="제목 · ID · 담당자 검색" value="${currentSearch}" onkeydown="if(event.key==='Enter')applyManagerFilter()" style="min-width:180px">
       <button class="search-btn" onclick="applyManagerFilter()" title="검색">🔍</button>
