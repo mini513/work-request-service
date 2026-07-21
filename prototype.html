@@ -2497,6 +2497,7 @@ function renderWorkerDashboard(el) {
     ${urgentHtml ? `<div class="card" style="padding:20px 24px;margin-bottom:16px">${urgentHtml}</div>` : ''}
     <div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--text-mid)">실무자별 현황 <span style="font-weight:400;font-size:11px;color:var(--text-dim)">클릭하여 필터링</span></div>
     <div class="stats-row" style="margin-bottom:20px">${workerSummaryHtml}</div>
+    <div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--text-mid)">${filterWorker ? `${filterWorker.name}의 업무 현황` : '전체 업무 현황'} <span style="font-weight:400;font-size:11px;color:var(--text-dim)">총 ${total}건</span></div>
     <div class="kanban-board">${kanbanHtml}</div>
   `;
 }
