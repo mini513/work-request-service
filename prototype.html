@@ -841,6 +841,26 @@ body {
 .req-item .req-date { font-size: 12px; color: var(--text-dim); }
 .req-item .req-assignee { font-size: 12px; color: var(--text-dim); }
 
+.sla-over {
+  display: block; font-size: 10px; color: var(--red); font-weight: 600; line-height: 1.2; margin-top: 2px;
+}
+
+.inline-assign-select {
+  font-size: 11px; padding: 3px 6px; border: 1.5px solid var(--yellow);
+  border-radius: 6px; background: var(--yellow-bg); color: var(--yellow);
+  cursor: pointer; font-weight: 600; outline: none; transition: all 0.15s;
+}
+.inline-assign-select:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+.inline-assign-select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(91,141,239,0.2); }
+
+.inline-status-btn {
+  font-size: 10px; padding: 2px 6px; border: 1.5px solid var(--accent);
+  border-radius: 4px; background: var(--accent-bg); color: var(--accent);
+  cursor: pointer; font-weight: 600; margin-left: 4px; transition: all 0.15s;
+  white-space: nowrap;
+}
+.inline-status-btn:hover { background: var(--accent); color: #fff; }
+
 .req-list-header {
   display: grid;
   gap: 12px;
@@ -1988,7 +2008,7 @@ body.light .scenario-target {
     <div class="modal-body">
       <div class="form-group">
         <label class="form-label">카테고리</label>
-        <select class="form-select" id="formCategory">
+        <select class="form-select" id="formCategory" onchange="applyTemplate(this.value)">
           <option value="">선택해주세요</option>
           <option>IT 장애</option>
           <option>비품 요청</option>
@@ -2310,7 +2330,7 @@ function renderManagerList(el) {
     </div>
     ${renderFilterBar('manager')}
     ${alertHtml}
-    ${(() => { const cols = [{key:'status',label:'상태'},{key:'priority',label:'긴급도'},{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'date',label:'등록일'},{key:'assignee',label:'담당자'}]; return renderSortableHeader(cols) + `<div class="req-list">${reqs.length ? reqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경해 보세요')}</div>`; })()}
+    ${(() => { const cols = [{key:'status',label:'상태'},{key:'priority',label:'긴급도'},{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'date',label:'등록일'},{key:'assigneeAction',label:'담당자'}]; return renderSortableHeader(cols) + `<div class="req-list">${reqs.length ? reqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경해 보세요')}</div>`; })()}
   `;
 }
 
@@ -2391,7 +2411,7 @@ function renderWorkerList(el) {
       <div><div class="page-title">내 담당 목록</div><div class="page-subtitle">나에게 배정된 요청을 처리합니다 (이준호)</div></div>
     </div>
     ${renderFilterBar('worker')}
-    ${(() => { const cols = [{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'status',label:'상태'},{key:'date',label:'등록일'},{key:'requester',label:'요청자'}]; return renderSortableHeader(cols) + `<div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('배정된 요청이 없습니다', '새로운 요청이 배정되면 알림으로 통보됩니다')}</div>`; })()}
+    ${(() => { const cols = [{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'statusAction',label:'상태'},{key:'date',label:'등록일'},{key:'requester',label:'요청자'}]; return renderSortableHeader(cols) + `<div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('배정된 요청이 없습니다', '새로운 요청이 배정되면 알림으로 통보됩니다')}</div>`; })()}
   `;
 }
 
@@ -2888,9 +2908,33 @@ const COL_DEFS = {
   title:    { width: '1fr',   render: r => `<div class="req-title-cell"><div class="req-title">${r.title}</div></div>` },
   priority: { width: '80px',  render: r => `<span class="req-priority"><span class="badge" style="background:${PRIORITY_COLORS[r.priority].bg};color:${PRIORITY_COLORS[r.priority].text}">${r.priority}</span></span>` },
   status:   { width: '90px',  render: r => `<span class="req-status">${renderStatusBadge(r)}</span>` },
-  date:     { width: '90px',  render: r => `<span class="req-date">${r.createdAt.split(' ')[0]}</span>` },
+  date:     { width: '105px',  render: r => {
+    const SLA_DAYS = { '긴급': 1, '높음': 2, '보통': 5, '낮음': 10 };
+    const elapsed = getDaysSince(r.createdAt);
+    const sla = SLA_DAYS[r.priority] || 5;
+    const overdue = r.status !== '완료' && r.status !== '반려' && elapsed > sla;
+    return `<span class="req-date">${r.createdAt.split(' ')[0]}${overdue ? `<span class="sla-over" title="SLA ${sla}일 초과">🔴 ${Math.floor(elapsed - sla)}일 초과</span>` : ''}</span>`;
+  }},
   assignee: { width: '80px',  render: r => `<span class="req-assignee">${r.assignee ? r.assignee.name : '<span style="color:var(--yellow)">미배정</span>'}</span>` },
   requester:{ width: '80px',  render: r => `<span class="req-assignee">${r.requester.name}</span>` },
+  assigneeAction: { width: '110px', render: r => {
+    if (r.assignee) return `<span class="req-assignee">${r.assignee.name}</span>`;
+    return `<span class="inline-assign" onclick="event.stopPropagation()">
+      <select class="inline-assign-select" onchange="quickAssign('${r.id}', this.value)">
+        <option value="">배정하기</option>
+        ${Object.values(USERS).filter(u => u.role === 'worker').map(u => `<option value="${u.id}">${u.name}</option>`).join('')}
+      </select>
+    </span>`;
+  }},
+  statusAction: { width: '110px', render: r => {
+    const nextMap = { '배정완료': '진행중', '진행중': '완료' };
+    const next = nextMap[r.status];
+    if (!next) return `<span class="req-status">${renderStatusBadge(r)}</span>`;
+    return `<span class="req-status" onclick="event.stopPropagation()">
+      ${renderStatusBadge(r)}
+      <button class="inline-status-btn" onclick="quickStatus('${r.id}','${next}')" title="${next}으로 변경">→ ${next}</button>
+    </span>`;
+  }},
 };
 
 function getGridTemplate(columns) {
@@ -3058,8 +3102,9 @@ function applySorting(reqs) {
       case 'priority': va = PRIORITY_ORDER[a.priority]; vb = PRIORITY_ORDER[b.priority]; return (va - vb) * dir;
       case 'status': va = STATUSES.indexOf(a.status); vb = STATUSES.indexOf(b.status); return (va - vb) * dir;
       case 'date': va = a.createdAt; vb = b.createdAt; break;
-      case 'assignee': va = a.assignee ? a.assignee.name : ''; vb = b.assignee ? b.assignee.name : ''; break;
+      case 'assignee': case 'assigneeAction': va = a.assignee ? a.assignee.name : ''; vb = b.assignee ? b.assignee.name : ''; break;
       case 'requester': va = a.requester.name; vb = b.requester.name; break;
+      case 'statusAction': va = STATUSES.indexOf(a.status); vb = STATUSES.indexOf(b.status); return (va - vb) * dir;
       default: return 0;
     }
     return va < vb ? -dir : va > vb ? dir : 0;
@@ -3092,6 +3137,22 @@ function backToList() {
 
 function openModal(id) { document.getElementById(id).classList.add('show'); }
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+const REQ_TEMPLATES = {
+  'IT 장애':  { title: 'PC/네트워크 장애 — ', content: '■ 증상:\n\n■ 발생 시점:\n\n■ PC 정보 (사번/모델):' , priority: '높음' },
+  '비품 요청': { title: '비품 요청 — ', content: '■ 필요 비품:\n\n■ 수량:\n\n■ 사용 목적:', priority: '보통' },
+  '시설 보수': { title: '시설 보수 요청 — ', content: '■ 위치 (건물/층/장소):\n\n■ 증상:\n\n■ 긴급 여부:', priority: '보통' },
+  '기타':     { title: '', content: '', priority: '보통' },
+};
+
+function applyTemplate(category) {
+  const t = REQ_TEMPLATES[category];
+  if (!t) return;
+  document.getElementById('formTitle').value = t.title;
+  document.getElementById('formContent').value = t.content;
+  document.getElementById('formPriority').value = t.priority;
+  document.getElementById('formTitle').focus();
+}
 
 function submitRequest() {
   const cat = document.getElementById('formCategory').value;
@@ -3133,6 +3194,32 @@ function openAssignModal(id) {
     <div class="text-dim" style="font-size:12px;margin-top:4px">${req.category} · ${req.requester.name} · 긴급도: ${req.priority}</div>
   `;
   openModal('assignModal');
+}
+
+function quickAssign(reqId, workerId) {
+  if (!workerId) return;
+  const req = REQUESTS.find(r => r.id === reqId);
+  const worker = Object.values(USERS).find(u => u.id === workerId);
+  if (!req || !worker) return;
+  req.assignee = worker;
+  req.status = '배정완료';
+  const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  req.timeline.push({ date: now, action: '담당자 배정', by: USERS.manager.name, detail: `실무자: ${worker.name} (빠른 배정)` });
+  NOTIFICATIONS.worker.unshift({ id: 'n' + Date.now(), reqId: req.id, message: `[배정] ${req.title}`, time: now, read: false });
+  renderSidebar(); renderPage(); renderNotiBadge();
+}
+
+function quickStatus(reqId, newStatus) {
+  const req = REQUESTS.find(r => r.id === reqId);
+  if (!req) return;
+  req.status = newStatus;
+  const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  const detail = newStatus === '완료' ? '작업 완료 처리' : '작업 시작';
+  req.timeline.push({ date: now, action: newStatus, by: USERS.worker1.name, detail });
+  if (newStatus === '완료') {
+    NOTIFICATIONS.requester.unshift({ id: 'n' + Date.now(), reqId: req.id, message: `[완료] ${req.title}`, time: now, read: false });
+  }
+  renderSidebar(); renderPage(); renderNotiBadge();
 }
 
 function confirmAssign() {
