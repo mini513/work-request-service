@@ -2938,10 +2938,10 @@ function renderLog(el) {
       ${logPeriod !== 'all' ? `<span style="font-size:12px;color:var(--accent);margin-left:auto;font-weight:500;${logPeriod === 'custom' ? 'cursor:pointer' : ''}" ${logPeriod === 'custom' ? 'onclick="openCalendarPopup()" title="클릭하여 날짜 변경"' : ''}>${rangeLabel}</span>` : ''}
     </div>
     <div class="stats-row">
-      <div class="stat-card" style="border-left:3px solid var(--green);background:var(--green-bg)"><div class="stat-label" style="color:var(--green)">처리 완료</div><div class="stat-value" style="color:var(--green)">${completed.length}<span style="font-size:14px;color:var(--text-dim);font-weight:400"> / ${all.length}</span></div></div>
-      <div class="stat-card" style="border-left:3px solid var(--accent);background:var(--accent-bg)"><div class="stat-label" style="color:var(--accent)">처리율</div><div class="stat-value" style="color:var(--accent)">${completionRate}%</div></div>
-      <div class="stat-card" style="border-left:3px solid var(--text-mid)"><div class="stat-label">평균 처리일</div><div class="stat-value">${avgDays}<span style="font-size:14px;color:var(--text-dim);font-weight:400">일</span></div></div>
-      <div class="stat-card" style="border-left:3px solid var(--yellow);background:var(--yellow-bg)"><div class="stat-label" style="color:var(--yellow)">긴급/높음 처리</div><div class="stat-value" style="color:var(--yellow)">${urgentDone.length}</div></div>
+      <div class="stat-card" style="border:1.5px solid #D5D5D5"><div class="stat-label" style="color:var(--green)">처리 완료</div><div class="stat-value" style="color:var(--green)">${completed.length}<span style="font-size:14px;color:var(--text-dim);font-weight:400"> / ${all.length}</span></div></div>
+      <div class="stat-card" style="border:1.5px solid #D5D5D5"><div class="stat-label" style="color:var(--accent)">처리율</div><div class="stat-value" style="color:var(--accent)">${completionRate}%</div></div>
+      <div class="stat-card" style="border:1.5px solid #D5D5D5"><div class="stat-label">평균 처리일</div><div class="stat-value">${avgDays}<span style="font-size:14px;color:var(--text-dim);font-weight:400">일</span></div></div>
+      <div class="stat-card" style="border:1.5px solid #D5D5D5"><div class="stat-label" style="color:var(--yellow)">긴급/높음 처리</div><div class="stat-value" style="color:var(--yellow)">${urgentDone.length}</div></div>
     </div>
 
     <div class="chart-grid">
