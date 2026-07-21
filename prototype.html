@@ -3272,13 +3272,7 @@ const COL_DEFS = {
     </span>`;
   }},
   statusAction: { width: '110px', render: r => {
-    const nextMap = { 'TO-DO': '진행중', '진행중': '완료' };
-    const next = nextMap[r.status];
-    if (!next) return `<span class="req-status">${renderStatusBadge(r)}</span>`;
-    return `<span class="req-status" onclick="event.stopPropagation()">
-      ${renderStatusBadge(r)}
-      <button class="inline-status-btn" onclick="quickStatus('${r.id}','${next}')" title="${next}으로 변경">→ ${next}</button>
-    </span>`;
+    return `<span class="req-status">${renderStatusBadge(r)}</span>`;
   }},
 };
 
