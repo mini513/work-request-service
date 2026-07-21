@@ -3108,7 +3108,11 @@ function renderDetail(el) {
           <div class="detail-content">${req.content}</div>
           <div class="detail-info-row"><div class="detail-info-label">긴급도</div><div class="detail-info-value"><span class="badge" style="background:${PRIORITY_COLORS[req.priority].bg};color:${PRIORITY_COLORS[req.priority].text}">${req.priority}</span></div></div>
           <div class="detail-info-row"><div class="detail-info-label">희망 완료일</div><div class="detail-info-value">${req.desiredDate || '-'}</div></div>
-          <div class="detail-info-row"><div class="detail-info-label">담당자</div><div class="detail-info-value">${req.assignee ? req.assignee.name + ' (' + req.assignee.dept + ')' : '<span style="color:var(--yellow)">⏳ 배정 대기</span>'}</div></div>
+          <div class="detail-info-row"><div class="detail-info-label">담당자</div><div class="detail-info-value">${req.assignee ? req.assignee.name + ' (' + req.assignee.dept + ')' : (() => {
+            const days = getDaysSince(req.createdAt);
+            const showRemind = currentRole === 'requester' && days >= 1;
+            return '<span style="color:var(--yellow)">⏳ 배정 대기</span>' + (showRemind ? ` <button class="btn btn-sm" style="margin-left:8px;padding:2px 10px;font-size:11px;border:1px solid var(--yellow);color:var(--yellow);border-radius:6px;cursor:pointer" onclick="event.stopPropagation();sendRemind('${req.id}')">🔔 리마인드</button>` : '');
+          })()}</div></div>
           <div class="detail-info-row"><div class="detail-info-label">보고자</div><div class="detail-info-value">${req.reporter ? req.reporter.name + ' (' + (req.reporter.title || req.reporter.dept) + ')' : '-'}</div></div>
           <div class="detail-info-row"><div class="detail-info-label">작업 예정일</div><div class="detail-info-value">${req.estimatedDate || '-'}</div></div>
           ${actionButtons}
@@ -3526,6 +3530,27 @@ function openAssignModal(id) {
     <div class="text-dim" style="font-size:12px;margin-top:4px">${req.category} · ${req.requester.name} · 긴급도: ${req.priority}</div>
   `;
   openModal('assignModal');
+}
+
+function sendRemind(reqId) {
+  const req = REQUESTS.find(r => r.id === reqId);
+  if (!req) return;
+  const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  NOTIFICATIONS.manager.unshift({
+    id: 'n' + Date.now(),
+    reqId: req.id,
+    message: `[리마인드] ${req.title} — 배정을 요청합니다`,
+    time: now,
+    read: false,
+  });
+  req.timeline.push({ date: now, action: '리마인드', by: req.requester.name, detail: '요청자가 담당자 배정을 리마인드했습니다' });
+  renderPage();
+  renderNotiBadge();
+  const btn = event.target;
+  btn.textContent = '✓ 전송됨';
+  btn.disabled = true;
+  btn.style.border = '1px solid var(--green)';
+  btn.style.color = 'var(--green)';
 }
 
 function quickAssign(reqId, workerId) {
