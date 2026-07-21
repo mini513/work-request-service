@@ -845,6 +845,45 @@ body {
   display: block; font-size: 10px; color: var(--red); font-weight: 600; line-height: 1.2; margin-top: 2px;
 }
 
+/* Calendar Popup */
+.cal-overlay { position: fixed; inset: 0; z-index: 9999; }
+.cal-popup {
+  position: absolute; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); padding: 16px;
+  min-width: 280px; z-index: 10000;
+}
+.cal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; font-size: 14px; font-weight: 700; color: var(--text);
+}
+.cal-header button {
+  background: none; border: none; cursor: pointer; font-size: 16px;
+  color: var(--text-mid); padding: 4px 8px; border-radius: 4px; transition: background 0.15s;
+}
+.cal-header button:hover { background: var(--surface2); color: var(--text); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+.cal-dow { font-size: 11px; color: var(--text-dim); font-weight: 600; padding: 4px 0; }
+.cal-day {
+  font-size: 12px; padding: 6px 0; border-radius: 6px; cursor: pointer;
+  color: var(--text); transition: all 0.12s; border: 2px solid transparent;
+}
+.cal-day:hover { background: var(--accent-bg); color: var(--accent); }
+.cal-day.other { color: var(--text-dim); opacity: 0.4; }
+.cal-day.today { color: var(--accent); font-weight: 700; border-color: var(--accent); }
+.cal-day.selected { background: var(--accent); color: #fff; font-weight: 700; }
+.cal-day.in-range { background: var(--accent-bg); }
+.cal-day.sun { color: var(--red); }
+.cal-day.sat { color: var(--blue); }
+.cal-day.sun.other, .cal-day.sat.other { opacity: 0.3; }
+.cal-footer {
+  display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.cal-selected-range {
+  font-size: 12px; color: var(--accent); font-weight: 600; padding: 6px 0;
+  text-align: center; background: var(--accent-bg); border-radius: 6px; margin-top: 8px;
+}
+
 .inline-assign-select {
   font-size: 11px; padding: 3px 6px; border: 1.5px solid var(--yellow);
   border-radius: 6px; background: var(--yellow-bg); color: var(--yellow);
@@ -2518,14 +2557,114 @@ function filterByPeriod(requests) {
 }
 
 function setLogPeriod(p) {
+  if (p === 'custom') { openCalendarPopup(); return; }
   logPeriod = p;
-  if (p !== 'custom') { renderPage(); }
+  renderPage();
 }
 
 function applyCustomDate() {
   logCustomDate = document.getElementById('logCustomDate').value;
   if (!logCustomDate) { alert('시작 날짜를 선택해주세요.'); return; }
   logPeriod = 'custom';
+  renderPage();
+}
+
+let calYear, calMonth, calSelected = null;
+
+function openCalendarPopup() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  calSelected = logCustomDate ? new Date(logCustomDate) : null;
+
+  const btn = document.querySelector('button[onclick="setLogPeriod(\'custom\')"]');
+  const rect = btn ? btn.getBoundingClientRect() : { left: 200, bottom: 200 };
+
+  let overlay = document.getElementById('calOverlay');
+  if (overlay) overlay.remove();
+
+  overlay = document.createElement('div');
+  overlay.id = 'calOverlay';
+  overlay.className = 'cal-overlay';
+  overlay.innerHTML = `<div class="cal-popup" style="left:${Math.min(rect.left, window.innerWidth - 310)}px;top:${rect.bottom + 6}px" id="calPopup"></div>`;
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeCalendar(); });
+  document.body.appendChild(overlay);
+  renderCalendar();
+}
+
+function closeCalendar() {
+  const o = document.getElementById('calOverlay');
+  if (o) o.remove();
+}
+
+function renderCalendar() {
+  const popup = document.getElementById('calPopup');
+  if (!popup) return;
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const dows = ['일','월','화','수','목','금','토'];
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const lastDate = new Date(calYear, calMonth + 1, 0).getDate();
+  const prevLastDate = new Date(calYear, calMonth, 0).getDate();
+
+  let days = '';
+  for (let i = 0; i < firstDay; i++) {
+    const d = prevLastDate - firstDay + 1 + i;
+    const dow = i;
+    days += `<div class="cal-day other ${dow===0?'sun':''}${dow===6?'sat':''}">${d}</div>`;
+  }
+  for (let d = 1; d <= lastDate; d++) {
+    const dow = (firstDay + d - 1) % 7;
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isSel = calSelected && dateStr === `${calSelected.getFullYear()}-${String(calSelected.getMonth()+1).padStart(2,'0')}-${String(calSelected.getDate()).padStart(2,'0')}`;
+    const isToday = dateStr === todayStr;
+    const inRange = calSelected && new Date(dateStr) >= calSelected && new Date(dateStr) <= today;
+    days += `<div class="cal-day${dow===0?' sun':''}${dow===6?' sat':''}${isSel?' selected':''}${isToday?' today':''}${inRange && !isSel?' in-range':''}" onclick="selectCalDay(${calYear},${calMonth+1},${d})">${d}</div>`;
+  }
+  const remain = 42 - firstDay - lastDate;
+  for (let d = 1; d <= remain; d++) {
+    const dow = (firstDay + lastDate + d - 1) % 7;
+    days += `<div class="cal-day other ${dow===0?'sun':''}${dow===6?'sat':''}">${d}</div>`;
+  }
+
+  const selLabel = calSelected ? `${calSelected.getFullYear()}.${String(calSelected.getMonth()+1).padStart(2,'0')}.${String(calSelected.getDate()).padStart(2,'0')} ~ ${todayStr.replace(/-/g,'.')}` : '시작일을 선택하세요';
+
+  popup.innerHTML = `
+    <div class="cal-header">
+      <button onclick="calNav(-12)">«</button><button onclick="calNav(-1)">‹</button>
+      <span>${calYear}년 ${months[calMonth]}</span>
+      <button onclick="calNav(1)">›</button><button onclick="calNav(12)">»</button>
+    </div>
+    <div class="cal-grid">
+      ${dows.map((d,i) => `<div class="cal-dow${i===0?' sun':''}${i===6?' sat':''}" style="${i===0?'color:var(--red)':''}${i===6?'color:var(--blue)':''}">${d}</div>`).join('')}
+      ${days}
+    </div>
+    <div class="cal-selected-range">${selLabel}</div>
+    <div class="cal-footer">
+      <button class="btn btn-sm btn-secondary" onclick="closeCalendar()">취소</button>
+      <button class="btn btn-sm btn-primary" onclick="applyCalendar()" ${!calSelected?'disabled style="opacity:0.5"':''}>적용</button>
+    </div>
+  `;
+}
+
+function calNav(delta) {
+  if (Math.abs(delta) >= 12) { calYear += delta / 12; }
+  else { calMonth += delta; if (calMonth < 0) { calMonth = 11; calYear--; } if (calMonth > 11) { calMonth = 0; calYear++; } }
+  renderCalendar();
+}
+
+function selectCalDay(y, m, d) {
+  calSelected = new Date(y, m - 1, d);
+  renderCalendar();
+}
+
+function applyCalendar() {
+  if (!calSelected) return;
+  logCustomDate = `${calSelected.getFullYear()}-${String(calSelected.getMonth()+1).padStart(2,'0')}-${String(calSelected.getDate()).padStart(2,'0')}`;
+  logPeriod = 'custom';
+  closeCalendar();
   renderPage();
 }
 
@@ -2586,11 +2725,7 @@ function renderLog(el) {
         const active = logPeriod === p ? 'background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600' : '';
         return `<button class="btn btn-sm btn-secondary" style="${active}" onclick="setLogPeriod('${p}')">${labels[p]}</button>`;
       }).join('')}
-      ${logPeriod === 'custom' ? `<div style="display:flex;align-items:center;gap:6px;margin-left:4px">
-        <input type="date" id="logCustomDate" class="form-input" style="width:140px;padding:4px 8px;font-size:12px" value="${logCustomDate}">
-        <span style="font-size:12px;color:var(--text-dim)">~ ${todayStr}</span>
-        <button class="btn btn-sm btn-primary" onclick="applyCustomDate()">적용</button>
-      </div>` : ''}
+      ${logPeriod === 'custom' && logCustomDate ? `<span style="font-size:12px;color:var(--text-dim);margin-left:4px;cursor:pointer" onclick="openCalendarPopup()" title="클릭하여 날짜 변경">📅 ${logCustomDate.replace(/-/g,'.')} ~ ${todayStr}</span>` : ''}
       ${logPeriod !== 'all' ? `<span style="font-size:12px;color:var(--accent);margin-left:auto;font-weight:500">${rangeLabel}</span>` : ''}
     </div>
     <div class="stats-row">
@@ -3537,8 +3672,8 @@ const SCENARIOS = [
     text: '<strong>소통 ③</strong> 상태 스테퍼에서 "배정완료" 단계를 확인합니다. 담당자가 지정되었네요!' },
   { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.detail-info-value',
     text: '<strong>소통 ④</strong> 배정된 담당자(이준호)와 보고자(한동훈 파트장) 정보를 확인합니다.' },
-  { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.comment-item', targetLabel: false,
-    text: '<strong>소통 ⑤</strong> 기존 댓글에서 실무자의 진행 메시지를 확인합니다.' },
+  { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.comment-item',
+    text: '<strong>소통 ⑤</strong> 기존 댓글에서 실무자의 진행 메시지를 확인합니다. 클릭하여 확인 후 다음으로 이동합니다.' },
   { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.comment-input',
     text: '<strong>소통 ⑥</strong> 일정이 급해졌습니다! 댓글로 긴급 사항과 빠뜨렸던 정보를 함께 전달합니다.' },
 
