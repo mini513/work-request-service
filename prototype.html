@@ -2231,7 +2231,7 @@ const SIDEBAR_MENUS = {
     { id: 'new', icon: '➕', label: '새 요청 등록' },
   ],
   manager: [
-    { id: 'dashboard', icon: '📊', label: '업무 모니터링' },
+    { id: 'dashboard', icon: '📊', label: '요청 모니터링' },
     { id: 'list', icon: '📋', label: '전체 요청 목록' },
     { id: 'log', icon: '📈', label: '처리 현황' },
   ],
@@ -2625,7 +2625,7 @@ function renderDashboard(el) {
 
   el.innerHTML = `
     <div class="page-header">
-      <div><div class="page-title">업무 모니터링</div><div class="page-subtitle">지금 조치가 필요한 항목을 확인합니다</div></div>
+      <div><div class="page-title">요청 모니터링</div><div class="page-subtitle">지금 조치가 필요한 항목을 확인합니다</div></div>
     </div>
 
     ${alertHtml ? `<div class="card" style="padding:20px 24px;margin-bottom:16px">${alertHtml}</div>` : ''}
@@ -3919,11 +3919,11 @@ const SCENARIOS = [
 
   // ═══════════════════════════════════════════════════════════════
   // 관리자 S1: 신규 요청 접수 + 담당자 배정
-  // Story: "업무 모니터링에서 미배정 경고를 발견! 빠르게 담당자를 배정하자"
+  // Story: "요청 모니터링에서 미배정 경고를 발견! 빠르게 담당자를 배정하자"
   // 서비스 사이클: ① 요청자 등록 → ② 관리자 배정 → 실무자 시작 → ...
   // ═══════════════════════════════════════════════════════════════
   { role: 'manager', group: '신규 요청 접수 + 배정', page: 'dashboard', detail: null, target: '#kpiUnassigned',
-    text: '<strong>접수 ①</strong> 업무 모니터링에서 현황을 파악합니다. 미배정 건수가 눈에 띕니다.' },
+    text: '<strong>접수 ①</strong> 요청 모니터링에서 현황을 파악합니다. 미배정 건수가 눈에 띕니다.' },
   { role: 'manager', group: '신규 요청 접수 + 배정', page: 'dashboard', detail: null, target: '.kpi-alert',
     text: '<strong>접수 ②</strong> ⚠️ KPI 경고를 확인합니다. 2일 이상 미배정된 요청이 있습니다!' },
   { role: 'manager', group: '신규 요청 접수 + 배정', page: 'list', detail: null, target: '.req-item', beforeAction: () => { currentFilter = '미배정'; renderPage(); },
@@ -4264,7 +4264,7 @@ function openIAMap() {
     manager: {
       label: '👔 관리자',
       pages: [
-        { name: '업무 모니터링', features: ['현황 카드 (전체/미배정/진행중/완료)', 'KPI 경고 (2일 이상 미배정)', '카테고리별 분포 차트', '긴급도별 분포 차트'] },
+        { name: '요청 모니터링', features: ['현황 카드 (전체/미배정/진행중/완료)', 'KPI 경고 (2일 이상 미배정)', '카테고리별 분포 차트', '긴급도별 분포 차트'] },
         { name: '전체 요청 목록', features: ['조건 필터 (카테고리/긴급도/담당자)', '상태 필터 (+ 미배정)', '검색', '정렬'] },
         { name: '요청 상세', features: ['담당자 배정 (모달)', '반려 + 사유 입력 (모달)', '댓글'] },
         { name: '처리 현황', features: ['기간 필터 (전체/오늘/7일/이번달/커스텀)', '완료 목록 테이블', '담당자별 완료율 차트'] },
