@@ -2236,7 +2236,7 @@ const SIDEBAR_MENUS = {
     { id: 'log', icon: '📈', label: '처리 현황' },
   ],
   worker: [
-    { id: 'dashboard', icon: '📊', label: '대시보드' },
+    { id: 'dashboard', icon: '📊', label: '전체 대시보드' },
     { id: 'list', icon: '📋', label: '내 담당 목록' },
   ],
 };
@@ -2376,15 +2376,17 @@ function renderManagerList(el) {
   `;
 }
 
-// ── Worker List ──
+// ── Worker Views ──
+let workerListViewMode = 'list';
+
 function renderWorkerDashboard(el) {
-  const myReqs = REQUESTS.filter(r => r.assignee && r.assignee.id === 'u3');
-  const total = myReqs.length;
+  const allAssigned = REQUESTS.filter(r => r.assignee);
+  const workers = [USERS.worker1, USERS.worker2, USERS.worker3];
+  const total = allAssigned.length;
   const byStatus = {};
-  ['배정완료', '진행중', '완료'].forEach(s => byStatus[s] = myReqs.filter(r => r.status === s).length);
+  ['접수','배정완료','진행중','완료','반려'].forEach(s => byStatus[s] = allAssigned.filter(r => r.status === s).length);
 
-  const urgentReqs = myReqs.filter(r => r.status !== '완료' && (r.priority === '긴급' || r.priority === '높음'));
-
+  const urgentReqs = allAssigned.filter(r => r.status !== '완료' && r.status !== '반려' && (r.priority === '긴급' || r.priority === '높음'));
   let urgentHtml = '';
   if (urgentReqs.length > 0) {
     urgentHtml = `<div class="kpi-alert-wrap" style="background:var(--yellow-bg,#fff8e1);border-color:var(--yellow,#ff8c00)">
@@ -2392,11 +2394,26 @@ function renderWorkerDashboard(el) {
     urgentReqs.forEach(r => {
       const pc = PRIORITY_COLORS[r.priority] || {};
       urgentHtml += `<div class="kpi-alert" style="color:var(--text);cursor:pointer" onclick="currentDetailId='${r.id}';renderPage()">
-        <span>• <strong>${r.id}</strong> ${r.title} — <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:11px;padding:2px 6px">${r.priority}</span> · ${r.status}</span>
+        <span>• <strong>${r.id}</strong> ${r.title} — <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:11px;padding:2px 6px">${r.priority}</span> · ${r.status} · ${r.assignee ? r.assignee.name : '미배정'}</span>
       </div>`;
     });
     urgentHtml += '</div>';
   }
+
+  const workerSummaryHtml = workers.map(w => {
+    const wReqs = allAssigned.filter(r => r.assignee.id === w.id);
+    const waiting = wReqs.filter(r => r.status === '배정완료').length;
+    const prog = wReqs.filter(r => r.status === '진행중').length;
+    const done = wReqs.filter(r => r.status === '완료').length;
+    return `<div class="stat-card" style="border:1.5px solid var(--border);padding:16px">
+      <div style="font-weight:600;font-size:14px;margin-bottom:10px">${w.name} <span style="font-weight:400;font-size:11px;color:var(--text-dim)">(${wReqs.length}건)</span></div>
+      <div style="display:flex;gap:12px;font-size:12px">
+        <span style="color:var(--blue)">대기 ${waiting}</span>
+        <span style="color:var(--accent)">진행 ${prog}</span>
+        <span style="color:var(--green)">완료 ${done}</span>
+      </div>
+    </div>`;
+  }).join('');
 
   const kanbanCols = [
     { status: '배정완료', label: '대기', color: 'var(--blue)', bg: 'var(--blue-bg)' },
@@ -2406,20 +2423,19 @@ function renderWorkerDashboard(el) {
 
   function renderKanbanCard(r) {
     const pc = PRIORITY_COLORS[r.priority] || {};
-    const sc = STATUS_COLORS[r.status] || {};
     return `<div class="kanban-card" onclick="currentDetailId='${r.id}';renderPage()">
       <div class="kanban-card-id">${r.id}</div>
       <div class="kanban-card-title">${r.title}</div>
       <div class="kanban-card-meta">
         <span class="kanban-card-tag" style="background:${pc.bg};color:${pc.text}">${r.priority}</span>
         <span class="kanban-card-tag" style="background:var(--surface3);color:var(--text-mid)">${r.category}</span>
-        <span style="font-size:10px;color:var(--text-dim);margin-left:auto">${r.requester.name}</span>
+        <span style="font-size:10px;color:var(--text-dim);margin-left:auto">${r.assignee ? r.assignee.name : ''}</span>
       </div>
     </div>`;
   }
 
   const kanbanHtml = kanbanCols.map(col => {
-    const cards = myReqs.filter(r => r.status === col.status).sort((a, b) => (PRIORITY_ORDER[a.priority] || 9) - (PRIORITY_ORDER[b.priority] || 9));
+    const cards = allAssigned.filter(r => r.status === col.status).sort((a, b) => (PRIORITY_ORDER[a.priority] || 9) - (PRIORITY_ORDER[b.priority] || 9));
     return `<div class="kanban-col">
       <div class="kanban-col-header">
         <span class="kanban-col-title">${col.label}</span>
@@ -2433,28 +2449,95 @@ function renderWorkerDashboard(el) {
 
   el.innerHTML = `
     <div class="page-header">
-      <div><div class="page-title">대시보드</div><div class="page-subtitle">내 담당 업무 현황을 한눈에 확인합니다 (이준호)</div></div>
+      <div><div class="page-title">전체 대시보드</div><div class="page-subtitle">실무자 전체 업무 현황을 한눈에 확인합니다</div></div>
     </div>
     ${urgentHtml}
     <div class="stats-row">
-      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--text-mid)" onclick="navigateWithFilter('전체')"><div class="stat-label">전체 담당</div><div class="stat-value">${total}</div></div>
-      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--blue);background:var(--blue-bg)" onclick="navigateWithFilter('배정완료')"><div class="stat-label" style="color:var(--blue)">배정완료</div><div class="stat-value" style="color:var(--blue)">${byStatus['배정완료'] || 0}</div></div>
-      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--accent);background:var(--accent-bg)" onclick="navigateWithFilter('진행중')"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${byStatus['진행중'] || 0}</div></div>
-      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--green);background:var(--green-bg)" onclick="navigateWithFilter('완료')"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${byStatus['완료'] || 0}</div></div>
+      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--text-mid)" onclick="navigateWithFilter('전체')"><div class="stat-label">전체 배정</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--blue)" onclick="navigateWithFilter('배정완료')"><div class="stat-label" style="color:var(--blue)">배정완료</div><div class="stat-value" style="color:var(--blue)">${byStatus['배정완료'] || 0}</div></div>
+      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--accent)" onclick="navigateWithFilter('진행중')"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${byStatus['진행중'] || 0}</div></div>
+      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--green)" onclick="navigateWithFilter('완료')"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${byStatus['완료'] || 0}</div></div>
     </div>
+    <div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--text-mid)">실무자별 현황</div>
+    <div class="stats-row" style="margin-bottom:20px">${workerSummaryHtml}</div>
     <div class="kanban-board">${kanbanHtml}</div>
   `;
 }
 
+function toggleWorkerView(mode) {
+  workerListViewMode = mode;
+  renderPage();
+}
+
 function renderWorkerList(el) {
-  const myReqs = applyFilters([...REQUESTS].filter(r => r.assignee && r.assignee.id === 'u3'));
-  el.innerHTML = `
-    <div class="page-header">
-      <div><div class="page-title">내 담당 목록</div><div class="page-subtitle">나에게 배정된 요청을 처리합니다 (이준호)</div></div>
-    </div>
-    ${renderFilterBar('worker')}
-    ${(() => { const cols = [{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'statusAction',label:'상태'},{key:'date',label:'등록일'},{key:'requester',label:'요청자'}]; return renderSortableHeader(cols) + `<div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('배정된 요청이 없습니다', '새로운 요청이 배정되면 알림으로 통보됩니다')}</div>`; })()}
-  `;
+  const myReqsAll = REQUESTS.filter(r => r.assignee && r.assignee.id === 'u3');
+  const myReqs = applyFilters([...myReqsAll]);
+
+  const viewToggle = `<div style="display:flex;gap:4px;border:1px solid var(--border);border-radius:6px;padding:2px;background:var(--surface2)">
+    <button class="filter-btn ${workerListViewMode === 'list' ? 'active f-default' : ''}" style="padding:4px 12px;font-size:12px" onclick="toggleWorkerView('list')">📋 리스트</button>
+    <button class="filter-btn ${workerListViewMode === 'kanban' ? 'active f-default' : ''}" style="padding:4px 12px;font-size:12px" onclick="toggleWorkerView('kanban')">📊 대시보드</button>
+  </div>`;
+
+  if (workerListViewMode === 'kanban') {
+    const total = myReqsAll.length;
+    const byStatus = {};
+    ['배정완료','진행중','완료'].forEach(s => byStatus[s] = myReqsAll.filter(r => r.status === s).length);
+
+    const kanbanCols = [
+      { status: '배정완료', label: '대기', color: 'var(--blue)', bg: 'var(--blue-bg)' },
+      { status: '진행중', label: '진행중', color: 'var(--accent)', bg: 'var(--accent-bg)' },
+      { status: '완료', label: '완료', color: 'var(--green)', bg: 'var(--green-bg)' },
+    ];
+
+    function renderMyKanbanCard(r) {
+      const pc = PRIORITY_COLORS[r.priority] || {};
+      return `<div class="kanban-card" onclick="currentDetailId='${r.id}';renderPage()">
+        <div class="kanban-card-id">${r.id}</div>
+        <div class="kanban-card-title">${r.title}</div>
+        <div class="kanban-card-meta">
+          <span class="kanban-card-tag" style="background:${pc.bg};color:${pc.text}">${r.priority}</span>
+          <span class="kanban-card-tag" style="background:var(--surface3);color:var(--text-mid)">${r.category}</span>
+          <span style="font-size:10px;color:var(--text-dim);margin-left:auto">${r.requester.name}</span>
+        </div>
+      </div>`;
+    }
+
+    const kanbanHtml = kanbanCols.map(col => {
+      const cards = myReqsAll.filter(r => r.status === col.status).sort((a, b) => (PRIORITY_ORDER[a.priority] || 9) - (PRIORITY_ORDER[b.priority] || 9));
+      return `<div class="kanban-col">
+        <div class="kanban-col-header">
+          <span class="kanban-col-title">${col.label}</span>
+          <span class="kanban-col-count" style="background:${col.bg};color:${col.color}">${cards.length}</span>
+        </div>
+        <div class="kanban-cards">
+          ${cards.length ? cards.map(r => renderMyKanbanCard(r)).join('') : '<div class="kanban-empty">일감 없음</div>'}
+        </div>
+      </div>`;
+    }).join('');
+
+    el.innerHTML = `
+      <div class="page-header">
+        <div><div class="page-title">내 담당 목록</div><div class="page-subtitle">나에게 배정된 요청을 처리합니다 (이준호)</div></div>
+        ${viewToggle}
+      </div>
+      <div class="stats-row">
+        <div class="stat-card" style="border:1.5px solid var(--text-mid)"><div class="stat-label">전체</div><div class="stat-value">${total}</div></div>
+        <div class="stat-card" style="border:1.5px solid var(--blue)"><div class="stat-label" style="color:var(--blue)">대기</div><div class="stat-value" style="color:var(--blue)">${byStatus['배정완료'] || 0}</div></div>
+        <div class="stat-card" style="border:1.5px solid var(--accent)"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${byStatus['진행중'] || 0}</div></div>
+        <div class="stat-card" style="border:1.5px solid var(--green)"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${byStatus['완료'] || 0}</div></div>
+      </div>
+      <div class="kanban-board">${kanbanHtml}</div>
+    `;
+  } else {
+    el.innerHTML = `
+      <div class="page-header">
+        <div><div class="page-title">내 담당 목록</div><div class="page-subtitle">나에게 배정된 요청을 처리합니다 (이준호)</div></div>
+        ${viewToggle}
+      </div>
+      ${renderFilterBar('worker')}
+      ${(() => { const cols = [{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'priority',label:'긴급도'},{key:'statusAction',label:'상태'},{key:'date',label:'등록일'},{key:'requester',label:'요청자'}]; return renderSortableHeader(cols) + `<div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('배정된 요청이 없습니다', '새로운 요청이 배정되면 알림으로 통보됩니다')}</div>`; })()}
+    `;
+  }
 }
 
 // ── Dashboard (액션 센터 — 지금 조치 필요한 항목) ──
@@ -2487,10 +2570,10 @@ function renderDashboard(el) {
     </div>
     ${alertHtml}
     <div class="stats-row">
-      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--text-mid)" onclick="navigateWithFilter('전체')"><div class="stat-label">전체 요청</div><div class="stat-value">${total}</div></div>
-      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--red);background:var(--red-bg)" onclick="navigateWithFilter('미배정')"><div class="stat-label" style="color:var(--red)">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div></div>
-      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--accent);background:var(--accent-bg)" onclick="navigateWithFilter('진행중')"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${inProgressCount}</div></div>
-      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--green);background:var(--green-bg)" onclick="navigateWithFilter('완료')"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${completed}</div></div>
+      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--text-mid)" onclick="navigateWithFilter('전체')"><div class="stat-label">전체 요청</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--red)" onclick="navigateWithFilter('미배정')"><div class="stat-label" style="color:var(--red)">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div></div>
+      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--accent)" onclick="navigateWithFilter('진행중')"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${inProgressCount}</div></div>
+      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--green)" onclick="navigateWithFilter('완료')"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${completed}</div></div>
     </div>
     <div class="chart-grid">
       <div class="chart-card">
