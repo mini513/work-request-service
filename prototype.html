@@ -2405,7 +2405,7 @@ function renderRequesterList(el) {
   if (delayedReqs.length) {
     const showDelay = delayedReqs.slice(0, 4);
     const moreDelay = delayedReqs.length - showDelay.length;
-    delayHtml = `<div style="margin-bottom:16px">
+    delayHtml = `<div style="margin-bottom:16px;background:var(--surface);border:1px solid #e0e0e0;border-radius:12px;padding:18px 20px">
       <div style="display:flex;align-items:center;margin-bottom:12px">
         <span style="font-size:15px;font-weight:700;color:var(--accent)">⏳ 배정 대기 중</span>
         <span style="background:var(--accent);color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:8px">${delayedReqs.length}건</span>
@@ -3738,6 +3738,7 @@ function addComment(id) {
   }
   renderPage();
   renderNotiBadge();
+  if (scenarioMode) setTimeout(() => nextScenarioStep(), 400);
 }
 
 // ── Notifications ──
@@ -3995,7 +3996,7 @@ const SCENARIOS = [
     text: '<strong>소통 ④</strong> 배정된 담당자(이준호)와 보고자(한동훈 파트장) 정보를 확인합니다.' },
   { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.comment-item',
     text: '<strong>소통 ⑤</strong> 기존 댓글에서 실무자의 진행 메시지를 확인합니다. 클릭하여 확인 후 다음으로 이동합니다.' },
-  { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.comment-input',
+  { role: 'requester', group: '배정 알림 + 긴급 소통', page: 'list', detail: 'REQ-001', target: '.comment-input-wrap', clickThrough: true,
     text: '<strong>소통 ⑥</strong> 일정이 급해졌습니다! 댓글로 긴급 사항과 빠뜨렸던 정보를 함께 전달합니다.' },
 
   // ═══════════════════════════════════════════════════════════════
@@ -4009,9 +4010,9 @@ const SCENARIOS = [
     text: '<strong>확인 ②</strong> "요청이 처리 완료되었습니다" 알림을 클릭합니다.' },
   { role: 'requester', group: '처리 완료 확인', page: 'list', detail: 'REQ-004', target: '.status-stepper',
     text: '<strong>확인 ③</strong> 상태 스테퍼에서 "완료" 단계를 확인합니다. 처리가 완료되었네요!' },
-  { role: 'requester', group: '처리 완료 확인', page: 'list', detail: 'REQ-004', target: '.timeline-item', targetLabel: false,
+  { role: 'requester', group: '처리 완료 확인', page: 'list', detail: 'REQ-004', target: '.timeline-item',
     text: '<strong>확인 ④</strong> 타임라인에서 전체 처리 이력(미배정→배정 완료→진행중→완료)을 확인합니다.' },
-  { role: 'requester', group: '처리 완료 확인', page: 'list', detail: 'REQ-004', target: '.comment-input',
+  { role: 'requester', group: '처리 완료 확인', page: 'list', detail: 'REQ-004', target: '.comment-input-wrap', clickThrough: true,
     text: '<strong>확인 ⑤</strong> 댓글로 감사 인사나 추가 피드백을 남깁니다.' },
 
   // ═══════════════════════════════════════════════════════════════
@@ -4047,8 +4048,8 @@ const SCENARIOS = [
   // ═══════════════════════════════════════════════════════════════
   { role: 'manager', group: '처리 현황 점검', page: 'log', detail: null, target: '.stats-row',
     text: '<strong>점검 ①</strong> 처리 현황 페이지에서 완료 건수, 처리율, 평균 처리일을 확인합니다.' },
-  { role: 'manager', group: '처리 현황 점검', page: 'log', detail: null, target: '.chart-card', targetLabel: false,
-    text: '<strong>점검 ②</strong> 긴급도별 분포와 담당자별 완료율 차트를 확인하여 업무 부하를 점검합니다.' },
+  { role: 'manager', group: '처리 현황 점검', page: 'log', detail: null, target: '.donut-legend-item[data-donut="완료"]', clickThrough: true,
+    text: '<strong>점검 ②</strong> 상태별 분포 차트에서 <strong>완료</strong> 영역을 클릭하여 완료 목록을 확인합니다.' },
   { role: 'manager', group: '처리 현황 점검', page: 'log', detail: null, target: '.stats-table',
     text: '<strong>점검 ③</strong> 완료 목록에서 카테고리·긴급도·담당자별 처리 내역을 점검하여 팀 성과를 파악합니다.' },
 
@@ -4061,7 +4062,7 @@ const SCENARIOS = [
     text: '<strong>시작 ①</strong> 🔔 새 업무가 배정되었습니다! 알림 벨을 클릭합니다.' },
   { role: 'worker', group: '배정 알림 + 작업 시작', page: 'list', detail: null, target: '.noti-item', action: 'openNoti',
     text: '<strong>시작 ②</strong> "[배정] 노트북 충전기 고장" 알림을 클릭하여 상세로 이동합니다.' },
-  { role: 'worker', group: '배정 알림 + 작업 시작', page: 'list', detail: 'REQ-008', target: '.detail-info-row', targetLabel: false,
+  { role: 'worker', group: '배정 알림 + 작업 시작', page: 'list', detail: 'REQ-008', target: '.detail-info-row',
     text: '<strong>시작 ③</strong> 요청 내용, 카테고리, 긴급도, 희망 완료일을 파악합니다.' },
   { role: 'worker', group: '배정 알림 + 작업 시작', page: 'list', detail: 'REQ-008', target: '#estDate',
     text: '<strong>시작 ④</strong> <em>작업 예정일</em>을 입력합니다. 요청자에게 예정일이 알림됩니다.' },
@@ -4073,9 +4074,9 @@ const SCENARIOS = [
   // Story: "요청자 댓글을 확인하고, 작업을 마무리하자"
   // 서비스 사이클: ... → ④ 요청자 소통 → ⑤ 실무자 완료 → 요청자 확인
   // ═══════════════════════════════════════════════════════════════
-  { role: 'worker', group: '작업 진행 + 완료 처리', page: 'list', detail: 'REQ-001', target: '.comment-item', targetLabel: false,
+  { role: 'worker', group: '작업 진행 + 완료 처리', page: 'list', detail: 'REQ-001', target: '.comment-item',
     text: '<strong>완료 ①</strong> 요청자가 남긴 긴급 댓글을 확인합니다. 추가 요청 사항을 파악합니다.' },
-  { role: 'worker', group: '작업 진행 + 완료 처리', page: 'list', detail: 'REQ-001', target: '.comment-input',
+  { role: 'worker', group: '작업 진행 + 완료 처리', page: 'list', detail: 'REQ-001', target: '.comment-input-wrap', clickThrough: true,
     text: '<strong>완료 ②</strong> 댓글로 요청자에게 진행 상황을 공유합니다.' },
   { role: 'worker', group: '작업 진행 + 완료 처리', page: 'list', detail: 'REQ-001', target: '#completeNote',
     text: '<strong>완료 ③</strong> 작업이 끝났습니다! 처리 내용을 기록합니다. 수행한 작업을 구체적으로 작성합니다.' },
@@ -4125,16 +4126,27 @@ function highlightScenarioTargets(s) {
         if (isClickable) {
           const isFormField = el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA';
           if (isFormField) {
-            const evt = el.tagName === 'SELECT' ? 'change' : 'input';
-            let inputTimer = null;
-            const handler = function() {
-              if (el.value && el.value.trim() !== '') {
-                if (inputTimer) clearTimeout(inputTimer);
-                inputTimer = setTimeout(() => { inputTimer = null; nextScenarioStep(); }, 400);
-              }
-            };
-            el.addEventListener(evt, handler);
-            scenarioClickTargets.push({ el, handler, evt });
+            if (el.type === 'date') {
+              const handler = function() { setTimeout(() => nextScenarioStep(), 400); };
+              el.addEventListener('change', handler);
+              scenarioClickTargets.push({ el, handler, evt: 'change' });
+              el.addEventListener('click', function() { try { el.showPicker(); } catch(e){} });
+            } else {
+              const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+              let inputTimer = null;
+              const handler = function() {
+                if (el.value && el.value.trim() !== '') {
+                  if (inputTimer) clearTimeout(inputTimer);
+                  inputTimer = setTimeout(() => { inputTimer = null; nextScenarioStep(); }, 400);
+                }
+              };
+              el.addEventListener(evt, handler);
+              scenarioClickTargets.push({ el, handler, evt });
+            }
+          } else if (s.clickThrough) {
+            const handler = function() { setTimeout(() => nextScenarioStep(), 300); };
+            el.addEventListener('click', handler);
+            scenarioClickTargets.push({ el, handler, evt: 'click' });
           } else {
             const handler = function(e) {
               e.preventDefault();
