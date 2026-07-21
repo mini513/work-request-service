@@ -3138,10 +3138,6 @@ function renderFilterBar(role) {
         ${getAssigneeList().map(n => `<option value="${n}"${filterAssignee===n?' selected':''}>${n}</option>`).join('')}
       </select>
     </div>
-    <span style="color:var(--border);margin:0 2px">|</span>
-    <div class="search-wrap">
-      <input class="search-input" id="searchInput" placeholder="검색..." value="${currentSearch}" onkeydown="if(event.key==='Enter')applyManagerFilter()">
-    </div>
     <button class="filter-search-btn" onclick="applyManagerFilter()">검색</button>
     ${hasAdvFilter ? '<button class="filter-reset-btn" onclick="resetAdvFilters()">초기화</button>' : ''}
   </div>`;
@@ -3151,6 +3147,10 @@ function renderFilterBar(role) {
     <button class="filter-btn ${currentFilter==='전체'?'active f-default':''}" onclick="filterStatus(this,'전체')">전체</button>
     ${STATUSES.map(s => `<button class="filter-btn ${currentFilter===s?'active f-'+s:''}" onclick="filterStatus(this,'${s}')">${s}</button>`).join('')}
     <button class="filter-btn ${currentFilter==='미배정'?'active f-미배정':''}" onclick="filterStatus(this,'미배정')">미배정</button>
+    <div class="search-wrap" style="margin-left:auto">
+      <input class="search-input" id="searchInput" placeholder="제목 · ID · 담당자 검색" value="${currentSearch}" onkeydown="if(event.key==='Enter')applyManagerFilter()" style="min-width:180px">
+      <button class="search-btn" onclick="applyManagerFilter()" title="검색">🔍</button>
+    </div>
   </div>`;
 
   return conditionRow + statusRow;
