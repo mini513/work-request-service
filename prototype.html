@@ -1881,10 +1881,8 @@ body.light .scenario-target {
       <button class="login-btn" id="loginBtn" onclick="handleLogin()">로그인</button>
       <div class="login-error" id="loginError">등록되지 않은 계정입니다.</div>
       <div class="login-divider">테스트 계정</div>
-      <div style="text-align:center;font-size:12px;color:var(--accent);font-weight:600;margin-bottom:12px;line-height:1.6">
-        <span style="animation:arrowBlink 1.2s ease-in-out infinite;display:inline-block">👇</span>
-        역할을 선택해 주세요!
-        <span style="animation:arrowBlink 1.2s ease-in-out infinite;display:inline-block">👇</span>
+      <div id="testAccountGuide" style="text-align:center;font-size:12px;color:var(--accent);font-weight:600;margin-bottom:12px;line-height:1.6;animation:arrowBlink 1.2s ease-in-out infinite">
+        역할을 선택해 주세요
       </div>
       <div class="test-accounts">
         <div class="test-account" onclick="fillTestAccount('kimms','1234',this)">
@@ -4038,8 +4036,17 @@ function fillTestAccount(id, pw, el) {
   document.getElementById('loginId').value = id;
   document.getElementById('loginPw').value = pw;
   document.getElementById('loginError').style.display = 'none';
-  document.querySelectorAll('.test-account').forEach(a => a.classList.remove('selected'));
-  if (el) el.classList.add('selected');
+  document.querySelectorAll('.test-account').forEach(a => {
+    a.classList.remove('selected');
+    a.style.animation = 'none';
+    a.style.opacity = '0.45';
+  });
+  if (el) {
+    el.classList.add('selected');
+    el.style.opacity = '1';
+  }
+  const guide = document.getElementById('testAccountGuide');
+  if (guide) guide.style.animation = 'none';
   const btn = document.getElementById('loginBtn');
   btn.classList.remove('pulse');
   void btn.offsetWidth;
