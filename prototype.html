@@ -678,6 +678,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex: 1;
   min-width: 200px;
 }
 .ia-role-box {
@@ -713,7 +714,7 @@ body {
   font-weight: 600;
   color: var(--text);
   text-align: center;
-  white-space: nowrap;
+  box-sizing: border-box;
 }
 .ia-features {
   display: flex;
@@ -731,7 +732,7 @@ body {
   font-size: 10px;
   color: var(--text-dim);
   text-align: center;
-  white-space: nowrap;
+  box-sizing: border-box;
 }
 .ia-vline-sm {
   width: 1.5px;
@@ -2057,8 +2058,7 @@ body.light .scenario-target {
       <div class="ham-divider-double"></div>
       <div class="ham-section">
         <div class="ham-section-label">Service Planning</div>
-        <button class="ham-action-btn" onclick="openStoryboard();toggleHamburger()">시나리오 스토리보드</button>
-        <button class="ham-action-btn" onclick="openScenarioMap();toggleHamburger()" style="margin-top:4px">시나리오 흐름도</button>
+        <button class="ham-action-btn" onclick="openStoryboard();toggleHamburger()">시나리오</button>
         <button class="ham-action-btn" onclick="openIAMap();toggleHamburger()" style="margin-top:4px">IA 구조도</button>
         <button class="ham-action-btn" onclick="openStakeholderMap();toggleHamburger()" style="margin-top:4px">이해관계자맵</button>
         <button class="ham-action-btn" onclick="openBlueprintMap();toggleHamburger()" style="margin-top:4px">서비스 블루프린트</button>
@@ -2253,7 +2253,7 @@ body.light .scenario-target {
 <div class="modal-overlay" id="storyboardModal">
   <div class="modal" style="max-width:95vw;width:1200px;max-height:90vh">
     <div class="modal-header">
-      <h3>시나리오 스토리보드</h3>
+      <h3>시나리오</h3>
       <button class="modal-close" onclick="closeModal('storyboardModal')">×</button>
     </div>
     <div class="modal-body" id="storyboardBody" style="overflow:auto;max-height:calc(90vh - 80px)"></div>
@@ -4561,7 +4561,7 @@ function openIAMap() {
       <span class="ia-common-item">🔔 알림</span>
       <span class="ia-common-item">☰ 역할 전환</span>
       <span class="ia-common-item">🎯 시나리오 모드</span>
-      <span class="ia-common-item">📊 시나리오 흐름도</span>
+      <span class="ia-common-item">🎬 시나리오</span>
       <span class="ia-common-item">🗂 IA 구조도</span>
       <span class="ia-common-item">🤝 이해관계자맵</span>
       <span class="ia-common-item">📐 서비스 블루프린트</span>
@@ -4585,6 +4585,12 @@ function openIAMap() {
       row.style.setProperty('--hline-left', lineLeft + '%');
       row.style.setProperty('--hline-width', lineWidth + '%');
     }
+    cols.forEach(col => {
+      const items = col.querySelectorAll('.ia-page, .ia-feature');
+      let maxW = 0;
+      items.forEach(el => { el.style.width = 'auto'; maxW = Math.max(maxW, el.offsetWidth); });
+      items.forEach(el => { el.style.width = maxW + 'px'; });
+    });
   });
 }
 
