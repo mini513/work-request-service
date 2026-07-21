@@ -2268,8 +2268,14 @@ function toggleHamburger() {
 
 // ── Sidebar ──
 function renderSidebar() {
+  const sidebarEl = document.getElementById('sidebar');
+  if (currentRole === 'requester') {
+    sidebarEl.style.display = 'none';
+    return;
+  }
+  sidebarEl.style.display = '';
   const menus = SIDEBAR_MENUS[currentRole];
-  let html = `<div class="sidebar-section">${currentRole === 'requester' ? '요청자 메뉴' : currentRole === 'manager' ? '관리자 메뉴' : '실무자 메뉴'}</div>`;
+  let html = `<div class="sidebar-section">${currentRole === 'manager' ? '관리자 메뉴' : '실무자 메뉴'}</div>`;
   menus.forEach(m => {
     const badgeVal = m.badge ? m.badge() : 0;
     html += `<div class="sidebar-item ${currentPage === m.id ? 'active' : ''}" onclick="navigateTo('${m.id}')">
@@ -2278,7 +2284,7 @@ function renderSidebar() {
     </div>`;
   });
   html += `<div class="sidebar-spacer"></div>`;
-  document.getElementById('sidebar').innerHTML = html;
+  sidebarEl.innerHTML = html;
 }
 
 function navigateTo(page) {
@@ -2363,7 +2369,7 @@ function renderRequesterList(el) {
     </div>
     ${delayHtml}
     ${renderFilterBar('requester')}
-    ${(() => { const cols = [{key:'priority',label:'긴급도'},{key:'status',label:'상태'},{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'date',label:'등록일'},{key:'assignee',label:'담당자'}]; return renderSortableHeader(cols) + `<div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경하거나 새 요청을 등록해 보세요')}</div>`; })()}
+    ${(() => { const cols = [{key:'status',label:'상태'},{key:'priority',label:'긴급도'},{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'date',label:'등록일'},{key:'assignee',label:'담당자'}]; return renderSortableHeader(cols) + `<div class="req-list">${myReqs.length ? myReqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경하거나 새 요청을 등록해 보세요')}</div>`; })()}
   `;
 }
 
