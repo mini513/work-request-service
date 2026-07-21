@@ -2352,26 +2352,11 @@ function renderRequesterList(el) {
 function renderManagerList(el) {
   let reqs = applyFilters([...REQUESTS]);
 
-  const isUnassignedFilter = currentFilter === '미배정';
-
-  let alertHtml = '';
-  if (isUnassignedFilter) {
-    const kpiAlerts = REQUESTS.filter(r => !r.assignee && getDaysSince(r.createdAt) >= 1.5);
-    if (kpiAlerts.length) {
-      alertHtml = `<div class="kpi-alert-wrap"><div class="kpi-alert-title">⚠️ 미배정 경고 (${kpiAlerts.length}건)</div>`;
-      kpiAlerts.forEach(r => {
-        alertHtml += `<div class="kpi-alert" onclick="openAssignModal('${r.id}')"><span>• <strong>${r.id}</strong> ${r.title} — ${getDaysSince(r.createdAt).toFixed(0)}일 경과</span></div>`;
-      });
-      alertHtml += '</div>';
-    }
-  }
-
   el.innerHTML = `
     <div class="page-header">
       <div><div class="page-title">전체 요청 목록</div><div class="page-subtitle">모든 부서의 업무 요청을 관리합니다</div></div>
     </div>
     ${renderFilterBar('manager')}
-    ${alertHtml}
     ${(() => { const cols = [{key:'status',label:'상태'},{key:'priority',label:'긴급도'},{key:'id',label:'ID'},{key:'category',label:'카테고리'},{key:'title',label:'제목'},{key:'date',label:'등록일'},{key:'assigneeAction',label:'담당자'}]; return renderSortableHeader(cols) + `<div class="req-list">${reqs.length ? reqs.map(r => renderReqRow(r, cols)).join('') : renderEmptyState('해당하는 요청이 없습니다', '필터를 변경해 보세요')}</div>`; })()}
   `;
 }
