@@ -4452,6 +4452,10 @@ function applyScenarioStep() {
   if (!needsModal) {
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
   }
+  if (s.action !== 'openNoti') {
+    const notiDd = document.getElementById('notiDropdown');
+    if (notiDd) notiDd.classList.remove('show');
+  }
 
   if (s.detail) { currentDetailId = s.detail; renderPage(); }
   else if (s.page === 'new') { }
