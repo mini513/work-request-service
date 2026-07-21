@@ -2579,7 +2579,7 @@ function renderDashboard(el) {
     ${alertHtml}
     <div class="stats-row">
       <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--text-mid)" onclick="navigateWithFilter('전체')"><div class="stat-label">전체 요청</div><div class="stat-value">${total}</div></div>
-      <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--red)" onclick="navigateWithFilter('미배정')"><div class="stat-label" style="color:var(--red)">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div></div>
+      <div id="kpiUnassigned" class="stat-card" style="cursor:pointer;border:1.5px solid var(--red)" onclick="navigateWithFilter('미배정')"><div class="stat-label" style="color:var(--red)">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div></div>
       <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--accent)" onclick="navigateWithFilter('진행중')"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${inProgressCount}</div></div>
       <div class="stat-card" style="cursor:pointer;border:1.5px solid var(--green)" onclick="navigateWithFilter('완료')"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${completed}</div></div>
     </div>
@@ -2898,8 +2898,13 @@ function renderLog(el) {
       </div>
     </div>
 
-    <div class="card">
-      <div class="fw-600 mb-8">완료된 요청 목록</div>
+    <div class="card" id="logReqList">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span class="fw-600" id="logListTitle">완료된 요청 목록</span>
+        <span id="logListCount" style="font-size:12px;color:var(--text-dim)">${completed.length}건</span>
+        <span id="logListReset" style="display:none;font-size:11px;color:var(--accent);cursor:pointer;margin-left:auto" onclick="filterLogList(null)">전체 보기로 돌아가기</span>
+      </div>
+      <div id="logListBody">
       ${completed.length ? `<table class="stats-table">
         <thead><tr><th class="sortable" onclick="toggleSort('id')">ID${sortArrow('id')}</th><th class="sortable" onclick="toggleSort('category')">카테고리${sortArrow('category')}</th><th class="sortable" onclick="toggleSort('title')">제목${sortArrow('title')}</th><th class="sortable" onclick="toggleSort('priority')">긴급도${sortArrow('priority')}</th><th class="sortable" onclick="toggleSort('assignee')">담당자${sortArrow('assignee')}</th><th class="sortable" onclick="toggleSort('date')">처리일${sortArrow('date')}</th></tr></thead>
         <tbody>
@@ -2916,6 +2921,7 @@ function renderLog(el) {
         }).join('')}
         </tbody>
       </table>` : renderEmptyState('완료된 요청이 없습니다', '처리가 완료되면 이곳에 표시됩니다')}
+      </div>
     </div>
   `;
 
@@ -2938,8 +2944,55 @@ function renderLog(el) {
       circle.addEventListener('mouseleave', function() {
         tooltip.style.opacity = '0';
       });
+      circle.style.cursor = 'pointer';
+      circle.addEventListener('click', function() {
+        filterLogList(this.getAttribute('data-name'));
+      });
     });
   }
+  el.querySelectorAll('.donut-legend-item').forEach(item => {
+    item.style.cursor = 'pointer';
+    item.addEventListener('click', function() {
+      filterLogList(this.getAttribute('data-donut'));
+    });
+  });
+}
+
+function filterLogList(status) {
+  const listEl = document.getElementById('logReqList');
+  const bodyEl = document.getElementById('logListBody');
+  const titleEl = document.getElementById('logListTitle');
+  const countEl = document.getElementById('logListCount');
+  const resetEl = document.getElementById('logListReset');
+  if (!listEl || !bodyEl) return;
+
+  const sc = STATUS_COLORS[status] || {};
+  const filtered = status ? REQUESTS.filter(r => r.status === status) : REQUESTS.filter(r => r.status === '완료');
+  const label = status || '완료';
+
+  titleEl.innerHTML = status ? `<span style="color:${sc.text || 'var(--text)'}">${status}</span> 요청 목록` : '완료된 요청 목록';
+  countEl.textContent = filtered.length + '건';
+  resetEl.style.display = status ? 'inline' : 'none';
+
+  if (filtered.length) {
+    bodyEl.innerHTML = `<table class="stats-table">
+      <thead><tr><th>ID</th><th>카테고리</th><th>제목</th><th>긴급도</th><th>담당자</th><th>등록일</th></tr></thead>
+      <tbody>${filtered.map(r => {
+        const pc = PRIORITY_COLORS[r.priority] || {};
+        return `<tr style="cursor:pointer" onclick="openDetail('${r.id}')">
+          <td style="font-family:monospace;color:var(--text-dim)">${r.id}</td>
+          <td>${r.category}</td>
+          <td>${r.title}</td>
+          <td><span class="badge" style="background:${pc.bg};color:${pc.text}">${r.priority}</span></td>
+          <td>${r.assignee ? r.assignee.name : '-'}</td>
+          <td style="color:var(--text-dim)">${r.createdAt.split(' ')[0]}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  } else {
+    bodyEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:13px">해당 상태의 요청이 없습니다</div>';
+  }
+  listEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ── Detail ──
@@ -3791,7 +3844,7 @@ const SCENARIOS = [
   // Story: "대시보드에서 미배정 경고를 발견! 빠르게 담당자를 배정하자"
   // 서비스 사이클: ① 요청자 등록 → ② 관리자 배정 → 실무자 시작 → ...
   // ═══════════════════════════════════════════════════════════════
-  { role: 'manager', group: '신규 요청 접수 + 배정', page: 'dashboard', detail: null, target: '.stats-row',
+  { role: 'manager', group: '신규 요청 접수 + 배정', page: 'dashboard', detail: null, target: '#kpiUnassigned',
     text: '<strong>접수 ①</strong> 대시보드에서 현황을 파악합니다. 미배정 건수가 눈에 띕니다.' },
   { role: 'manager', group: '신규 요청 접수 + 배정', page: 'dashboard', detail: null, target: '.kpi-alert',
     text: '<strong>접수 ②</strong> ⚠️ KPI 경고를 확인합니다. 2일 이상 미배정된 요청이 있습니다!' },
