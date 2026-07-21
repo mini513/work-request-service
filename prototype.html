@@ -2773,7 +2773,7 @@ function renderDashboard(el) {
               <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:10px;padding:1px 6px">${r.priority}</span>
               <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</span>
               <span style="font-size:11px;color:var(--text-dim);white-space:nowrap">${days}일 전</span>
-              ${!r.assignee ? `<button class="btn btn-sm btn-primary" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();openAssignModal('${r.id}')">배정</button>` : ''}
+              ${!r.assignee ? `<button class="btn btn-sm" style="padding:3px 10px;font-size:11px;border-radius:6px;border:1px solid #bbb;color:var(--text-mid);background:#fff;transition:all .15s" onmouseover="this.style.background='var(--surface2)';this.style.borderColor='#999'" onmouseout="this.style.background='#fff';this.style.borderColor='#bbb'" onclick="event.stopPropagation();openAssignModal('${r.id}')">배정하기</button>` : ''}
             </div>`;
           }).join('')}
         </div>` : `<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:13px">미배정 요청이 없습니다</div>`}
