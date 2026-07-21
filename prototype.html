@@ -2331,15 +2331,16 @@ function renderRequesterList(el) {
     const showDelay = delayedReqs.slice(0, 4);
     const moreDelay = delayedReqs.length - showDelay.length;
     delayHtml = `<div style="margin-bottom:16px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;margin-bottom:12px">
         <span style="font-size:15px;font-weight:700;color:var(--accent)">⏳ 접수 대기 중</span>
-        <span style="background:var(--accent);color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px">${delayedReqs.length}건</span>
+        <span style="background:var(--accent);color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:8px">${delayedReqs.length}건</span>
+        ${moreDelay > 0 ? `<span style="margin-left:auto;font-size:12px;color:var(--text-dim);cursor:pointer;text-decoration:underline" onclick="currentFilter='접수';renderPage()">외 ${moreDelay}건 더보기 →</span>` : ''}
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
         ${showDelay.map(r => {
           const days = Math.floor(getDaysSince(r.createdAt));
           const pc = PRIORITY_COLORS[r.priority] || {};
-          const urgency = days >= 5 ? 'var(--red)' : days >= 3 ? 'var(--yellow)' : 'var(--accent)';
+          const urgency = days >= 5 ? '#666' : days >= 3 ? '#999' : '#bbb';
           return `<div style="border:1.5px solid ${urgency};border-radius:10px;padding:14px;cursor:pointer;background:var(--surface);transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'" onclick="openDetail('${r.id}')">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
               <span style="font-size:11px;color:var(--text-dim);font-family:monospace">${r.id}</span>
@@ -2352,7 +2353,6 @@ function renderRequesterList(el) {
           </div>`;
         }).join('')}
       </div>
-      ${moreDelay > 0 ? `<div style="text-align:center;margin-top:10px"><span style="font-size:12px;color:var(--text-dim);cursor:pointer;text-decoration:underline" onclick="currentFilter='접수';renderPage()">외 ${moreDelay}건 더보기 →</span></div>` : ''}
     </div>`;
   }
 
@@ -2405,9 +2405,10 @@ function renderWorkerDashboard(el) {
     const showUrgent = urgentReqs.slice(0, 4);
     const moreUrgent = urgentReqs.length - showUrgent.length;
     urgentHtml = `<div style="margin-bottom:20px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;margin-bottom:12px">
         <span style="font-size:15px;font-weight:700;color:var(--yellow,#ff8c00)">🔥 긴급/높음 우선 처리</span>
-        <span style="background:var(--yellow,#ff8c00);color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px">${urgentReqs.length}건</span>
+        <span style="background:var(--yellow,#ff8c00);color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:8px">${urgentReqs.length}건</span>
+        ${moreUrgent > 0 ? `<span style="margin-left:auto;font-size:12px;color:var(--text-dim);cursor:pointer;text-decoration:underline">외 ${moreUrgent}건 더보기 →</span>` : ''}
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
         ${showUrgent.map(r => {
@@ -2426,7 +2427,6 @@ function renderWorkerDashboard(el) {
           </div>`;
         }).join('')}
       </div>
-      ${moreUrgent > 0 ? `<div style="text-align:center;margin-top:10px"><span style="font-size:12px;color:var(--text-dim);cursor:pointer;text-decoration:underline">외 ${moreUrgent}건 더보기 →</span></div>` : ''}
     </div>`;
   }
 
@@ -2591,15 +2591,16 @@ function renderDashboard(el) {
     const showAlerts = kpiAlerts.slice(0, 4);
     const moreCount = kpiAlerts.length - showAlerts.length;
     alertHtml = `<div style="margin-bottom:20px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;margin-bottom:12px">
         <span style="font-size:15px;font-weight:700;color:var(--red)">⚠ 담당자 미배정</span>
-        <span style="background:var(--red);color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px">${kpiAlerts.length}건</span>
+        <span style="background:var(--red);color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:8px">${kpiAlerts.length}건</span>
+        ${moreCount > 0 ? `<span style="margin-left:auto;font-size:12px;color:var(--text-dim);cursor:pointer;text-decoration:underline" onclick="navigateWithFilter('미배정')">외 ${moreCount}건 더보기 →</span>` : ''}
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
         ${showAlerts.map(r => {
           const days = Math.floor(getDaysSince(r.createdAt));
           const pc = PRIORITY_COLORS[r.priority] || {};
-          const urgency = days >= 5 ? 'var(--red)' : days >= 3 ? 'var(--yellow)' : 'var(--text-mid)';
+          const urgency = days >= 5 ? '#666' : days >= 3 ? '#999' : '#bbb';
           return `<div style="border:1.5px solid ${urgency};border-radius:10px;padding:14px;cursor:pointer;background:var(--surface);transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'" onclick="openAssignModal('${r.id}')">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
               <span style="font-size:11px;color:var(--text-dim);font-family:monospace">${r.id}</span>
@@ -2613,7 +2614,6 @@ function renderDashboard(el) {
           </div>`;
         }).join('')}
       </div>
-      ${moreCount > 0 ? `<div style="text-align:center;margin-top:10px"><span style="font-size:12px;color:var(--text-dim);cursor:pointer;text-decoration:underline" onclick="navigateWithFilter('미배정')">외 ${moreCount}건 더보기 →</span></div>` : ''}
     </div>`;
   }
 
