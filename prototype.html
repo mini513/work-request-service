@@ -3242,9 +3242,9 @@ function quickChangeStatus(id, newStatus) {
 
 const COL_DEFS = {
   id:       { width: '80px',  render: r => `<span class="req-id">${r.id}</span>` },
-  category: { width: '80px',  render: r => `<span class="req-category"><span class="badge" style="background:var(--surface3);color:var(--text-mid)">${r.category}</span></span>` },
+  category: { width: '80px',  render: r => `<span class="req-category" style="font-size:12px;color:var(--text-mid)">${r.category}</span>` },
   title:    { width: '1fr',   render: r => `<div class="req-title-cell"><div class="req-title">${r.title}</div></div>` },
-  priority: { width: '80px',  render: r => `<span class="req-priority"><span class="badge" style="background:${PRIORITY_COLORS[r.priority].bg};color:${PRIORITY_COLORS[r.priority].text}">${r.priority}</span></span>` },
+  priority: { width: '80px',  render: r => `<span class="req-priority" style="display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:${PRIORITY_COLORS[r.priority].text};flex-shrink:0"></span><span style="font-size:12px;font-weight:${r.priority==='긴급'?'700':'500'};color:${PRIORITY_COLORS[r.priority].text}">${r.priority}</span></span>` },
   status:   { width: '90px',  render: r => `<span class="req-status">${renderStatusBadge(r)}</span>` },
   date:     { width: '105px',  render: r => {
     const SLA_DAYS = { '긴급': 1, '높음': 2, '보통': 5, '낮음': 10 };
@@ -3253,7 +3253,7 @@ const COL_DEFS = {
     const overdue = r.status !== '완료' && r.status !== '반려' && elapsed > sla;
     return `<span class="req-date">${r.createdAt.split(' ')[0]}${overdue ? `<span class="sla-over" title="SLA ${sla}일 초과">🔴 ${Math.floor(elapsed - sla)}일 초과</span>` : ''}</span>`;
   }},
-  assignee: { width: '80px',  render: r => `<span class="req-assignee">${r.assignee ? r.assignee.name : '<span style="color:var(--yellow)">미배정</span>'}</span>` },
+  assignee: { width: '80px',  render: r => `<span class="req-assignee">${r.assignee ? r.assignee.name : '<span style="color:var(--red)">미배정</span>'}</span>` },
   requester:{ width: '80px',  render: r => `<span class="req-assignee">${r.requester.name}</span>` },
   assigneeAction: { width: '110px', render: r => {
     if (r.assignee) return `<span class="req-assignee">${r.assignee.name}</span>`;
