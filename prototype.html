@@ -2419,12 +2419,10 @@ function renderWorkerDashboard(el) {
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
         ${showUrgent.map(r => {
-          const pc = PRIORITY_COLORS[r.priority] || {};
-          const borderColor = r.priority === '긴급' ? 'var(--red)' : 'var(--yellow,#ff8c00)';
-          return `<div style="border:1.5px solid ${borderColor};border-radius:10px;padding:14px;cursor:pointer;background:var(--surface);transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'" onclick="currentDetailId='${r.id}';renderPage()">
+          return `<div style="border:1.5px solid #bbb;border-radius:10px;padding:14px;cursor:pointer;background:var(--surface);transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'" onclick="currentDetailId='${r.id}';renderPage()">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
               <span style="font-size:11px;color:var(--text-dim);font-family:monospace">${r.id}</span>
-              <span class="badge" style="background:${pc.bg};color:${pc.text};font-size:10px;padding:2px 6px">${r.priority}</span>
+              <span style="font-size:11px;font-weight:${r.priority==='긴급'?'700':'400'};color:${r.priority==='긴급'?'var(--red)':'var(--text-mid)'}">${r.priority}</span>
             </div>
             <div style="font-size:13px;font-weight:600;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</div>
             <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-dim)">
@@ -2443,14 +2441,7 @@ function renderWorkerDashboard(el) {
     const prog = wReqs.filter(r => r.status === '진행중').length;
     const done = wReqs.filter(r => r.status === '완료').length;
     const isActive = workerDashFilter === w.id;
-    return `<div class="stat-card" style="border:1.5px solid ${isActive ? 'var(--accent)' : 'var(--border)'};padding:16px;cursor:pointer;${isActive ? 'background:var(--accent-bg)' : ''}" onclick="setWorkerDashFilter('${isActive ? 'all' : w.id}')">
-      <div style="font-weight:600;font-size:14px;margin-bottom:10px">${w.name} <span style="font-weight:400;font-size:11px;color:var(--text-dim)">(${wReqs.length}건)</span></div>
-      <div style="display:flex;gap:12px;font-size:12px">
-        <span style="color:var(--blue)">대기 ${waiting}</span>
-        <span style="color:var(--accent)">진행 ${prog}</span>
-        <span style="color:var(--green)">완료 ${done}</span>
-      </div>
-    </div>`;
+    return `<button class="filter-btn ${isActive ? 'active f-default' : ''}" style="padding:6px 14px;font-size:12px;cursor:pointer" onclick="setWorkerDashFilter('${isActive ? 'all' : w.id}')">${w.name} <span style="font-size:11px;color:var(--text-dim)">${wReqs.length}</span></button>`;
   }).join('');
 
   const kanbanCols = [
@@ -2460,13 +2451,12 @@ function renderWorkerDashboard(el) {
   ];
 
   function renderKanbanCard(r) {
-    const pc = PRIORITY_COLORS[r.priority] || {};
     return `<div class="kanban-card" onclick="currentDetailId='${r.id}';renderPage()">
       <div class="kanban-card-id">${r.id}</div>
       <div class="kanban-card-title">${r.title}</div>
       <div class="kanban-card-meta">
-        <span class="kanban-card-tag" style="background:${pc.bg};color:${pc.text}">${r.priority}</span>
-        <span class="kanban-card-tag" style="background:var(--surface3);color:var(--text-mid)">${r.category}</span>
+        <span style="font-size:10px;font-weight:${r.priority==='긴급'?'700':'400'};color:${r.priority==='긴급'?'var(--red)':'var(--text-dim)'}">${r.priority}</span>
+        <span style="font-size:10px;color:var(--text-dim)">${r.category}</span>
         <span style="font-size:10px;color:var(--text-dim);margin-left:auto">${r.assignee ? r.assignee.name : ''}</span>
       </div>
     </div>`;
@@ -2495,8 +2485,11 @@ function renderWorkerDashboard(el) {
       </div>
     </div>
     ${urgentHtml ? `<div class="card" style="padding:20px 24px;margin-bottom:16px">${urgentHtml}</div>` : ''}
-    <div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--text-mid)">실무자별 현황 <span style="font-weight:400;font-size:11px;color:var(--text-dim)">클릭하여 필터링</span></div>
-    <div class="stats-row" style="margin-bottom:20px">${workerSummaryHtml}</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <span style="font-size:12px;color:var(--text-dim)">실무자</span>
+      <button class="filter-btn ${workerDashFilter === 'all' ? 'active f-default' : ''}" style="padding:6px 14px;font-size:12px;cursor:pointer" onclick="setWorkerDashFilter('all')">전체</button>
+      ${workerSummaryHtml}
+    </div>
     <div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--text-mid)">${filterWorker ? `${filterWorker.name}의 업무 현황` : '전체 업무 현황'} <span style="font-weight:400;font-size:11px;color:var(--text-dim)">총 ${total}건</span></div>
     <div class="kanban-board">${kanbanHtml}</div>
   `;
@@ -3110,7 +3103,7 @@ function renderDetail(el) {
         <div class="card">
           <div class="fw-600 mb-8">요청 내용</div>
           <div class="detail-content">${req.content}</div>
-          <div class="detail-info-row"><div class="detail-info-label">긴급도</div><div class="detail-info-value"><span class="badge" style="background:${PRIORITY_COLORS[req.priority].bg};color:${PRIORITY_COLORS[req.priority].text}">${req.priority}</span></div></div>
+          <div class="detail-info-row"><div class="detail-info-label">긴급도</div><div class="detail-info-value"><span style="font-weight:${req.priority==='긴급'?'700':'400'};color:${req.priority==='긴급'?'var(--red)':'var(--text)'}">${req.priority}</span></div></div>
           <div class="detail-info-row"><div class="detail-info-label">희망 완료일</div><div class="detail-info-value">${req.desiredDate || '-'}</div></div>
           <div class="detail-info-row"><div class="detail-info-label">담당자</div><div class="detail-info-value">${req.assignee ? req.assignee.name + ' (' + req.assignee.dept + ')' : (() => {
             const showRemind = currentRole === 'requester' && req.remindEnabled;
@@ -3245,7 +3238,7 @@ const COL_DEFS = {
   id:       { width: '80px',  render: r => `<span class="req-id">${r.id}</span>` },
   category: { width: '80px',  render: r => `<span class="req-category" style="font-size:12px;color:var(--text-mid)">${r.category}</span>` },
   title:    { width: '1fr',   render: r => `<div class="req-title-cell"><div class="req-title">${r.title}</div></div>` },
-  priority: { width: '80px',  render: r => `<span class="req-priority" style="display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:${PRIORITY_COLORS[r.priority].text};flex-shrink:0"></span><span style="font-size:12px;font-weight:${r.priority==='긴급'?'700':'500'};color:${PRIORITY_COLORS[r.priority].text}">${r.priority}</span></span>` },
+  priority: { width: '80px',  render: r => `<span class="req-priority" style="font-size:12px;font-weight:${r.priority==='긴급'?'700':'400'};color:${r.priority==='긴급'?'var(--red)':'var(--text-mid)'}">${r.priority}</span>` },
   status:   { width: '90px',  render: r => `<span class="req-status">${renderStatusBadge(r)}</span>` },
   date:     { width: '105px',  render: r => {
     const SLA_DAYS = { '긴급': 1, '높음': 2, '보통': 5, '낮음': 10 };
