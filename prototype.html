@@ -2434,10 +2434,10 @@ function renderWorkerDashboard(el) {
     </div>
     ${urgentHtml}
     <div class="stats-row">
-      <div class="stat-card" style="cursor:pointer" onclick="navigateWithFilter('전체')"><div class="stat-label">전체 담당</div><div class="stat-value">${total}</div></div>
-      <div class="stat-card" style="cursor:pointer" onclick="navigateWithFilter('배정완료')"><div class="stat-label">배정완료</div><div class="stat-value" style="color:var(--blue)">${byStatus['배정완료'] || 0}</div></div>
-      <div class="stat-card" style="cursor:pointer" onclick="navigateWithFilter('진행중')"><div class="stat-label">진행중</div><div class="stat-value" style="color:var(--accent)">${byStatus['진행중'] || 0}</div></div>
-      <div class="stat-card" style="cursor:pointer" onclick="navigateWithFilter('완료')"><div class="stat-label">완료</div><div class="stat-value" style="color:var(--green)">${byStatus['완료'] || 0}</div></div>
+      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--text-mid)" onclick="navigateWithFilter('전체')"><div class="stat-label">전체 담당</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--blue);background:var(--blue-bg)" onclick="navigateWithFilter('배정완료')"><div class="stat-label" style="color:var(--blue)">배정완료</div><div class="stat-value" style="color:var(--blue)">${byStatus['배정완료'] || 0}</div></div>
+      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--accent);background:var(--accent-bg)" onclick="navigateWithFilter('진행중')"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${byStatus['진행중'] || 0}</div></div>
+      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--green);background:var(--green-bg)" onclick="navigateWithFilter('완료')"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${byStatus['완료'] || 0}</div></div>
     </div>
     <div class="kanban-board">${kanbanHtml}</div>
   `;
@@ -2484,10 +2484,10 @@ function renderDashboard(el) {
     </div>
     ${alertHtml}
     <div class="stats-row">
-      <div class="stat-card" style="cursor:pointer" onclick="navigateWithFilter('전체')"><div class="stat-label">전체 요청</div><div class="stat-value">${total}</div></div>
-      <div class="stat-card" style="cursor:pointer" onclick="navigateWithFilter('미배정')"><div class="stat-label">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div></div>
-      <div class="stat-card" style="cursor:pointer" onclick="navigateWithFilter('진행중')"><div class="stat-label">진행중</div><div class="stat-value" style="color:var(--accent)">${inProgressCount}</div></div>
-      <div class="stat-card" style="cursor:pointer" onclick="navigateWithFilter('완료')"><div class="stat-label">완료</div><div class="stat-value" style="color:var(--green)">${completed}</div></div>
+      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--text-mid)" onclick="navigateWithFilter('전체')"><div class="stat-label">전체 요청</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--red);background:var(--red-bg)" onclick="navigateWithFilter('미배정')"><div class="stat-label" style="color:var(--red)">미배정</div><div class="stat-value" style="color:var(--red)">${unassigned}</div></div>
+      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--accent);background:var(--accent-bg)" onclick="navigateWithFilter('진행중')"><div class="stat-label" style="color:var(--accent)">진행중</div><div class="stat-value" style="color:var(--accent)">${inProgressCount}</div></div>
+      <div class="stat-card" style="cursor:pointer;border-left:3px solid var(--green);background:var(--green-bg)" onclick="navigateWithFilter('완료')"><div class="stat-label" style="color:var(--green)">완료</div><div class="stat-value" style="color:var(--green)">${completed}</div></div>
     </div>
     <div class="chart-grid">
       <div class="chart-card">
@@ -2728,10 +2728,10 @@ function renderLog(el) {
       ${logPeriod !== 'all' ? `<span style="font-size:12px;color:var(--accent);margin-left:auto;font-weight:500;${logPeriod === 'custom' ? 'cursor:pointer' : ''}" ${logPeriod === 'custom' ? 'onclick="openCalendarPopup()" title="클릭하여 날짜 변경"' : ''}>${rangeLabel}</span>` : ''}
     </div>
     <div class="stats-row">
-      <div class="stat-card"><div class="stat-label">처리 완료</div><div class="stat-value" style="color:var(--green)">${completed.length}<span style="font-size:14px;color:var(--text-dim);font-weight:400"> / ${all.length}</span></div></div>
-      <div class="stat-card"><div class="stat-label">처리율</div><div class="stat-value" style="color:var(--accent)">${completionRate}%</div></div>
-      <div class="stat-card"><div class="stat-label">평균 처리일</div><div class="stat-value">${avgDays}<span style="font-size:14px;color:var(--text-dim);font-weight:400">일</span></div></div>
-      <div class="stat-card"><div class="stat-label">긴급/높음 처리</div><div class="stat-value" style="color:var(--yellow)">${urgentDone.length}</div></div>
+      <div class="stat-card" style="border-left:3px solid var(--green);background:var(--green-bg)"><div class="stat-label" style="color:var(--green)">처리 완료</div><div class="stat-value" style="color:var(--green)">${completed.length}<span style="font-size:14px;color:var(--text-dim);font-weight:400"> / ${all.length}</span></div></div>
+      <div class="stat-card" style="border-left:3px solid var(--accent);background:var(--accent-bg)"><div class="stat-label" style="color:var(--accent)">처리율</div><div class="stat-value" style="color:var(--accent)">${completionRate}%</div></div>
+      <div class="stat-card" style="border-left:3px solid var(--text-mid)"><div class="stat-label">평균 처리일</div><div class="stat-value">${avgDays}<span style="font-size:14px;color:var(--text-dim);font-weight:400">일</span></div></div>
+      <div class="stat-card" style="border-left:3px solid var(--yellow);background:var(--yellow-bg)"><div class="stat-label" style="color:var(--yellow)">긴급/높음 처리</div><div class="stat-value" style="color:var(--yellow)">${urgentDone.length}</div></div>
     </div>
 
     <div class="chart-grid">
