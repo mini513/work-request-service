@@ -1390,6 +1390,55 @@ body {
   padding-left: 12px;
 }
 
+/* ── Storyboard ── */
+.sb-section { margin-bottom: 40px; }
+.sb-section-title {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+}
+.sb-role-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 700;
+}
+.sb-role-badge.requester { background: var(--blue-bg); color: var(--blue); }
+.sb-role-badge.manager { background: var(--yellow-bg); color: var(--yellow); }
+.sb-role-badge.worker { background: var(--green-bg); color: var(--green); }
+.sb-story-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.sb-panels { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.sb-panel { display: flex; flex-direction: column; }
+.sb-scene {
+  background: #2a2d3a; border-radius: 12px; padding: 24px 16px;
+  min-height: 180px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 8px;
+  position: relative; overflow: hidden;
+}
+.sb-scene-number {
+  position: absolute; top: 8px; left: 12px;
+  font-size: 11px; font-weight: 700; color: rgba(255,255,255,.3);
+}
+.sb-emoji-main { font-size: 48px; line-height: 1; }
+.sb-emoji-row { display: flex; gap: 6px; font-size: 24px; }
+.sb-bubble {
+  background: rgba(255,255,255,.12); border-radius: 10px; padding: 6px 12px;
+  font-size: 11px; color: rgba(255,255,255,.8); text-align: center;
+  max-width: 90%; line-height: 1.4;
+}
+.sb-ui-mock {
+  background: rgba(255,255,255,.08); border-radius: 6px; padding: 6px 10px;
+  display: flex; align-items: center; gap: 6px; font-size: 10px;
+  color: rgba(255,255,255,.6); width: 80%;
+}
+.sb-ui-btn {
+  background: rgba(99,132,255,.5); border-radius: 4px; padding: 2px 8px;
+  font-size: 9px; color: #fff; white-space: nowrap;
+}
+.sb-ui-badge {
+  border-radius: 4px; padding: 1px 6px; font-size: 9px; font-weight: 600;
+}
+.sb-desc {
+  padding: 12px 4px 0; font-size: 12px; color: var(--text-mid);
+  line-height: 1.6; word-break: keep-all;
+}
+
 /* ── Dev Mode ── */
 .dev-panel {
   position: fixed;
@@ -2008,7 +2057,8 @@ body.light .scenario-target {
       <div class="ham-divider-double"></div>
       <div class="ham-section">
         <div class="ham-section-label">Service Planning</div>
-        <button class="ham-action-btn" onclick="openScenarioMap();toggleHamburger()">시나리오 흐름도</button>
+        <button class="ham-action-btn" onclick="openStoryboard();toggleHamburger()">시나리오 스토리보드</button>
+        <button class="ham-action-btn" onclick="openScenarioMap();toggleHamburger()" style="margin-top:4px">시나리오 흐름도</button>
         <button class="ham-action-btn" onclick="openIAMap();toggleHamburger()" style="margin-top:4px">IA 구조도</button>
         <button class="ham-action-btn" onclick="openStakeholderMap();toggleHamburger()" style="margin-top:4px">이해관계자맵</button>
         <button class="ham-action-btn" onclick="openBlueprintMap();toggleHamburger()" style="margin-top:4px">서비스 블루프린트</button>
@@ -2197,6 +2247,16 @@ body.light .scenario-target {
       <button class="modal-close" onclick="closeModal('blueprintModal')">×</button>
     </div>
     <div class="modal-body" id="blueprintBody" style="overflow:auto;max-height:calc(90vh - 80px)"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="storyboardModal">
+  <div class="modal" style="max-width:95vw;width:1200px;max-height:90vh">
+    <div class="modal-header">
+      <h3>시나리오 스토리보드</h3>
+      <button class="modal-close" onclick="closeModal('storyboardModal')">×</button>
+    </div>
+    <div class="modal-body" id="storyboardBody" style="overflow:auto;max-height:calc(90vh - 80px)"></div>
   </div>
 </div>
 
@@ -4103,6 +4163,149 @@ function getScenarioGroups(steps) {
 }
 
 let filteredScenarios = [];
+
+function openStoryboard() {
+  const scenarios = [
+    {
+      role: 'requester', roleLabel: '👤 요청자', roleClass: 'requester',
+      title: '"PC가 또 멈췄어... 긴급 요청 넣어야지!"',
+      panels: [
+        {
+          scene: `<div class="sb-emoji-main">😫💻</div>
+            <div class="sb-emoji-row">💥🔵💀</div>
+            <div class="sb-bubble">블루스크린이 또...!</div>`,
+          desc: '어김없이 찾아온 PC 블루스크린. 하루 3번째 반복이다. 더 이상 참을 수 없어 긴급 요청을 넣기로 한다.'
+        },
+        {
+          scene: `<div class="sb-emoji-main">📝</div>
+            <div class="sb-ui-mock">
+              <span>IT 장애</span>
+              <span class="sb-ui-badge" style="background:rgba(255,99,99,.4);color:#fcc">긴급</span>
+            </div>
+            <div class="sb-ui-mock">
+              <span style="flex:1">PC 블루스크린 반복 발생</span>
+            </div>
+            <div class="sb-ui-btn">요청 등록</div>`,
+          desc: '새 요청을 등록한다. 카테고리는 IT 장애, 긴급도는 "긴급". 증상과 위치를 구체적으로 작성하고 제출!'
+        },
+        {
+          scene: `<div class="sb-emoji-main">🔔</div>
+            <div class="sb-bubble">담당자가 배정되었습니다<br>(이준호, IT지원팀)</div>
+            <div class="sb-emoji-row">💬📱</div>`,
+          desc: '잠시 후 알림이 온다. 담당자가 배정됐다! 급한 사항을 댓글로 전달하고, 예정일도 확인한다.'
+        },
+        {
+          scene: `<div class="sb-emoji-main">😊✅</div>
+            <div class="sb-bubble">처리 완료! 메모리 교체했습니다</div>
+            <div class="sb-emoji-row">👍💬</div>`,
+          desc: '처리 완료 알림! 타임라인에서 전체 이력을 확인하고, 감사 댓글을 남긴다. 만족스러운 마무리.'
+        }
+      ]
+    },
+    {
+      role: 'manager', roleLabel: '👔 관리자', roleClass: 'manager',
+      title: '"미배정 경고가 떴다! 빠르게 배정하자"',
+      panels: [
+        {
+          scene: `<div class="sb-emoji-main">📊</div>
+            <div class="sb-ui-mock">
+              <span>미배정</span>
+              <span style="color:#f88;font-weight:700;font-size:16px;margin-left:auto">9</span>
+            </div>
+            <div class="sb-emoji-row">⚠️🔴⏰</div>`,
+          desc: '출근 후 대시보드를 확인한다. 미배정 9건! KPI 경고 카드에 2일 넘은 요청이 보인다.'
+        },
+        {
+          scene: `<div class="sb-emoji-main">🔍📋</div>
+            <div class="sb-bubble">3층 화장실 수도꼭지 누수<br>높음 · 시설 보수</div>
+            <div class="sb-ui-mock"><span>오태준 · 개발팀</span></div>`,
+          desc: '경고 카드를 클릭해 요청 상세를 확인한다. 긴급도, 카테고리, 요청 내용을 꼼꼼히 검토.'
+        },
+        {
+          scene: `<div class="sb-emoji-main">👥</div>
+            <div class="sb-ui-mock" style="flex-direction:column;align-items:flex-start;gap:4px">
+              <span>담당자: 최서연</span>
+              <span>보고자: 윤미래 파트장</span>
+            </div>
+            <div class="sb-ui-btn">배정 확인</div>`,
+          desc: '적합한 실무자를 선택하고 보고자를 지정한다. 배정 확인을 누르면 담당자에게 알림이 간다.'
+        },
+        {
+          scene: `<div class="sb-emoji-main">📈</div>
+            <div class="sb-ui-mock" style="justify-content:space-around">
+              <span style="text-align:center">완료<br><span style="color:#6c8;font-size:14px;font-weight:700">85%</span></span>
+              <span style="text-align:center">평균<br><span style="font-size:14px;font-weight:700">2.3일</span></span>
+            </div>`,
+          desc: '처리 현황 페이지에서 팀 성과를 점검한다. 완료율과 평균 처리일을 확인하며 업무 부하를 관리.'
+        }
+      ]
+    },
+    {
+      role: 'worker', roleLabel: '🔧 실무자', roleClass: 'worker',
+      title: '"새 업무가 왔다! 확인하고 바로 시작하자"',
+      panels: [
+        {
+          scene: `<div class="sb-emoji-main">🔔📱</div>
+            <div class="sb-bubble">[배정] 노트북 충전기 고장</div>
+            <div class="sb-emoji-row">👀</div>`,
+          desc: '알림 벨이 울린다. 새로운 업무가 배정됐다! 알림을 클릭해 요청 상세로 이동한다.'
+        },
+        {
+          scene: `<div class="sb-emoji-main">📋</div>
+            <div class="sb-ui-mock" style="flex-direction:column;align-items:flex-start;gap:3px">
+              <span>노트북 충전기 고장</span>
+              <span style="font-size:9px">보통 · IT 장애</span>
+            </div>
+            <div class="sb-ui-mock">
+              <span>📅 작업 예정일</span>
+              <span class="sb-ui-btn">07-21</span>
+            </div>`,
+          desc: '요청 내용을 파악하고 작업 예정일을 입력한다. "작업 시작" 버튼을 눌러 상태를 진행중으로 변경.'
+        },
+        {
+          scene: `<div class="sb-emoji-main">🔧</div>
+            <div class="sb-bubble">부품 수배 중입니다.<br>내일 오전 방문 예정이에요.</div>
+            <div class="sb-emoji-row">💬👤</div>`,
+          desc: '작업 중 요청자의 긴급 댓글을 확인한다. 진행 상황을 댓글로 공유하며 소통.'
+        },
+        {
+          scene: `<div class="sb-emoji-main">✅🎉</div>
+            <div class="sb-ui-mock">
+              <span>처리 내용</span>
+            </div>
+            <div class="sb-ui-mock">
+              <span style="font-size:9px">충전기 교체 완료. 정상 충전 확인.</span>
+            </div>
+            <div class="sb-ui-btn">처리 완료</div>`,
+          desc: '작업이 끝났다! 처리 내용을 기록하고 완료 버튼을 누른다. 요청자와 보고자에게 완료 알림이 전송.'
+        }
+      ]
+    }
+  ];
+
+  const html = scenarios.map(s => `
+    <div class="sb-section">
+      <div class="sb-section-title">
+        <span class="sb-role-badge ${s.roleClass}">${s.roleLabel}</span>
+        <span class="sb-story-title">${s.title}</span>
+      </div>
+      <div class="sb-panels">
+        ${s.panels.map((p, i) => `
+          <div class="sb-panel">
+            <div class="sb-scene">
+              <div class="sb-scene-number">${i + 1}</div>
+              ${p.scene}
+            </div>
+            <div class="sb-desc">${p.desc}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('storyboardBody').innerHTML = html;
+  openModal('storyboardModal');
+}
 
 function openBlueprintMap() {
   const phases = [
